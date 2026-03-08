@@ -13,7 +13,7 @@ input,select,button{outline:none;-webkit-appearance:none;font-family:inherit}
 select option{background:#0f1a2a;color:#cbd5e1}
 ::-webkit-scrollbar{width:0;height:0}
 input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
-.hdr{background:linear-gradient(180deg,#0a1628,#080d13);padding:14px;border-bottom:1px solid rgba(30,58,95,.2)}
+.hdr{background:linear-gradient(180deg,#0a1628,#080d13);padding:14px;padding-top:calc(14px + env(safe-area-inset-top));border-bottom:1px solid rgba(30,58,95,.2)}
 .fx{display:flex}.fc{flex-direction:column}.ac{align-items:center}.jb{justify-content:space-between}.fw{flex-wrap:wrap}.g6{gap:6px}.g8{gap:8px}.g10{gap:10px}.g12{gap:12px}
 .tag{font-size:8px;letter-spacing:4px;color:#4ade80;margin-bottom:8px}
 .pills{display:flex;gap:5px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px}
@@ -184,7 +184,7 @@ function render(){
   h+='<div class="fx ac g12" style="margin-bottom:10px">';
   h+='<div class="gauge" style="width:96px;height:56px">'+svg(96,56,tSale>0?tWS/tSale:0,tSale>0?tSince/tSale:0,tSale>0?tExp/tSale:0,fp(pp))+'</div>';
   h+='<div class="fc" style="flex:1"><div style="font-size:22px;font-weight:700;color:#fb923c">'+fd(tBal-tSince)+'</div>';
-  h+='<div style="font-size:11px;color:#64748b">'+items.length+' accts outstanding</div>';
+  h+='<div style="font-size:11px;color:#64748b">'+items.length+' accts'+(f!=='ALL'?' ('+f+')':'')+' outstanding</div>';
   h+='<div class="fx g8" style="font-size:10px;margin-top:2px"><span class="grn">WS: '+fd(tWS)+'</span>';
   if(tSince>0)h+='<span class="blu">+'+fd(tSince)+'</span>';
   if(tExp>0)h+='<span class="ylw">Exp: '+fd(tExp)+'</span>';
@@ -344,7 +344,7 @@ function render(){
     h+='<select class="sel" style="color:'+SC[cs]+'" onchange="upd(\''+c.id+'\',\'cs\',this.value)">';
     Object.keys(SN).forEach(function(k){h+='<option value="'+k+'"'+(cs===k?' selected':'')+'>'+SN[k]+'</option>'});
     h+='</select>';
-    h+='<button class="btn" onclick="S.exp=S.exp===\''+c.id+'\'?null:\''+c.id+'\';render()">'+(isX?'\u25B2':'\u25BC')+'</button>';
+    h+='<button class="btn" onclick="S.exp=S.exp===\''+c.id+'\'?null:\''+c.id+'\';render()">'+(isX?'&#9650;':'&#9660;')+'</button>';
     h+='</div>';
 
     // Expanded panel

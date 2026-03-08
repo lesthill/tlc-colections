@@ -72,8 +72,8 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
 <div id="app"></div>
 <script>
 var CRED_KEY='tlc-cred-id';
-function getCredId(){try{var c=localStorage.getItem(CRED_KEY);if(c)return Uint8Array.from(atob(c),function(x){return x.charCodeAt(0)});return null}catch(e){return null}}
-function saveCredId(rawId){try{var b='';var a=new Uint8Array(rawId);for(var i=0;i<a.length;i++)b+=String.fromCharCode(a[i]);localStorage.setItem(CRED_KEY,btoa(b))}catch(e){}}
+function hasCredential(){try{return localStorage.getItem(CRED_KEY)==='1'}catch(e){return false}}
+function saveCredential(){try{localStorage.setItem(CRED_KEY,'1')}catch(e){}}
 function randBuf(n){var a=new Uint8Array(n);crypto.getRandomValues(a);return a}
 function doUnlock(){
 var btn=document.getElementById('unlockBtn');
@@ -81,8 +81,7 @@ var msg=document.getElementById('lockMsg');
 btn.disabled=true;btn.style.opacity='.5';
 msg.style.display='none';
 if(!window.PublicKeyCredential){showBypass('Biometrics not supported.');return}
-var credId=getCredId();
-if(credId){doAuth(credId,btn,msg)}
+if(hasCredential()){doAuth(btn,msg)}
 else{doRegister(btn,msg)}
 }
 function doRegister(btn,msg){
@@ -93,12 +92,12 @@ challenge:challenge,
 rp:{name:'TLC Collections',id:location.hostname},
 user:{id:userId,name:'tlc-user',displayName:'TLC User'},
 pubKeyCredParams:[{alg:-7,type:'public-key'},{alg:-257,type:'public-key'}],
-authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required',residentKey:'preferred'},
+authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required',residentKey:'required',requireResidentKey:true},
 timeout:60000,
 attestation:'none'
 }};
 navigator.credentials.create(opts).then(function(cred){
-saveCredId(cred.rawId);
+saveCredential();
 removeLock();
 }).catch(function(e){
 msg.textContent='Setup cancelled. Tap to try again.';
@@ -107,20 +106,20 @@ btn.disabled=false;btn.style.opacity='1';
 showBypass('Skip setup');
 });
 }
-function doAuth(credId,btn,msg){
+function doAuth(btn,msg){
 var challenge=randBuf(32);
 var opts={publicKey:{
 challenge:challenge,
 timeout:60000,
 rpId:location.hostname,
 userVerification:'required',
-allowCredentials:[{id:credId,type:'public-key',transports:['internal']}]
+allowCredentials:[]
 }};
 navigator.credentials.get(opts).then(function(){
 removeLock();
 }).catch(function(e){
 if(e.name==='NotAllowedError'){
-msg.textContent='Authentication cancelled. Tap to try again.';
+msg.textContent='Cancelled. Tap to try again.';
 }else{
 msg.textContent='Auth error. Tap to retry or skip.';
 showBypass('Enter without Face ID');
@@ -282,7 +281,7 @@ function svg(w,h,ws,si,ex,txt){
   if(txt)s+='<text x="'+cx+'" y="'+(cy-4)+'" text-anchor="middle" fill="#e2e8f0" font-size="'+(w*.22)+'" font-weight="700" font-family="system-ui">'+txt+'</text>';
   return s+'</svg>'}
 
-function doRefresh(){if(window.caches){caches.keys().then(function(n){n.forEach(function(k){caches.delete(k)})});setTimeout(function(){window.location.href=window.location.pathname+'?v=46&t='+Date.now()},300)}else{window.location.href=window.location.pathname+'?v=46&t='+Date.now()}}
+function doRefresh(){if(window.caches){caches.keys().then(function(n){n.forEach(function(k){caches.delete(k)})});setTimeout(function(){window.location.href=window.location.pathname+'?v=47&t='+Date.now()},300)}else{window.location.href=window.location.pathname+'?v=47&t='+Date.now()}}
 function render(){
   var f=S.f;
   // Only show events within last 5 weeks
@@ -303,7 +302,7 @@ function render(){
   // ===== STICKY TOP =====
   var h='<div class="ftop">';
   h+='<div class="hdr">';
-  h+='<div class="fx jb ac" style="margin-bottom:8px"><div><div class="tag">TLC COLLECTIONS</div><div style="font-size:9px;color:#334155;letter-spacing:1px" onclick="doRefresh()">v46</div></div>';
+  h+='<div class="fx jb ac" style="margin-bottom:8px"><div><div class="tag">TLC COLLECTIONS</div><div style="font-size:9px;color:#334155;letter-spacing:1px" onclick="doRefresh()">v47</div></div>';
   h+='<div class="fx g6">';
   h+='<button style="background:transparent;border:1px solid rgba(30,58,95,.3);color:#7dd3fc;padding:6px 10px;font-size:16px;border-radius:6px" onclick="S.settings=!S.settings;render()">&#9881;</button>';
   h+='<button style="background:transparent;border:1px solid rgba(74,222,128,.25);color:#4ade80;padding:6px 10px;font-size:13px;border-radius:6px" onclick="doRefresh()">&#x21bb;</button>';

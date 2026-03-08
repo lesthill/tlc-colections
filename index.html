@@ -262,7 +262,7 @@ function render(){
     h+='<div style="text-align:right;flex-shrink:0"><div class="bal">'+fd(remaining>0?remaining:c.bal)+'</div>';
     h+='<div class="bsub">of '+fd(c.sale)+'</div>';
     if(since>0)h+='<div style="color:#38bdf8;font-size:10px;font-weight:600">+'+fd(since)+'</div>';
-    if(remaining>0)h+='<div style="margin-top:4px;display:flex;gap:14px;justify-content:flex-end"><a href="'+NMI+'" target="_blank" rel="noopener" style="color:#38bdf8;text-decoration:none;font-size:22px">&#128179;</a><a href="'+ACH+'" target="_blank" rel="noopener" style="color:#4ade80;text-decoration:none;font-size:22px">&#127974;</a></div>';
+    if(remaining>0)h+='<div style="margin-top:4px;display:flex;gap:14px;justify-content:flex-end"><a href="'+NMI+'" target="_blank" rel="noopener" style="color:#38bdf8;text-decoration:none;font-size:22px">&#128179;</a><a href="mailto:'+c.em+'?subject=ACH%20Collection%20Form%20-%20Tax%20Lien%20Code&body=Hi%20'+encodeURIComponent(c.nm.split(' ')[0])+'%2C%0A%0APlease%20fill%20out%20the%20attached%20ACH%20Collection%20Form%20and%20return%20it%20at%20your%20earliest%20convenience.%0A%0AACH%20Form%3A%20https%3A%2F%2Flesthill.github.io%2Ftlc-colections%2Fach.pdf%0A%0AAmount%20Due%3A%20'+(remaining>0?fd(remaining):fd(c.bal))+'%0A%0AThank%20you%2C%0ATax%20Lien%20Code%0A(888)%20333-9403" style="color:#4ade80;text-decoration:none;font-size:22px">&#127974;</a></div>';
     h+='</div></div>';
     // Stats
     h+='<div style="padding:0 12px 6px" class="fx g8 fw" style="font-size:11px">';

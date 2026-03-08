@@ -173,8 +173,8 @@ function testNotif(){
   var rem=pick.bal-gdn(pick.id,'since');
   var dl=daysLeft(pick.ed);
   try{
-    var n=new Notification('TLC: Time to collect '+fd(rem),{
-      body:'Call '+pick.nm+' ('+pick.ev+') - '+(dl<=0?'PAST DEADLINE':'deadline in '+dl+'d')+' | '+pick.cl,
+    var n=new Notification('Time to collect '+fd(rem),{
+      body:'Call '+pick.nm+' ('+pick.ev+') - '+dl+' days left to collect.',
       tag:'test-'+Date.now()
     });
     n.onclick=function(){window.focus();if(pick.id)jumpTo(pick.id)};
@@ -299,8 +299,8 @@ function render(){
     h+='</div>';
     h+='<button style="width:100%;background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.2);border-radius:10px;padding:14px;text-align:left" onclick="testNotif()">';
     h+='<div style="font-size:11px;color:#475569;margin-bottom:4px">TAP TO PREVIEW</div>';
-    h+='<div style="font-size:14px;font-weight:700;color:#e2e8f0">TLC: Time to collect $29,997</div>';
-    h+='<div style="font-size:12px;color:#94a3b8;margin-top:2px">Call Anthony Lucero (Albuquerque) - deadline in 3d | LH</div>';
+    h+='<div style="font-size:14px;font-weight:700;color:#e2e8f0">Time to collect $29,997</div>';
+    h+='<div style="font-size:12px;color:#94a3b8;margin-top:2px">Call Anthony Lucero (Albuquerque) - 3 days left to collect.</div>';
     h+='</button>';
     h+='</div>';
     h+='</div>'

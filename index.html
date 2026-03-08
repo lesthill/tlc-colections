@@ -99,7 +99,8 @@ var ACH_B64='JVBERi0xLjQKJfbk/N8KMSAwIG9iago8PAovVHlwZSAvQ2F0YWxvZwovVmVyc2lvbiA
 
 var S={f:'ALL',sb:'bal',sd:'desc',exp:null,reset:false,settings:false,jump:null,evs:{}};
 var TD={};var SK='tlc-v10';
-var NK='tlc-notif';var NC={};
+var NK='tlc-notif';var NC={};var NTIME='09:00';
+try{var nt=localStorage.getItem('tlc-ntime');if(nt)NTIME=nt}catch(e){}
 
 function fd(n){return '$'+Math.abs(n).toLocaleString('en-US',{maximumFractionDigits:0})}
 function fp(n){return Math.round(n*100)+'%'}
@@ -163,7 +164,23 @@ async function sendACH(name,amount,withAmount){
     }
   }
 }
-function testNotif(){if(!('Notification' in window)){alert('Install to Home Screen first');return}if(Notification.permission!=='granted'){alert('Enable notifications first');return}try{var n=new Notification('TLC Collections',{body:'Notifications working!',tag:'test'});n.onclick=function(){window.focus()}}catch(e){alert('Error: '+e.message)}}
+function testNotif(){
+  if(!('Notification' in window)){alert('Install to Home Screen first');return}
+  if(Notification.permission!=='granted'){alert('Enable notifications first');return}
+  var sample=D.filter(function(c){return c.bal>0});
+  var pick=sample[Math.floor(Math.random()*sample.length)];
+  if(!pick)pick={nm:'Anthony Lucero',ev:'Albuquerque',cl:'LH',bal:29997};
+  var rem=pick.bal-gdn(pick.id,'since');
+  var dl=daysLeft(pick.ed);
+  try{
+    var n=new Notification('TLC: Time to collect '+fd(rem),{
+      body:'Call '+pick.nm+' ('+pick.ev+') - '+(dl<=0?'PAST DUE':dl+'d until due')+' | '+pick.cl,
+      tag:'test-'+Date.now()
+    });
+    n.onclick=function(){window.focus();if(pick.id)jumpTo(pick.id)};
+  }catch(e){alert('Error: '+e.message)}
+}
+function setNTime(v){NTIME=v;try{localStorage.setItem('tlc-ntime',v)}catch(e){}}
 function reqPerm(){if('Notification' in window)Notification.requestPermission().then(function(){render()})}
 function svg(w,h,ws,si,ex,txt){
   var r=w*.4,lw=w*.13,cx=w/2,cy=h-2;
@@ -274,7 +291,18 @@ function render(){
       h+='<div style="flex:1;min-width:0"><div class="fx jb"><span style="color:#7dd3fc;font-weight:700;font-size:13px">'+k+'</span><span style="color:#fb923c;font-weight:700;font-size:11px">'+fd(c2.bal)+'</span></div>';
       h+='<div style="color:#475569;font-size:9px">'+c2.con+'/'+c2.cnt+' contacted</div></div></div></div>'
     });
-    h+='<button style="width:100%;margin-top:14px;background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.2);color:#38bdf8;padding:12px;font-size:13px;font-weight:700;border-radius:8px" onclick="testNotif()">Test Notification</button>';
+    h+='<div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(30,58,95,.15)">';
+    h+='<div style="font-size:10px;color:#64748b;letter-spacing:1px;margin-bottom:8px;font-weight:600">DAILY ALERT TIME</div>';
+    h+='<div class="fx ac g8" style="margin-bottom:14px">';
+    h+='<input type="time" class="inp" style="flex:1;font-size:16px;font-weight:600;color:#7dd3fc" value="'+NTIME+'" onchange="setNTime(this.value)">';
+    h+='<div style="font-size:11px;color:#475569;flex:1">Alerts fire when you<br>open the app after this time</div>';
+    h+='</div>';
+    h+='<button style="width:100%;background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.2);border-radius:10px;padding:14px;text-align:left" onclick="testNotif()">';
+    h+='<div style="font-size:11px;color:#475569;margin-bottom:4px">TAP TO PREVIEW</div>';
+    h+='<div style="font-size:14px;font-weight:700;color:#e2e8f0">TLC: Time to collect $29,997</div>';
+    h+='<div style="font-size:12px;color:#94a3b8;margin-top:2px">Call Anthony Lucero (Albuquerque) - 3d until due | LH</div>';
+    h+='</button>';
+    h+='</div>';
     h+='</div>'
   }
 

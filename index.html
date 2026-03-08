@@ -252,9 +252,8 @@ function render(){
 
   // ===== SCROLLABLE CONTENT =====
 
-  h+='<div id="sb" style="overflow-y:auto;-webkit-overflow-scrolling:touch">';
   // Settings overlay
-  if(S.settings){h+='<div style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:50;background:#080d13;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:60px 14px 40px">';
+  if(S.settings){h+='<div style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:200;background:#080d13;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:60px 14px 40px">';
     h+='<div class="frame" style="margin-top:8px">';
     h+='<div class="fx jb ac" style="margin-bottom:12px"><div style="font-size:14px;font-weight:700;color:#e2e8f0">&#128276; Notifications</div>';
     h+='<button style="background:transparent;border:1px solid rgba(30,58,95,.3);color:#475569;padding:6px 12px;font-size:11px;border-radius:6px" onclick="S.settings=false;render()">Close</button></div>';
@@ -274,6 +273,8 @@ function render(){
     h+='</div></div>'
   }
 
+  
+  h+='<div id="sb" style="overflow-y:auto;-webkit-overflow-scrolling:touch">';
   // Event pills
   h+='<div style="padding:8px 10px"><div class="pills">';
   h+='<div class="evpill'+(showAllEvs?' on':'')+'" onclick="togEv(\'ALL\')">ALL</div>';

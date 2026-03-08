@@ -142,11 +142,13 @@ var S={f:'ALL',sb:'bal',sd:'desc',exp:null,reset:false,settings:false,jump:null,
 var TD={};var SK='tlc-v10';
 var NK='tlc-notif';var NC={};var NTIME='09:00';
 try{var nt=localStorage.getItem('tlc-ntime');if(nt)NTIME=nt}catch(e){}
-var NTITLE='Time to collect {amount}';var NBODY='Call {name} ({event}) - {days} days left to collect.';
+var DEF_NTITLE='Time to collect {amount}';var DEF_NBODY='Call {name} ({event}) - {days} days left to collect.';
+var NTITLE=DEF_NTITLE;var NBODY=DEF_NBODY;
 try{var ct=localStorage.getItem('tlc-ntitle');if(ct)NTITLE=ct}catch(e){}
 try{var cb=localStorage.getItem('tlc-nbody');if(cb)NBODY=cb}catch(e){}
 function setNTitle(v){NTITLE=v;try{localStorage.setItem('tlc-ntitle',v)}catch(e){}}
 function setNBody(v){NBODY=v;try{localStorage.setItem('tlc-nbody',v)}catch(e){}}
+function resetNotif(){NTITLE=DEF_NTITLE;NBODY=DEF_NBODY;try{localStorage.removeItem('tlc-ntitle');localStorage.removeItem('tlc-nbody')}catch(e){};render()}
 function fmtNotif(tpl,nm,ev,amt,dl){return tpl.replace('{name}',nm).replace('{event}',ev).replace('{amount}',amt).replace('{days}',dl<=0?'OVERDUE':dl)}
 
 function fd(n){return '$'+Math.abs(n).toLocaleString('en-US',{maximumFractionDigits:0})}
@@ -348,7 +350,8 @@ function render(){
       h+='<div style="font-size:14px;font-weight:700;color:#e2e8f0">'+fmtNotif(NTITLE,'Anthony Lucero','Albuquerque','$29,997',3)+'</div>';
       h+='<div style="font-size:12px;color:#94a3b8;margin-top:2px">'+fmtNotif(NBODY,'Anthony Lucero','Albuquerque','$29,997',3)+'</div>';
       h+='</button>';
-      h+='<button style="width:100%;background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.2);border-radius:8px;padding:10px;color:#4ade80;font-size:12px;font-weight:600" onclick="S.customNotif=false;render()">&#10003; Done</button>';
+      h+='<button style="width:100%;background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.2);border-radius:8px;padding:10px;color:#4ade80;font-size:12px;font-weight:600;margin-bottom:8px" onclick="S.customNotif=false;render()">&#10003; Done</button>';
+      h+='<button style="width:100%;background:rgba(248,113,113,.06);border:1px solid rgba(248,113,113,.2);border-radius:8px;padding:10px;color:#f87171;font-size:12px;font-weight:600" onclick="resetNotif()">&#8634; Reset to Defaults</button>';
     }
     h+='</div>';
 

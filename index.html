@@ -7,13 +7,14 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>TLC Collections</title>
 <style>
+html{overscroll-behavior:none}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{background:#080d13;color:#e2e8f0;font-family:-apple-system,system-ui,sans-serif;min-height:100vh;-webkit-overflow-scrolling:touch}
 input,select,button{outline:none;-webkit-appearance:none;font-family:inherit}
 select option{background:#0f1a2a;color:#cbd5e1}
 ::-webkit-scrollbar{width:0;height:0}
 input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
-.sticky{position:sticky;top:0;z-index:10;background:#080d13}
+.ftop{position:fixed;top:0;left:0;right:0;z-index:10;background:#080d13}
 .hdr{background:linear-gradient(180deg,#0a1628,#080d13);padding:60px 14px 10px 14px;border-bottom:1px solid rgba(30,58,95,.2)}
 .closer-bar{background:#080d13;padding:8px 14px 10px;border-bottom:1px solid rgba(30,58,95,.15)}
 .fx{display:flex}.fc{flex-direction:column}.ac{align-items:center}.jb{justify-content:space-between}.fw{flex-wrap:wrap}.g4{gap:4px}.g6{gap:6px}.g8{gap:8px}.g10{gap:10px}.g12{gap:12px}
@@ -44,9 +45,7 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
 .sort.on{color:#7dd3fc;font-weight:700}
 .closer-card{background:#0c1117;border:1px solid rgba(30,58,95,.15);border-radius:8px;padding:10px}
 .closer-card.on{background:#0f1a2a;border:2px solid rgba(125,211,252,.25)}
-.pay-btn{display:flex;align-items:center;justify-content:center;width:48%;padding:10px;border-radius:6px;text-decoration:none;font-size:20px;font-weight:600}
-.pay-cc{background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.2);color:#38bdf8}
-.pay-ach{background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.2);color:#4ade80}
+
 @keyframes pifPop{0%{transform:scale(1)}50%{transform:scale(1.06)}100%{transform:scale(1)}}
 @keyframes pifGlow{0%{box-shadow:0 0 0 0 rgba(74,222,128,.4)}70%{box-shadow:0 0 0 12px rgba(74,222,128,0)}100%{box-shadow:0 0 0 0 rgba(74,222,128,0)}}
 .pif-anim{animation:pifPop .5s ease,pifGlow .7s ease}
@@ -117,6 +116,7 @@ function jumpTo(id){S.jump=id;S.exp=id;S.settings=false;S.f='ALL';render();setTi
 function saveN(){try{localStorage.setItem(NK,JSON.stringify(NC))}catch(e){}}
 function togN(k){if(!NC[k])NC[k]={on:true,days:[1,3,7]};else NC[k].on=!NC[k].on;saveN();render()}
 function togD(k,d){if(!NC[k])NC[k]={on:true,days:[]};var i=NC[k].days.indexOf(d);if(i>=0)NC[k].days.splice(i,1);else NC[k].days.push(d);saveN();render()}
+function testNotif(){if(!('Notification' in window)){alert('Install to Home Screen first');return}if(Notification.permission!=='granted'){alert('Enable notifications first');return}try{var n=new Notification('TLC Collections',{body:'Notifications working!',tag:'test'});n.onclick=function(){window.focus()}}catch(e){alert('Error: '+e.message)}}
 function reqPerm(){if('Notification' in window)Notification.requestPermission().then(function(){render()})}
 function svg(w,h,ws,si,ex,txt){
   var r=w*.4,lw=w*.13,cx=w/2,cy=h-2;
@@ -145,7 +145,7 @@ function render(){
   var selCl=f!=='ALL'&&cls[f]?cls[f]:null;
 
   // ===== STICKY TOP =====
-  var h='<div class="sticky">';
+  var h='<div class="ftop">';
   h+='<div class="hdr">';
   h+='<div class="fx jb ac" style="margin-bottom:8px"><div class="tag">TLC COLLECTIONS</div>';
   h+='<div class="fx g6">';
@@ -183,10 +183,11 @@ function render(){
   h+='<div class="pill all'+(f==='ALL'?' on':'')+'" onclick="S.f=\'ALL\';render()">ALL</div>';
   clKeys.forEach(function(k){h+='<div class="pill'+(f===k?' on':'')+'" onclick="S.f=S.f===\''+k+'\'?\'ALL\':\''+k+'\';render()">'+k+'</div>'});
   h+='</div></div>';
-  h+='</div>';// end .sticky
+  h+='</div>';// end ftop
 
   // ===== SCROLLABLE CONTENT =====
 
+  h+='<div id="sb" style="overflow-y:auto;-webkit-overflow-scrolling:touch">';
   // Settings
   if(S.settings){
     h+='<div class="frame" style="margin-top:8px">';
@@ -226,6 +227,7 @@ function render(){
       h+='<div style="flex:1;min-width:0"><div class="fx jb"><span style="color:#7dd3fc;font-weight:700;font-size:13px">'+k+'</span><span style="color:#fb923c;font-weight:700;font-size:11px">'+fd(c2.bal)+'</span></div>';
       h+='<div style="color:#475569;font-size:9px">'+c2.con+'/'+c2.cnt+' contacted</div></div></div></div>'
     });
+    h+='<button style="width:100%;margin-top:14px;background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.2);color:#38bdf8;padding:12px;font-size:13px;font-weight:700;border-radius:8px" onclick="testNotif()">Test Notification</button>';
     h+='</div>'
   }
 
@@ -260,6 +262,7 @@ function render(){
     h+='<div style="text-align:right;flex-shrink:0"><div class="bal">'+fd(remaining>0?remaining:c.bal)+'</div>';
     h+='<div class="bsub">of '+fd(c.sale)+'</div>';
     if(since>0)h+='<div style="color:#38bdf8;font-size:10px;font-weight:600">+'+fd(since)+'</div>';
+    if(remaining>0)h+='<div style="margin-top:4px;display:flex;gap:14px;justify-content:flex-end"><a href="'+NMI+'" target="_blank" rel="noopener" style="color:#38bdf8;text-decoration:none;font-size:22px">&#128179;</a><a href="'+ACH+'" target="_blank" rel="noopener" style="color:#4ade80;text-decoration:none;font-size:22px">&#127974;</a></div>';
     h+='</div></div>';
     // Stats
     h+='<div style="padding:0 12px 6px" class="fx g8 fw" style="font-size:11px">';
@@ -272,11 +275,7 @@ function render(){
       if(c.ph)h+='<a href="tel:'+c.ph+'">&#128222; '+c.ph+'</a>';
       if(c.em)h+='<a href="mailto:'+c.em+'" style="overflow:hidden;text-overflow:ellipsis;max-width:200px;white-space:nowrap">&#9993; '+c.em+'</a>';
     h+='</div>'}
-    // Payment buttons (CC + ACH icons)
-    if(remaining>0){h+='<div style="padding:0 12px 8px" class="fx g8">';
-      h+='<a href="'+NMI+'" target="_blank" class="pay-btn pay-cc" title="Credit Card">&#128179;</a>';
-      h+='<a href="'+ACH+'" target="_blank" class="pay-btn pay-ach" title="ACH Form">&#127974;</a>';
-    h+='</div>'}
+
     // Status + expand
     h+='<div class="fx g8" style="padding:6px 12px 8px;border-top:1px solid rgba(30,58,95,.1)">';
     h+='<select class="sel" style="color:'+SC[cs]+'" onchange="upd(\''+c.id+'\',\'cs\',this.value)">';
@@ -304,7 +303,7 @@ function render(){
     h+='</div>'
   });
   h+='<div class="fx jb ac" style="padding:14px 16px;font-size:8px;color:#1e293b"><span>LH // '+new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'})+'</span><span style="color:#7dd3fc;font-weight:700">TLC COLLECTIONS</span></div>';
-  document.getElementById('app').innerHTML=h
+  h+='</div>';document.getElementById('app').innerHTML=h;setTimeout(function(){var f=document.querySelector('.ftop');var s=document.getElementById('sb');if(f&&s){s.style.marginTop=f.offsetHeight+'px';s.style.height='calc(100vh - '+f.offsetHeight+'px)'}},20)
 }
 try{var v=localStorage.getItem(SK);if(v)TD=JSON.parse(v)}catch(e){}
 try{var nv=localStorage.getItem(NK);if(nv)NC=JSON.parse(nv)}catch(e){}

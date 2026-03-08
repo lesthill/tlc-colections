@@ -213,7 +213,7 @@ function svg(w,h,ws,si,ex,txt){
   if(txt)s+='<text x="'+cx+'" y="'+(cy-4)+'" text-anchor="middle" fill="#e2e8f0" font-size="'+(w*.22)+'" font-weight="700" font-family="system-ui">'+txt+'</text>';
   return s+'</svg>'}
 
-function doRefresh(){if(window.caches){caches.keys().then(function(n){n.forEach(function(k){caches.delete(k)})});setTimeout(function(){window.location.href=window.location.pathname+'?v=48&t='+Date.now()},300)}else{window.location.href=window.location.pathname+'?v=48&t='+Date.now()}}
+function doRefresh(){if(window.caches){caches.keys().then(function(n){n.forEach(function(k){caches.delete(k)})});setTimeout(function(){window.location.href=window.location.pathname+'?v=49&t='+Date.now()},300)}else{window.location.href=window.location.pathname+'?v=49&t='+Date.now()}}
 function render(){
   var f=S.f;
   // Only show events within last 5 weeks
@@ -234,7 +234,7 @@ function render(){
   // ===== STICKY TOP =====
   var h='<div class="ftop">';
   h+='<div class="hdr">';
-  h+='<div class="fx jb ac" style="margin-bottom:8px"><div><div class="tag">TLC COLLECTIONS</div><div style="font-size:9px;color:#334155;letter-spacing:1px" onclick="doRefresh()">v48</div></div>';
+  h+='<div class="fx jb ac" style="margin-bottom:8px"><div><div class="tag">TLC COLLECTIONS</div><div style="font-size:9px;color:#334155;letter-spacing:1px" onclick="doRefresh()">v49</div></div>';
   h+='<div class="fx g6">';
   h+='<button style="background:transparent;border:1px solid rgba(30,58,95,.3);color:#7dd3fc;padding:6px 10px;font-size:16px;border-radius:6px" onclick="S.settings=!S.settings;render()">&#9881;</button>';
   h+='<button style="background:transparent;border:1px solid rgba(74,222,128,.25);color:#4ade80;padding:6px 10px;font-size:13px;border-radius:6px" onclick="doRefresh()">&#x21bb;</button>';
@@ -245,7 +245,7 @@ function render(){
   // Team gauge row
   h+='<div class="fx ac g10" style="margin-bottom:8px">';
   h+='<div style="width:80px;height:46px;flex-shrink:0">'+svg(80,46,tS>0?tW/tS:0,tS>0?tSi/tS:0,tS>0?tE/tS:0,fp(pp))+'</div>';
-  h+='<div style="flex:1"><div style="font-size:20px;font-weight:700;color:#fb923c">'+fd(tB-tSi)+'</div>';
+  h+='<div style="flex:1"><div style="font-size:20px;font-weight:700;color:#fb923c">'+fd(tB-tSi)+'</div><div style="color:#475569;font-size:9px">outstanding</div>';
   h+='<div class="fx g6" style="font-size:10px;margin-top:2px"><span class="grn">WS:'+fd(tW)+'</span>';
   if(tSi>0)h+='<span class="blu">+'+fd(tSi)+'</span>';
   if(tE>0)h+='<span class="ylw">Exp:'+fd(tE)+'</span>';

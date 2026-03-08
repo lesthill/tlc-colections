@@ -119,15 +119,20 @@ function saveN(){try{localStorage.setItem(NK,JSON.stringify(NC))}catch(e){}}
 function togN(k){if(!NC[k])NC[k]={on:true,days:[1,3,7]};else NC[k].on=!NC[k].on;saveN();render()}
 function togD(k,d){if(!NC[k])NC[k]={on:true,days:[]};var i=NC[k].days.indexOf(d);if(i>=0)NC[k].days.splice(i,1);else NC[k].days.push(d);saveN();render()}
 
-async function sendACH(name,amount){
-  if(typeof PDFLib==="undefined"&&typeof window.PDFLib==="undefined"){alert("PDF library loading, try again in a sec");return}
+var achPending=null;
+function askACH(name,amount){
+  achPending={name:name,amount:amount};
+  render();
+}
+async function sendACH(name,amount,withAmount){
   var firstName=name.split(' ')[0];
   var byteChars=atob(ACH_B64);
   var byteArr=new Uint8Array(byteChars.length);
   for(var i=0;i<byteChars.length;i++)byteArr[i]=byteChars.charCodeAt(i);
   
   try{
-    var PL=window.PDFLib||window['PDFLib']||window['pdf-lib'];if(!PL){alert('PDF lib not loaded');return}
+    var PL=window.PDFLib||window['PDFLib']||window['pdf-lib'];
+    if(!PL) throw new Error('no lib');
     var pdfDoc=await PL.PDFDocument.load(byteArr);
     var pages=pdfDoc.getPages();
     var pg=pages[0];
@@ -135,7 +140,7 @@ async function sendACH(name,amount){
     var h=pg.getHeight();
     
     // Amount to be processed only
-    pg.drawText(amount,{x:248,y:h-573,size:14,font:font,color:PL.rgb(0,0,0)});
+    if(withAmount)pg.drawText(amount,{x:290,y:h-481,size:12,font:font,color:PL.rgb(0,0,0)});
     
     var filledBytes=await pdfDoc.save();
     var blob=new Blob([filledBytes],{type:'application/pdf'});
@@ -304,7 +309,7 @@ function render(){
     h+='<div style="text-align:right;flex-shrink:0"><div class="bal">'+fd(remaining>0?remaining:c.bal)+'</div>';
     h+='<div class="bsub">of '+fd(c.sale)+'</div>';
     if(since>0)h+='<div style="color:#38bdf8;font-size:10px;font-weight:600">+'+fd(since)+'</div>';
-    if(remaining>0)h+='<div style="margin-top:4px;display:flex;gap:14px;justify-content:flex-end"><a href="javascript:void(0)" onclick="var info=\''+c.nm+'\\n'+(c.em||"")+'\\n'+(remaining>0?fd(remaining):fd(c.bal))+'\';navigator.clipboard.writeText(info).then(function(){}).catch(function(){});window.open(\''+NMI+'\',\'_blank\')" style="color:#38bdf8;text-decoration:none;font-size:22px">&#128179;</a><a href="javascript:void(0)" onclick="sendACH(\''+c.nm+'\',\''+(remaining>0?fd(remaining):fd(c.bal))+'\');return false" style="color:#4ade80;text-decoration:none;font-size:22px">&#127974;</a></div>';
+    if(remaining>0)h+='<div style="margin-top:4px;display:flex;gap:14px;justify-content:flex-end"><a href="javascript:void(0)" onclick="var info=\''+c.nm+'\\n'+(c.em||"")+'\\n'+(remaining>0?fd(remaining):fd(c.bal))+'\';navigator.clipboard.writeText(info).then(function(){}).catch(function(){});window.open(\''+NMI+'\',\'_blank\')" style="color:#38bdf8;text-decoration:none;font-size:22px">&#128179;</a><a href="javascript:void(0)" onclick="askACH(\''+c.nm+'\',\''+(remaining>0?fd(remaining):fd(c.bal))+'\');return false" style="color:#4ade80;text-decoration:none;font-size:22px">&#127974;</a></div>';
     h+='</div></div>';
     // Stats
     h+='<div style="padding:0 12px 6px" class="fx g8 fw" style="font-size:11px">';
@@ -344,6 +349,18 @@ function render(){
       if(edt)h+='<span class="gry">by '+edt+'</span>';if(cn)h+='<span class="gry">"'+cn+'"</span>';h+='</div>'}
     h+='</div>'
   });
+  // ACH choice modal
+  if(achPending){
+    h+='<div style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:100;display:flex;align-items:center;justify-content:center" onclick="achPending=null;render()">';
+    h+='<div style="background:#0c1117;border:1px solid rgba(30,58,95,.3);border-radius:16px;padding:24px;margin:20px;max-width:320px;width:100%" onclick="event.stopPropagation()">';
+    h+='<div style="font-size:16px;font-weight:700;color:#e2e8f0;margin-bottom:4px">Send ACH Form</div>';
+    h+='<div style="font-size:12px;color:#475569;margin-bottom:20px">'+achPending.name+'</div>';
+    h+='<button onclick="var p=achPending;achPending=null;render();sendACH(p.name,p.amount,true)" style="width:100%;padding:16px;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.25);color:#4ade80;font-size:15px;font-weight:700;border-radius:10px;margin-bottom:10px">With Balance ('+achPending.amount+')</button>';
+    h+='<button onclick="var p=achPending;achPending=null;render();sendACH(p.name,p.amount,false)" style="width:100%;padding:16px;background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.25);color:#38bdf8;font-size:15px;font-weight:700;border-radius:10px;margin-bottom:10px">Send Blank</button>';
+    h+='<button onclick="achPending=null;render()" style="width:100%;padding:12px;background:transparent;border:1px solid rgba(30,58,95,.3);color:#475569;font-size:13px;border-radius:10px">Cancel</button>';
+    h+='</div></div>';
+  }
+
   h+='<div class="fx jb ac" style="padding:14px 16px;font-size:8px;color:#1e293b"><span>LH // '+new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'})+'</span><span style="color:#7dd3fc;font-weight:700">TLC COLLECTIONS</span></div>';
   h+='</div>';document.getElementById('app').innerHTML=h;setTimeout(function(){var f=document.querySelector('.ftop');var s=document.getElementById('sb');if(f&&s){s.style.marginTop=f.offsetHeight+'px';s.style.height='calc(100vh - '+f.offsetHeight+'px)'}},20)
 }

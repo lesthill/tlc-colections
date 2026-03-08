@@ -127,25 +127,14 @@ function sendACH(name,email,phone,amount){
 function doACH(method){
   var m=achModal;if(!m)return;
   var firstName=m.name.split(' ')[0];
-  var byteChars=atob(ACH_B64);
-  var byteArr=new Uint8Array(byteChars.length);
-  for(var i=0;i<byteChars.length;i++)byteArr[i]=byteChars.charCodeAt(i);
-  var blob=new Blob([byteArr],{type:'application/pdf'});
-  var file=new File([blob],'ACH_Collection_Form_TLC.pdf',{type:'application/pdf'});
-  var msg='Hi '+firstName+', please fill out the attached ACH form and return it. Amount due: '+m.amount+'. Thank you, Tax Lien Code (888) 333-9403';
+  var formUrl='https://lesthill.github.io/tlc-colections/ach.pdf';
+  var body='Hi '+firstName+',\n\nPlease fill out the ACH Collection Form linked below and return it at your earliest convenience.\n\nACH Form: '+formUrl+'\n\nAmount Due: '+m.amount+'\n\nThank you,\nTax Lien Code\n(888) 333-9403';
+  var smsBody='Hi '+firstName+', please fill out this ACH form: '+formUrl+' Amount due: '+m.amount+'. Thank you - Tax Lien Code (888) 333-9403';
   
   if(method==='email'){
-    if(navigator.canShare&&navigator.canShare({files:[file]})){
-      navigator.share({title:'ACH Form - Tax Lien Code',text:msg,files:[file]}).catch(function(){});
-    } else {
-      window.location='mailto:'+m.email+'?subject=ACH%20Collection%20Form&body='+encodeURIComponent(msg+'\n\nACH Form: https://lesthill.github.io/tlc-colections/ach.pdf');
-    }
+    window.location='mailto:'+m.email+'?subject=ACH%20Collection%20Form%20-%20Tax%20Lien%20Code&body='+encodeURIComponent(body);
   } else {
-    if(navigator.canShare&&navigator.canShare({files:[file]})){
-      navigator.share({title:'ACH Form',text:msg,files:[file]}).catch(function(){});
-    } else {
-      window.location='sms:'+m.phone+'&body='+encodeURIComponent(msg+' ACH Form: https://lesthill.github.io/tlc-colections/ach.pdf');
-    }
+    window.location='sms:'+m.phone+'&body='+encodeURIComponent(smsBody);
   }
   achModal=null;render();
 }

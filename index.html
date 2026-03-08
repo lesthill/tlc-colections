@@ -29,7 +29,7 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
 .frame{background:#0c1117;border:1px solid rgba(30,58,95,.2);border-radius:10px;padding:14px;margin:8px 10px}
 .frame-title{font-size:9px;letter-spacing:2px;color:#475569;margin-bottom:10px;font-weight:600}
 .pills{display:flex;gap:5px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px}
-.pill{background:#0f1a2a;border:1px solid rgba(30,58,95,.3);color:#7dd3fc;padding:10px 16px;font-size:15px;border-radius:8px;font-weight:700;white-space:nowrap;flex-shrink:0}
+.pill{background:#0f1a2a;border:1px solid rgba(30,58,95,.3);color:#7dd3fc;padding:7px 10px;font-size:12px;border-radius:8px;font-weight:700;white-space:nowrap;flex-shrink:0}
 .pill.on{background:#7dd3fc;color:#080d13;border:none}
 .pill.all{color:#94a3b8}.pill.all.on{background:#4ade80;color:#080d13}
 .evpill{background:#0f1a2a;border:1px solid rgba(30,58,95,.3);color:#94a3b8;padding:8px 12px;font-size:12px;border-radius:6px;font-weight:600;white-space:nowrap;flex-shrink:0}
@@ -77,6 +77,7 @@ setTimeout(function(){ls.remove()},350);
 </script>
 <script>
 var CN={LH:'Les Hill',SH:'Scott Hoffmann',CL:'Chad Lawson',BL:'Bernard Lawson',TK:'Tiffany Knight',BH:'Boyd Hoffmann',LT:'Lisa Toland',KF:'K. Fontaine'};
+var CFN={};Object.keys(CN).forEach(function(k){CFN[k]=CN[k].split(' ')[0]});
 var D=[
 {id:'b1',nm:'William DuQuette',ev:'Boston',ed:'2025-11-24',cl:'BL',sale:46997,col:2500,bal:44497,t:46997,nt:"Founder's Club",rr:'DECLINED',rn:'691 $18K',ph:'603-234-4546',em:'billduke32@gmail.com'},
 {id:'b2',nm:'Willy Santana',ev:'Boston',ed:'2025-11-24',cl:'BL',sale:9995,col:3500,bal:6495,t:9995,nt:'',rr:'DECLINED',rn:'<600',ph:'617-686-5290',em:'santana.willy@icloud.com'},
@@ -108,7 +109,24 @@ var D=[
 {id:'a5',nm:'Becky Gonzalez',ev:'Albuquerque',ed:'2026-02-09',cl:'TK',sale:39997,col:26997,bal:13000,t:39997,nt:'Bal 3 wks',rr:'DECLINED',rn:'649 thin',ph:'505-688-1064',em:'beckygonzalez30@yahoo.com'},
 {id:'a6',nm:'Selena Fox-Anderson',ev:'Albuquerque',ed:'2026-02-09',cl:'TK',sale:46997,col:0,bal:46997,t:46997,nt:'FC TSP',rr:'DECLINED',rn:'680 $9.9K',ph:'505-366-4514',em:'selenapfox@gmail.com'},
 {id:'a7',nm:'Douglas Conrad',ev:'Albuquerque',ed:'2026-02-09',cl:'TK',sale:25997,col:1000,bal:24997,t:25997,nt:'Bal 3 wks',rr:'NEED_INFO',rn:'Verify',ph:'505-702-2902',em:'fr3sh4200@gmail.com'},
-{id:'a8',nm:'Armando Maestas',ev:'Albuquerque',ed:'2026-02-09',cl:'TK',sale:46997,col:2000,bal:44997,t:46997,nt:'Save @10',rr:'DECLINED',rn:'723 $0',ph:'',em:''}
+{id:'a8',nm:'Armando Maestas',ev:'Albuquerque',ed:'2026-02-09',cl:'TK',sale:46997,col:2000,bal:44997,t:46997,nt:'Save @10',rr:'DECLINED',rn:'723 $0',ph:'',em:''},
+{id:'dc1',nm:'Brenda C Jones',ev:'Wash DC',ed:'2026-03-06',cl:'TK',sale:39997,col:10000,bal:29997,t:39997,nt:'Bal RR',rr:'RANGE',rn:'30',ph:'703-998-4131',em:'unionyes7@gmail.com'},
+{id:'dc2',nm:'Amy Holland',ev:'Wash DC',ed:'2026-03-06',cl:'SH',sale:39997,col:5000,bal:34997,t:39997,nt:'Bal RR',rr:'RANGE',rn:'10-30',ph:'240-401-9979',em:'hollanda@comcast.net'},
+{id:'dc3',nm:'Abelardo Ramirez',ev:'Wash DC',ed:'2026-03-06',cl:'LT',sale:39997,col:3000,bal:36997,t:39997,nt:'Bal RR',rr:'RANGE',rn:'10-30',ph:'502-321-8023',em:'rabelardo58@yahoo.com'},
+{id:'dc4',nm:'Howard Ashmon',ev:'Wash DC',ed:'2026-03-06',cl:'BL',sale:39997,col:5000,bal:34997,t:39997,nt:'Bal RR',rr:'RANGE',rn:'30-50',ph:'202-905-4595',em:'ashmdnhc@yahoo.com'},
+{id:'dc5',nm:'Dennys Velasquez',ev:'Wash DC',ed:'2026-03-06',cl:'SH',sale:39997,col:1000,bal:38997,t:39997,nt:'Bal via savings',ph:'240-314-9442',em:'gmsllc@icloud.com'},
+{id:'dc6',nm:'Mercy Peterson',ev:'Wash DC',ed:'2026-03-06',cl:'SH',sale:25997,col:1000,bal:24997,t:25997,nt:'Bal RR',rr:'RANGE',rn:'Mercy 30-50',ph:'301-910-1821',em:'mercy01peters@gmail.com'},
+{id:'dc7',nm:'Tyrone Harrison',ev:'Wash DC',ed:'2026-03-06',cl:'BL',sale:25997,col:3000,bal:22997,t:25997,nt:'Bal RR + Savings',rr:'RANGE',rn:'0-10',ph:'301-828-0416',em:'tyrone.harrison@gmail.com'},
+{id:'dc8',nm:'Kyle Kinzer',ev:'Wash DC',ed:'2026-03-06',cl:'TK',sale:46997,col:46997,bal:0,t:46997,nt:'PIF',ph:'703-599-1269',em:'bandkkinzer@verizon.net'},
+{id:'dc9',nm:'Willie Taylor',ev:'Wash DC',ed:'2026-03-06',cl:'SH',sale:25997,col:1500,bal:24497,t:25997,nt:'Bal RR',rr:'RANGE',rn:'10-30',ph:'301-653-7852',em:'wjtj320@gmail.com'},
+{id:'dc10',nm:'April Parker',ev:'Wash DC',ed:'2026-03-06',cl:'LT',sale:39997,col:5000,bal:34997,t:39997,nt:'Bal RR',rr:'RANGE',rn:'20-40',ph:'301-641-8268',em:'mzsean@aol.com'},
+{id:'dc11',nm:'Ralph Gill',ev:'Wash DC',ed:'2026-03-06',cl:'BL',sale:46997,col:1000,bal:45997,t:46997,nt:'Bal savings, cc, HELOC',ph:'202-327-3452',em:'prmnow1@aol.com'},
+{id:'dc12',nm:'Julie Kozloski',ev:'Wash DC',ed:'2026-03-06',cl:'TK',sale:46997,col:46997,bal:0,t:46997,nt:'PIF',ph:'540-207-8506',em:'jlkozloski@gmail.com'},
+{id:'dc13',nm:'Bridgette Ahima',ev:'Wash DC',ed:'2026-03-06',cl:'LH',sale:25997,col:20000,bal:5997,t:25997,nt:'Bal 3 wks',ph:'571-435-5354',em:'lil_bridgo@yahoo.com'},
+{id:'dc14',nm:'Ricco Carman',ev:'Wash DC',ed:'2026-03-06',cl:'TK',sale:39997,col:1000,bal:38997,t:39997,nt:'Bal other loan',ph:'240-484-6112',em:'antonioshadow17@gmail.com'},
+{id:'dc15',nm:'Dennis Green',ev:'Wash DC',ed:'2026-03-06',cl:'BL',sale:46997,col:10000,bal:36997,t:46997,nt:'Bal other cc + savings',ph:'202-569-6047',em:'e3green1281@gmail.com'},
+{id:'dc16',nm:'Gary Reed',ev:'Wash DC',ed:'2026-03-06',cl:'LH',sale:39997,col:4000,bal:35997,t:39997,nt:'Bal same card next 2 thursdays',ph:'757-504-4579',em:'nmbiz.llc@gmail.com'},
+{id:'dc17',nm:'Christine Bridewell',ev:'Wash DC',ed:'2026-03-06',cl:'CL',sale:39997,col:2500,bal:37497,t:39997,nt:'Bal in 2 wks',ph:'703-623-9532',em:'cbridewell01@gmail.com'}
 ];
 var TS={9995:'$10K',25997:'$26K',39997:'$40K',46997:'$47K'};
 var TC={9995:'#94a3b8',25997:'#38bdf8',39997:'#4ade80',46997:'#fbbf24'};
@@ -213,7 +231,7 @@ function svg(w,h,ws,si,ex,txt){
   if(txt)s+='<text x="'+cx+'" y="'+(cy-4)+'" text-anchor="middle" fill="#e2e8f0" font-size="'+(w*.22)+'" font-weight="700" font-family="system-ui">'+txt+'</text>';
   return s+'</svg>'}
 
-function doRefresh(){if(window.caches){caches.keys().then(function(n){n.forEach(function(k){caches.delete(k)})});setTimeout(function(){window.location.href=window.location.pathname+'?v=50&t='+Date.now()},300)}else{window.location.href=window.location.pathname+'?v=50&t='+Date.now()}}
+function doRefresh(){if(window.caches){caches.keys().then(function(n){n.forEach(function(k){caches.delete(k)})});setTimeout(function(){window.location.href=window.location.pathname+'?v=51&t='+Date.now()},300)}else{window.location.href=window.location.pathname+'?v=51&t='+Date.now()}}
 function render(){
   var f=S.f;
   // Only show events within last 5 weeks
@@ -235,7 +253,7 @@ function render(){
   // ===== STICKY TOP =====
   var h='<div class="ftop">';
   h+='<div class="hdr">';
-  h+='<div class="fx jb ac" style="margin-bottom:8px"><div><div class="tag">TLC COLLECTIONS</div><div style="font-size:9px;color:#334155;letter-spacing:1px" onclick="doRefresh()">v50</div></div>';
+  h+='<div class="fx jb ac" style="margin-bottom:8px"><div><div class="tag">TLC COLLECTIONS</div><div style="font-size:9px;color:#334155;letter-spacing:1px" onclick="doRefresh()">v51</div></div>';
   h+='<div class="fx g6">';
   h+='<button style="background:transparent;border:1px solid rgba(30,58,95,.3);color:#7dd3fc;padding:6px 10px;font-size:16px;border-radius:6px" onclick="S.settings=!S.settings;render()">&#9881;</button>';
   h+='<button style="background:transparent;border:1px solid rgba(74,222,128,.25);color:#4ade80;padding:6px 10px;font-size:13px;border-radius:6px" onclick="doRefresh()">&#x21bb;</button>';
@@ -249,28 +267,31 @@ function render(){
   h+='<div style="flex:1"><div style="font-size:20px;font-weight:700;color:#fb923c">'+fd(tB-tSi)+'</div><div style="color:#475569;font-size:9px">outstanding</div>';
   h+='<div class="fx g6" style="font-size:10px;margin-top:2px"><span class="grn">WS:'+fd(tW)+'</span>';
   if(tSi>0)h+='<span class="blu">+'+fd(tSi)+'</span>';
-  if(tE>0)h+='<span class="ylw">Exp:'+fd(tE)+'</span>';
+  if(tE>0)h+='<span class="ylw">Potential:'+fd(tE)+'</span>';
   h+='</div></div>';
   h+='<div style="text-align:right"><div style="font-size:24px;font-weight:700;color:#fff">'+items.length+'</div><div style="font-size:8px;font-weight:700;color:#475569;letter-spacing:1px">OPEN</div></div>';
   h+='</div>';
 
-  // Selected closer mini frame (in sticky)
+  // Selected closer mini frame (always visible)
+  h+='<div style="background:rgba(30,58,95,.1);border-radius:8px;padding:8px 10px;margin-bottom:8px;min-height:30px">';
   if(selCl){
     var sc=cls[f],swp=sc.sale>0?sc.ws/sc.sale:0,ssp=sc.sale>0?sc.si/sc.sale:0,sep=sc.sale>0?sc.ex/sc.sale:0,spd=sc.sale>0?(sc.ws+sc.si)/sc.sale:0;
-    h+='<div style="background:rgba(30,58,95,.1);border-radius:8px;padding:10px;margin-bottom:8px">';
     h+='<div class="fx ac g8">';
-    if(spd>=.999){h+='<div style="width:50px;height:30px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(74,222,128,.1);border-radius:6px"><span style="font-size:14px">&#9989;</span></div>'}
-    else{h+='<div style="width:50px;height:30px;flex-shrink:0">'+svg(50,30,swp,ssp,sep,fp(spd))+'</div>'}
-    h+='<div style="flex:1"><div style="font-size:14px;font-weight:700;color:#7dd3fc">'+f+' <span style="color:#64748b;font-weight:400;font-size:11px">'+CN[f]+'</span></div>';
-    h+='<div style="font-size:11px;color:#475569">'+sc.cnt+' accts | '+sc.con+' contacted | <span style="color:#fb923c;font-weight:700">'+fd(sc.bal)+'</span></div></div></div></div>'
+    if(spd>=.999){h+='<div style="width:50px;height:28px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(74,222,128,.1);border-radius:6px"><span style="font-size:13px">&#9989;</span></div>'}
+    else{h+='<div style="width:50px;height:28px;flex-shrink:0">'+svg(50,28,swp,ssp,sep,fp(spd))+'</div>'}
+    h+='<div style="flex:1"><div style="font-size:13px;font-weight:700;color:#7dd3fc">'+CFN[f]+' <span style="color:#64748b;font-weight:400;font-size:10px">'+CN[f]+'</span></div>';
+    h+='<div style="font-size:10px;color:#475569">'+sc.cnt+' accts | '+sc.con+' contacted | <span style="color:#fb923c;font-weight:700">'+fd(sc.bal)+'</span></div></div></div>'
+  } else {
+    h+='<div class="fx ac" style="height:28px"><span style="color:#334155;font-size:10px;font-style:italic">Select a closer to view details</span></div>'
   }
+  h+='</div>';
 
   h+='</div>';// end .hdr
 
   // Closer pills (in sticky)
   h+='<div class="closer-bar"><div class="pills">';
   h+='<div class="pill all'+(f==='ALL'?' on':'')+'" onclick="S.f=\'ALL\';render()">ALL</div>';
-  clKeys.forEach(function(k){h+='<div class="pill'+(f===k?' on':'')+'" onclick="S.f=S.f===\''+k+'\'?\'ALL\':\''+k+'\';render()">'+k+'</div>'});
+  clKeys.forEach(function(k){h+='<div class="pill'+(f===k?' on':'')+'" onclick="S.f=S.f===\''+k+'\'?\'ALL\':\''+k+'\';render()">'+CFN[k]+'</div>'});
   h+='</div></div>';
   h+='</div>';// end ftop
 
@@ -400,7 +421,7 @@ function render(){
       h+='<div><label class="lbl gry">NOTES</label><input class="inp" value="'+(cn||'').replace(/"/g,'&quot;')+'" placeholder="Follow-up notes..." onchange="upd(\''+c.id+'\',\'cn\',this.value)"></div></div>'
     }
     if(!isX&&(cn||since>0||exp>0)){h+='<div style="padding:4px 12px 8px;font-size:11px" class="fx g8 fw">';
-      if(since>0)h+='<span class="blu">+'+fd(since)+'</span>';if(exp>0)h+='<span class="ylw">Exp:'+fd(exp)+'</span>';
+      if(since>0)h+='<span class="blu">+'+fd(since)+'</span>';if(exp>0)h+='<span class="ylw">Potential:'+fd(exp)+'</span>';
       if(edt)h+='<span class="gry">by '+edt+'</span>';if(cn)h+='<span class="gry">"'+cn+'"</span>';h+='</div>'}
     h+='</div>'
   });

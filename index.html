@@ -134,15 +134,8 @@ async function sendACH(name,amount){
     var font=await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
     var h=pg.getHeight();
     
-    // Account Holder Name - right of the label, in the form field area
-    pg.drawText(name,{x:248,y:h-286,size:12,font:font,color:PDFLib.rgb(0.1,0.1,0.3)});
-    
-    // Amount to be processed
-    pg.drawText(amount,{x:248,y:h-573,size:12,font:font,color:PDFLib.rgb(0.1,0.1,0.3)});
-    
-    // Date to be processed - today's date
-    var today=new Date().toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'});
-    pg.drawText(today,{x:248,y:h-607,size:12,font:font,color:PDFLib.rgb(0.1,0.1,0.3)});
+    // Amount to be processed only
+    pg.drawText(amount,{x:248,y:h-573,size:14,font:font,color:PDFLib.rgb(0,0,0)});
     
     var filledBytes=await pdfDoc.save();
     var blob=new Blob([filledBytes],{type:'application/pdf'});

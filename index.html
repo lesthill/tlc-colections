@@ -301,7 +301,7 @@ function render(){
   // Closer pills (in sticky)
   h+='<div class="closer-bar"><div class="pills">';
   h+='<div class="pill all'+(f==='ALL'?' on':'')+'" onclick="S.f=\'ALL\';render()">ALL</div>';
-  clKeys.forEach(function(k){h+='<div class="pill'+(f===k?' on':'')+'" onclick="S.f=S.f===\''+k+'\'?\'ALL\':\''+k+'\';render()">'+k+'</div>'});
+  clKeys.forEach(function(k){var cb=cls[k].bal-cls[k].si;var cbs=cb>=1000?(Math.round(cb/1000)+'K'):fd(cb);h+='<div class="pill'+(f===k?' on':'')+'" onclick="S.f=S.f===\''+k+'\'?\'ALL\':\''+k+'\';render()">'+k+' <span style="font-size:10px;opacity:.7">'+cbs+'</span></div>'});
   h+='</div></div>';
   h+='</div>';// end ftop
 

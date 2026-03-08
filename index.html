@@ -212,7 +212,7 @@ function render(){
   // ===== STICKY TOP =====
   var h='<div class="ftop">';
   h+='<div class="hdr">';
-  h+='<div class="fx jb ac" style="margin-bottom:8px"><div class="tag">TLC COLLECTIONS</div>';
+  h+='<div class="fx jb ac" style="margin-bottom:8px"><div><div class="tag">TLC COLLECTIONS</div><div style="font-size:9px;color:#334155;letter-spacing:1px" onclick="location.reload(true)">v38 &#x21bb; REFRESH</div></div>';
   h+='<div class="fx g6">';
   h+='<button style="background:transparent;border:1px solid rgba(30,58,95,.3);color:#7dd3fc;padding:6px 10px;font-size:16px;border-radius:6px" onclick="S.settings=!S.settings;render()">&#9881;</button>';
   if(S.reset){h+='<button style="background:#f87171;border:none;color:#fff;padding:8px 12px;font-size:12px;border-radius:6px" onclick="TD={};try{localStorage.removeItem(SK)}catch(e){}S.reset=false;render()">Clear</button><button class="btn" style="font-size:12px;padding:8px 12px" onclick="S.reset=false;render()">X</button>'}

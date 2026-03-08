@@ -252,8 +252,8 @@ function render(){
   // ===== SCROLLABLE CONTENT =====
 
   h+='<div id="sb" style="overflow-y:auto;-webkit-overflow-scrolling:touch">';
-  // Settings
-  if(S.settings){
+  // Settings overlay
+  if(S.settings){h+='<div style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:50;background:#080d13;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:60px 14px 40px">';
     h+='<div class="frame" style="margin-top:8px">';
     h+='<div class="fx jb ac" style="margin-bottom:12px"><div style="font-size:14px;font-weight:700;color:#e2e8f0">&#128276; Notifications</div>';
     h+='<button style="background:transparent;border:1px solid rgba(30,58,95,.3);color:#475569;padding:6px 12px;font-size:11px;border-radius:6px" onclick="S.settings=false;render()">Close</button></div>';
@@ -270,7 +270,7 @@ function render(){
       h+='<div style="width:20px;height:20px;border-radius:10px;background:#fff;position:absolute;top:3px;'+(cfg.on?'right:3px':'left:3px')+'"></div></button></div>';
       if(cfg.on){h+='<div class="fx g4" style="padding:6px 0">';[1,3,5,7,14].forEach(function(d){var isOn=cfg.days&&cfg.days.indexOf(d)>=0;h+='<button style="padding:6px 10px;border-radius:6px;font-size:11px;font-weight:600;border:1px solid '+(isOn?'#7dd3fc':'rgba(30,58,95,.3)')+';background:'+(isOn?'rgba(125,211,252,.15)':'transparent')+';color:'+(isOn?'#7dd3fc':'#475569')+'" onclick="togD(\''+k+'\','+d+')">'+d+'d</button>'});h+='</div>'}
     });
-    h+='</div>'
+    h+='</div></div>'
   }
 
   // Event pills

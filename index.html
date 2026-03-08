@@ -13,7 +13,7 @@ input,select,button{outline:none;-webkit-appearance:none;font-family:inherit}
 select option{background:#0f1a2a;color:#cbd5e1}
 ::-webkit-scrollbar{width:0;height:0}
 input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
-.hdr{background:linear-gradient(180deg,#0a1628,#080d13);padding:14px;padding-top:calc(14px + env(safe-area-inset-top));border-bottom:1px solid rgba(30,58,95,.2)}
+.hdr{background:linear-gradient(180deg,#0a1628,#080d13);padding:14px;padding-top:54px;border-bottom:1px solid rgba(30,58,95,.2)}
 .fx{display:flex}.fc{flex-direction:column}.ac{align-items:center}.jb{justify-content:space-between}.fw{flex-wrap:wrap}.g6{gap:6px}.g8{gap:8px}.g10{gap:10px}.g12{gap:12px}
 .tag{font-size:8px;letter-spacing:4px;color:#4ade80;margin-bottom:8px}
 .pills{display:flex;gap:5px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px}
@@ -352,12 +352,14 @@ function render(){
       h+='<div class="exp-panel">';
       h+='<div style="margin-bottom:12px"><label class="lbl blu">COLLECTED SINCE WORKSHOP</label>';
       h+='<div class="fx g8 ac"><input type="number" class="inp inp-b" style="max-width:160px" value="'+(since||'')+'" placeholder="0" onchange="upd(\''+c.id+'\',\'since\',this.value)">';
-      h+='<button class="btn-pif" onclick="pif(\''+c.id+'\','+c.bal+')">PIF</button></div></div>';
+      var isPifSince=since>=c.bal;
+      h+='<button class="btn-pif" style="'+(isPifSince?'background:rgba(248,113,113,.1);border-color:rgba(248,113,113,.25);color:#f87171':'')+'" onclick="if(gdn(\''+c.id+'\',\'since\')>='+c.bal+'){upd(\''+c.id+'\',\'since\',gd(\''+c.id+'\',\'_prevSince\')||\'0\');upd(\''+c.id+'\',\'cs\',gd(\''+c.id+'\',\'_prevCs\')||\'not_contacted\')}else{upd(\''+c.id+'\',\'_prevSince\',String(since));upd(\''+c.id+'\',\'_prevCs\',cs);pif(\''+c.id+'\','+c.bal+')}">'+(isPifSince?'UNDO PIF':'PIF')+'</button></div></div>';
       h+='<div style="margin-bottom:12px"><label class="lbl ylw">EXPECTED NEXT PAYMENT</label>';
       h+='<div class="fx g8 ac"><input type="number" class="inp inp-y" style="width:140px" value="'+(exp||'')+'" placeholder="0" onchange="upd(\''+c.id+'\',\'exp\',this.value)">';
       var pifAmt=c.sale-c.col-since;
-      h+='<button class="btn-pif" style="background:rgba(251,191,36,.1);border-color:rgba(251,191,36,.25);color:#fbbf24" onclick="upd(\''+c.id+'\',\'exp\',\''+Math.max(0,pifAmt)+'\')">';
-      h+='PIF '+fd(Math.max(0,pifAmt))+'</button></div>';
+      var isExpPif=exp>=Math.max(0,pifAmt)&&pifAmt>0;
+      h+='<button class="btn-pif" style="background:'+(isExpPif?'rgba(248,113,113,.1);border-color:rgba(248,113,113,.25);color:#f87171':'rgba(251,191,36,.1);border-color:rgba(251,191,36,.25);color:#fbbf24')+'" onclick="if(gdn(\''+c.id+'\',\'exp\')>='+Math.max(0,pifAmt)+'&&'+pifAmt+'>0){upd(\''+c.id+'\',\'exp\',gd(\''+c.id+'\',\'_prevExp\')||\'0\')}else{upd(\''+c.id+'\',\'_prevExp\',String(exp));upd(\''+c.id+'\',\'exp\',\''+Math.max(0,pifAmt)+'\')}">';
+      h+=''+(isExpPif?'UNDO':'PIF '+fd(Math.max(0,pifAmt)))+'</button></div>';
       h+='<div style="margin-top:8px"><input type="date" class="inp" value="'+edt+'" onchange="upd(\''+c.id+'\',\'edt\',this.value)"></div></div>';
       h+='<div><label class="lbl gry">NOTES</label>';
       h+='<input class="inp" value="'+cn.replace(/"/g,'&quot;')+'" placeholder="Follow-up notes..." onchange="upd(\''+c.id+'\',\'cn\',this.value)"></div>';

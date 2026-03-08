@@ -51,7 +51,6 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
 .pif-anim{animation:pifPop .5s ease,pifGlow .7s ease}
 .done{display:flex;align-items:center;justify-content:center;width:96px;height:56px;flex-shrink:0;background:rgba(74,222,128,.1);border:2px solid rgba(74,222,128,.3);border-radius:12px}
 </style>
-<script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 </head>
 <body>
 <div id="app"></div>
@@ -352,5 +351,6 @@ try{var v=localStorage.getItem(SK);if(v)TD=JSON.parse(v)}catch(e){}
 try{var nv=localStorage.getItem(NK);if(nv)NC=JSON.parse(nv)}catch(e){}
 render();
 </script>
+<script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js" async></script>
 </body>
 </html>

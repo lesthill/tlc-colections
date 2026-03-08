@@ -127,12 +127,12 @@ function fd(n){return '$'+Math.abs(n).toLocaleString('en-US',{maximumFractionDig
 function fp(n){return Math.round(n*100)+'%'}
 function gd(id,f){return(TD[id]||{})[f]||''}
 function gdn(id,f){return parseFloat((TD[id]||{})[f])||0}
-function upd(id,f,v){if(!TD[id])TD[id]={};TD[id][f]=v;try{localStorage.setItem(SK,JSON.stringify(TD))}catch(e){}render()}
+function upd(id,f,v){if(!TD[id])TD[id]={};TD[id][f]=v;if(f==='cs'&&v==='collected'){TD[id]['ct']=Date.now()}if(f==='cs'&&v!=='collected'){delete TD[id]['ct']}try{localStorage.setItem(SK,JSON.stringify(TD))}catch(e){}render()}
 function dueDate(sd){var d=new Date(sd+'T12:00:00');var c=0;while(c<3){d.setDate(d.getDate()+1);if(d.getDay()===5)c++}return d}
 function daysLeft(sd){return Math.ceil((dueDate(sd)-new Date())/(864e5))}
 function weeksAgo(ed){return Math.round((new Date()-new Date(ed+'T12:00:00'))/(7*864e5))}
-function doPif(id,bal){upd(id,'_prev',JSON.stringify({since:gd(id,'since'),cs:gd(id,'cs'),exp:gd(id,'exp')}));upd(id,'_pif','1');upd(id,'since',String(bal));upd(id,'cs','collected');upd(id,'exp','0')}
-function undoPif(id){var p;try{p=JSON.parse(gd(id,'_prev'))}catch(e){p={}}upd(id,'since',p.since||'0');upd(id,'cs',p.cs||'not_contacted');upd(id,'exp',p.exp||'0');upd(id,'_pif','0')}
+function doPif(id,bal){upd(id,'_prev',JSON.stringify({since:gd(id,'since'),cs:gd(id,'cs'),exp:gd(id,'exp'),ct:gd(id,'ct')}));if(!TD[id])TD[id]={};TD[id]['_pif']='1';TD[id]['since']=String(bal);TD[id]['cs']='collected';TD[id]['exp']='0';TD[id]['ct']=Date.now();try{localStorage.setItem(SK,JSON.stringify(TD))}catch(e){}render()}
+function undoPif(id){var p;try{p=JSON.parse(gd(id,'_prev'))}catch(e){p={}}if(!TD[id])TD[id]={};TD[id]['since']=p.since||'0';TD[id]['cs']=p.cs||'not_contacted';TD[id]['exp']=p.exp||'0';TD[id]['_pif']='0';if(p.ct){TD[id]['ct']=p.ct}else{delete TD[id]['ct']}try{localStorage.setItem(SK,JSON.stringify(TD))}catch(e){}render()}
 function doPifExp(id,a){upd(id,'_prevExp',gd(id,'exp'));upd(id,'exp',String(a))}
 function undoPifExp(id){upd(id,'exp',gd(id,'_prevExp')||'0');upd(id,'_prevExp','')}
 function togEv(ev){if(ev==='ALL'){S.evs={}}else{S.evs[ev]=!S.evs[ev];if(!S.evs[ev])delete S.evs[ev]}render()}
@@ -213,12 +213,13 @@ function svg(w,h,ws,si,ex,txt){
   if(txt)s+='<text x="'+cx+'" y="'+(cy-4)+'" text-anchor="middle" fill="#e2e8f0" font-size="'+(w*.22)+'" font-weight="700" font-family="system-ui">'+txt+'</text>';
   return s+'</svg>'}
 
-function doRefresh(){if(window.caches){caches.keys().then(function(n){n.forEach(function(k){caches.delete(k)})});setTimeout(function(){window.location.href=window.location.pathname+'?v=49&t='+Date.now()},300)}else{window.location.href=window.location.pathname+'?v=49&t='+Date.now()}}
+function doRefresh(){if(window.caches){caches.keys().then(function(n){n.forEach(function(k){caches.delete(k)})});setTimeout(function(){window.location.href=window.location.pathname+'?v=50&t='+Date.now()},300)}else{window.location.href=window.location.pathname+'?v=50&t='+Date.now()}}
 function render(){
   var f=S.f;
   // Only show events within last 5 weeks
   var cutoff=new Date();cutoff.setDate(cutoff.getDate()-35);var cutStr=cutoff.toISOString().split('T')[0];
-  var allOpen=D.filter(function(c){return c.bal>0&&c.ed>=cutStr});
+  var now=Date.now();var DAY=24*60*60*1000;
+  var allOpen=D.filter(function(c){if(c.bal<=0||c.ed<cutStr)return false;var cs=gd(c.id,'cs');var ct=gdn(c.id,'ct');if(cs==='collected'&&ct>0&&(now-ct)>DAY)return false;return true});
   var evSet={};allOpen.forEach(function(c){evSet[c.ev]=true});var evList=Object.keys(evSet);
   var activeEvs=Object.keys(S.evs).filter(function(k){return S.evs[k]});var showAllEvs=activeEvs.length===0;
   var evFiltered=showAllEvs?allOpen:allOpen.filter(function(c){return S.evs[c.ev]});
@@ -234,7 +235,7 @@ function render(){
   // ===== STICKY TOP =====
   var h='<div class="ftop">';
   h+='<div class="hdr">';
-  h+='<div class="fx jb ac" style="margin-bottom:8px"><div><div class="tag">TLC COLLECTIONS</div><div style="font-size:9px;color:#334155;letter-spacing:1px" onclick="doRefresh()">v49</div></div>';
+  h+='<div class="fx jb ac" style="margin-bottom:8px"><div><div class="tag">TLC COLLECTIONS</div><div style="font-size:9px;color:#334155;letter-spacing:1px" onclick="doRefresh()">v50</div></div>';
   h+='<div class="fx g6">';
   h+='<button style="background:transparent;border:1px solid rgba(30,58,95,.3);color:#7dd3fc;padding:6px 10px;font-size:16px;border-radius:6px" onclick="S.settings=!S.settings;render()">&#9881;</button>';
   h+='<button style="background:transparent;border:1px solid rgba(74,222,128,.25);color:#4ade80;padding:6px 10px;font-size:13px;border-radius:6px" onclick="doRefresh()">&#x21bb;</button>';

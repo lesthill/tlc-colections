@@ -119,29 +119,37 @@ function saveN(){try{localStorage.setItem(NK,JSON.stringify(NC))}catch(e){}}
 function togN(k){if(!NC[k])NC[k]={on:true,days:[1,3,7]};else NC[k].on=!NC[k].on;saveN();render()}
 function togD(k,d){if(!NC[k])NC[k]={on:true,days:[]};var i=NC[k].days.indexOf(d);if(i>=0)NC[k].days.splice(i,1);else NC[k].days.push(d);saveN();render()}
 
-function sendACH(name,email,amount){
-  var firstName=name.split(' ')[0];
-  // Convert base64 to blob
+var achModal=null;
+function sendACH(name,email,phone,amount){
+  achModal={name:name,email:email,phone:phone,amount:amount};
+  render();
+}
+function doACH(method){
+  var m=achModal;if(!m)return;
+  var firstName=m.name.split(' ')[0];
   var byteChars=atob(ACH_B64);
   var byteArr=new Uint8Array(byteChars.length);
   for(var i=0;i<byteChars.length;i++)byteArr[i]=byteChars.charCodeAt(i);
   var blob=new Blob([byteArr],{type:'application/pdf'});
   var file=new File([blob],'ACH_Collection_Form_TLC.pdf',{type:'application/pdf'});
+  var msg='Hi '+firstName+', please fill out the attached ACH form and return it. Amount due: '+m.amount+'. Thank you, Tax Lien Code (888) 333-9403';
   
-  if(navigator.canShare&&navigator.canShare({files:[file]})){
-    navigator.share({
-      title:'ACH Collection Form - Tax Lien Code',
-      text:'Hi '+firstName+',\n\nPlease fill out the attached ACH Collection Form and return it.\n\nAmount Due: '+amount+'\n\nThank you,\nTax Lien Code\n(888) 333-9403',
-      files:[file]
-    }).catch(function(){});
+  if(method==='email'){
+    if(navigator.canShare&&navigator.canShare({files:[file]})){
+      navigator.share({title:'ACH Form - Tax Lien Code',text:msg,files:[file]}).catch(function(){});
+    } else {
+      window.location='mailto:'+m.email+'?subject=ACH%20Collection%20Form&body='+encodeURIComponent(msg+'\n\nACH Form: https://lesthill.github.io/tlc-colections/ach.pdf');
+    }
   } else {
-    // Fallback: download the PDF
-    var a=document.createElement('a');
-    a.href=URL.createObjectURL(blob);
-    a.download='ACH_Collection_Form_TLC.pdf';
-    a.click();
+    if(navigator.canShare&&navigator.canShare({files:[file]})){
+      navigator.share({title:'ACH Form',text:msg,files:[file]}).catch(function(){});
+    } else {
+      window.location='sms:'+m.phone+'&body='+encodeURIComponent(msg+' ACH Form: https://lesthill.github.io/tlc-colections/ach.pdf');
+    }
   }
+  achModal=null;render();
 }
+function closeACH(){achModal=null;render()}
 function testNotif(){if(!('Notification' in window)){alert('Install to Home Screen first');return}if(Notification.permission!=='granted'){alert('Enable notifications first');return}try{var n=new Notification('TLC Collections',{body:'Notifications working!',tag:'test'});n.onclick=function(){window.focus()}}catch(e){alert('Error: '+e.message)}}
 function reqPerm(){if('Notification' in window)Notification.requestPermission().then(function(){render()})}
 function svg(w,h,ws,si,ex,txt){
@@ -288,7 +296,7 @@ function render(){
     h+='<div style="text-align:right;flex-shrink:0"><div class="bal">'+fd(remaining>0?remaining:c.bal)+'</div>';
     h+='<div class="bsub">of '+fd(c.sale)+'</div>';
     if(since>0)h+='<div style="color:#38bdf8;font-size:10px;font-weight:600">+'+fd(since)+'</div>';
-    if(remaining>0)h+='<div style="margin-top:4px;display:flex;gap:14px;justify-content:flex-end"><a href="'+NMI+'" target="_blank" rel="noopener" style="color:#38bdf8;text-decoration:none;font-size:22px">&#128179;</a><a href="javascript:void(0)" onclick="sendACH(\''+c.nm+'\',\''+c.em+'\',\''+(remaining>0?fd(remaining):fd(c.bal))+'\');return false" style="color:#4ade80;text-decoration:none;font-size:22px">&#127974;</a></div>';
+    if(remaining>0)h+='<div style="margin-top:4px;display:flex;gap:14px;justify-content:flex-end"><a href="'+NMI+'" target="_blank" rel="noopener" style="color:#38bdf8;text-decoration:none;font-size:22px">&#128179;</a><a href="javascript:void(0)" onclick="sendACH(\''+c.nm+'\',\''+c.em+'\',\''+c.ph+'\',\''+(remaining>0?fd(remaining):fd(c.bal))+'\');return false" style="color:#4ade80;text-decoration:none;font-size:22px">&#127974;</a></div>';
     h+='</div></div>';
     // Stats
     h+='<div style="padding:0 12px 6px" class="fx g8 fw" style="font-size:11px">';
@@ -328,6 +336,18 @@ function render(){
       if(edt)h+='<span class="gry">by '+edt+'</span>';if(cn)h+='<span class="gry">"'+cn+'"</span>';h+='</div>'}
     h+='</div>'
   });
+  // ACH Modal
+  if(achModal){
+    h+='<div style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:100;display:flex;align-items:center;justify-content:center" onclick="closeACH()">';
+    h+='<div style="background:#0c1117;border:1px solid rgba(30,58,95,.3);border-radius:16px;padding:24px;margin:20px;max-width:320px;width:100%" onclick="event.stopPropagation()">';
+    h+='<div style="font-size:16px;font-weight:700;color:#e2e8f0;margin-bottom:4px">Send ACH Form</div>';
+    h+='<div style="font-size:12px;color:#475569;margin-bottom:20px">'+achModal.name+' &middot; '+achModal.amount+'</div>';
+    h+='<button onclick="doACH('email')" style="width:100%;padding:16px;background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.25);color:#38bdf8;font-size:15px;font-weight:700;border-radius:10px;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:10px"><span style="font-size:22px">&#9993;</span> Email</button>';
+    h+='<button onclick="doACH('text')" style="width:100%;padding:16px;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.25);color:#4ade80;font-size:15px;font-weight:700;border-radius:10px;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:10px"><span style="font-size:22px">&#128172;</span> Text Message</button>';
+    h+='<button onclick="closeACH()" style="width:100%;padding:12px;background:transparent;border:1px solid rgba(30,58,95,.3);color:#475569;font-size:13px;border-radius:10px">Cancel</button>';
+    h+='</div></div>';
+  }
+
   h+='<div class="fx jb ac" style="padding:14px 16px;font-size:8px;color:#1e293b"><span>LH // '+new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'})+'</span><span style="color:#7dd3fc;font-weight:700">TLC COLLECTIONS</span></div>';
   h+='</div>';document.getElementById('app').innerHTML=h;setTimeout(function(){var f=document.querySelector('.ftop');var s=document.getElementById('sb');if(f&&s){s.style.marginTop=f.offsetHeight+'px';s.style.height='calc(100vh - '+f.offsetHeight+'px)'}},20)
 }

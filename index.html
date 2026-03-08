@@ -92,6 +92,9 @@ var TC={9995:'#94a3b8',25997:'#38bdf8',39997:'#4ade80',46997:'#fbbf24'};
 var SN={not_contacted:'Not Contacted',contacted:'Contacted',committed:'Committed',unreachable:'Unreachable',collected:'Collected'};
 var SC={not_contacted:'#64748b',contacted:'#fbbf24',committed:'#4ade80',unreachable:'#f87171',collected:'#38bdf8'};
 var S={f:'ALL',sb:'bal',sd:'desc',exp:null,dates:false,reset:false};
+var DF=(function(){var d=new Date();d.setDate(d.getDate()-28);return d.toISOString().split('T')[0]})();
+var DT=new Date().toISOString().split('T')[0];
+function setPre(w){var d=new Date();d.setDate(d.getDate()-w*7);DF=d.toISOString().split('T')[0];DT=new Date().toISOString().split('T')[0];render()}
 var TD={};
 var SK='tlc-v8';
 
@@ -122,7 +125,7 @@ function svg(w,h,ws,si,ex,txt){
 }
 
 function render(){
-  var f=S.f,items=D.filter(function(c){return c.bal>0});
+  var f=S.f,items=D.filter(function(c){return c.bal>0&&c.ed>=DF&&c.ed<=DT});
   if(f!=='ALL')items=items.filter(function(c){return c.cl===f});
   var col=S.sb,dir=S.sd;
   items.sort(function(a,b){
@@ -131,7 +134,7 @@ function render(){
     return dir==='asc'?av-bv:bv-av
   });
 
-  var all=D.filter(function(c){return c.bal>0});
+  var all=D.filter(function(c){return c.bal>0&&c.ed>=DF&&c.ed<=DT});
   var tSale=0,tWS=0,tBal=0,tSince=0,tExp=0;
   all.forEach(function(c){tSale+=c.sale;tWS+=c.col;tBal+=c.bal;tSince+=gdn(c.id,'since');tExp+=gdn(c.id,'exp')});
   var pp=tSale>0?(tWS+tSince)/tSale:0;
@@ -171,6 +174,23 @@ function render(){
   h+='<span><span style="display:inline-block;width:8px;height:8px;background:#38bdf8;border-radius:2px;margin-right:4px"></span>Since</span>';
   h+='<span><span style="display:inline-block;width:8px;height:8px;background:rgba(251,191,36,.3);border-radius:2px;margin-right:4px"></span>Expected</span>';
   h+='</div>';
+
+  // Date presets
+  h+='<div class="fx g6" style="margin-bottom:8px">';
+  ['4W','6W','8W','3M','ALL'].forEach(function(l,i){
+    var w=[4,6,8,13,52][i];
+    h+='<button class="pre" onclick="setPre('+w+')">'+l+'</button>';
+  });
+  h+='<button class="pre" style="width:44px;flex:none;color:#7dd3fc;font-size:16px'+(S.dates?';background:#1e3a5f':'')+'" onclick="S.dates=!S.dates;render()">Cal</button>';
+  h+='</div>';
+
+  // Date inputs (collapsible)
+  if(S.dates){
+    h+='<div class="fx g8" style="margin-bottom:8px">';
+    h+='<input type="date" class="inp" style="flex:1;padding:10px;font-size:14px" value="'+DF+'" onchange="DF=this.value;render()">';
+    h+='<input type="date" class="inp" style="flex:1;padding:10px;font-size:14px" value="'+DT+'" onchange="DT=this.value;render()">';
+    h+='</div>';
+  }
 
   // Closer pills
   h+='<div class="pills" style="margin-bottom:8px">';

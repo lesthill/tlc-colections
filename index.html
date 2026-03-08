@@ -195,6 +195,7 @@ function svg(w,h,ws,si,ex,txt){
   if(txt)s+='<text x="'+cx+'" y="'+(cy-4)+'" text-anchor="middle" fill="#e2e8f0" font-size="'+(w*.22)+'" font-weight="700" font-family="system-ui">'+txt+'</text>';
   return s+'</svg>'}
 
+function doRefresh(){if(window.caches){caches.keys().then(function(n){n.forEach(function(k){caches.delete(k)})});setTimeout(function(){window.location.href=window.location.pathname+'?v=40&t='+Date.now()},300)}else{window.location.href=window.location.pathname+'?v=40&t='+Date.now()}}
 function render(){
   var f=S.f;
   // Only show events within last 5 weeks
@@ -215,7 +216,7 @@ function render(){
   // ===== STICKY TOP =====
   var h='<div class="ftop">';
   h+='<div class="hdr">';
-  h+='<div class="fx jb ac" style="margin-bottom:8px"><div><div class="tag">TLC COLLECTIONS</div><div style="font-size:9px;color:#334155;letter-spacing:1px" onclick="caches&&caches.keys().then(function(n){n.forEach(function(k){caches.delete(k)})});setTimeout(function(){window.location.href=window.location.pathname+'?v=40&t='+Date.now()},200)">v40 &#x21bb; REFRESH</div></div>';
+  h+='<div class="fx jb ac" style="margin-bottom:8px"><div><div class="tag">TLC COLLECTIONS</div><div style="font-size:9px;color:#334155;letter-spacing:1px" onclick="doRefresh()">v40 &#x21bb; REFRESH</div></div>';
   h+='<div class="fx g6">';
   h+='<button style="background:transparent;border:1px solid rgba(30,58,95,.3);color:#7dd3fc;padding:6px 10px;font-size:16px;border-radius:6px" onclick="S.settings=!S.settings;render()">&#9881;</button>';
   if(S.reset){h+='<button style="background:#f87171;border:none;color:#fff;padding:8px 12px;font-size:12px;border-radius:6px" onclick="TD={};try{localStorage.removeItem(SK)}catch(e){}S.reset=false;render()">Clear</button><button class="btn" style="font-size:12px;padding:8px 12px" onclick="S.reset=false;render()">X</button>'}

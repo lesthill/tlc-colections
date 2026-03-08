@@ -2,311 +2,200 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="TLC Collect">
-<meta name="theme-color" content="#080d13">
 <title>TLC Collections</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{background:#080d13;overflow-y:scroll;-webkit-overflow-scrolling:touch;min-height:100vh}
-select,input,button{outline:none;-webkit-appearance:none}
-select option{background:#0f1a2a;color:#cbd5e1}
-::-webkit-scrollbar{width:0;height:0}
-input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
-input[type=number]{-moz-appearance:textfield}
+body{background:#080d13;color:#e2e8f0;font-family:-apple-system,system-ui,sans-serif;min-height:100vh;-webkit-overflow-scrolling:touch}
+.hdr{background:linear-gradient(180deg,#0a1628,#080d13);padding:16px;border-bottom:1px solid rgba(30,58,95,0.2)}
+.tag{font-size:9px;letter-spacing:4px;color:#4ade80;margin-bottom:8px}
+.row{display:flex;align-items:center;gap:12px}
+.col{display:flex;flex-direction:column}
+.big{font-size:24px;font-weight:700;color:#fb923c}
+.sub{font-size:12px;color:#64748b;margin-top:2px}
+.pills{display:flex;gap:5px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px;margin-top:10px}
+.pill{background:#0f1a2a;border:1px solid rgba(30,58,95,0.3);color:#94a3b8;padding:10px 14px;font-size:13px;border-radius:8px;font-weight:600;white-space:nowrap;flex-shrink:0;cursor:pointer;font-family:inherit}
+.pill.on{background:#7dd3fc;color:#080d13;border:none}
+.card{background:#0c1117;border:1px solid rgba(30,58,95,0.15);border-radius:8px;padding:14px;margin:6px 10px}
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.name{font-size:15px;font-weight:600;color:#e2e8f0}
+.ev{font-size:11px;color:#475569;margin-top:2px}
+.bal{font-size:18px;font-weight:700;color:#fb923c;text-align:right}
+.balsub{font-size:10px;color:#475569;text-align:right}
+.stat{display:flex;gap:10px;font-size:11px;flex-wrap:wrap;margin-bottom:6px}
+.grn{color:#4ade80}.blu{color:#38bdf8}.red{color:#f87171}.ylw{color:#fbbf24}.gry{color:#475569}
+.contact{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.contact a{color:#38bdf8;text-decoration:none;background:rgba(56,189,248,0.06);padding:8px 12px;border-radius:6px;font-size:12px}
+.badge{font-size:9px;font-weight:700;padding:3px 8px;border-radius:4px;display:inline-block;margin-right:6px}
+.sel{width:100%;background:#0a0f18;border:1px solid rgba(100,116,139,0.3);color:#64748b;padding:10px;font-size:13px;border-radius:6px;font-weight:600;font-family:inherit;-webkit-appearance:none;margin-top:6px}
+.gauge{position:relative;width:80px;height:46px;flex-shrink:0}
+.gauge svg{width:80px;height:46px}
+.sep{height:1px;background:rgba(30,58,95,0.15);margin:8px 10px}
 </style>
 </head>
 <body>
-<div id="root"></div>
-<script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
-<script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js"></script>
+<div id="app"></div>
 <script>
-const { useState, useEffect, useCallback, useMemo } = React;
-const { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } = Recharts;
-
-const CN = { LH:"Les Hill", SH:"Scott Hoffmann", CL:"Chad Lawson", BL:"Bernard Lawson", TK:"Tiffany Knight", BH:"Boyd Hoffmann", LT:"Lisa Toland", KF:"K. Fontaine" };
-const fmt = n => "$" + Math.abs(n).toLocaleString(undefined,{maximumFractionDigits:0});
-const pct = n => (n*100).toFixed(0)+"%";
-const TS = {9995:"$10K",25997:"$26K",39997:"$40K",46997:"$47K"};
-const TC = {9995:"#94a3b8",25997:"#38bdf8",39997:"#4ade80",46997:"#fbbf24"};
-const SK = "coll-v6";
-const TODAY = new Date().toISOString().split("T")[0];
-const DEF_FROM = (() => { const d = new Date(); d.setDate(d.getDate() - 28); return d.toISOString().split("T")[0]; })();
-
-const D = [
-  {id:"b1",nm:"William DuQuette",ev:"Boston",ed:"2025-11-24",cl:"BL",sale:46997,col:2500,bal:44497,t:46997,nt:"Founder's Club",rr:"DECLINED",rn:"691 $18K",ph:"603-234-4546",em:"billduke32@gmail.com"},
-  {id:"b2",nm:"Willy Santana",ev:"Boston",ed:"2025-11-24",cl:"BL",sale:9995,col:3500,bal:6495,t:9995,nt:"",rr:"DECLINED",rn:"<600 $0",ph:"617-686-5290",em:"santana.willy@icloud.com"},
-  {id:"b3",nm:"Russell Thompson",ev:"Boston",ed:"2025-11-24",cl:"KF",sale:25997,col:10000,bal:15997,t:25997,nt:"",rr:"DECLINED",rn:"716 charge off",ph:"",em:""},
-  {id:"f1",nm:"Luce Pierre-Russon",ev:"Ft Lauderdale",ed:"2025-12-08",cl:"LT",sale:39997,col:1000,bal:38997,t:39997,nt:"Lawsuit postponed",rr:"DECLINED",rn:"656 $3K",ph:"816-410-3290",em:"taisharusson@yahoo.com"},
-  {id:"f2",nm:"Shannon Burrows",ev:"Ft Lauderdale",ed:"2025-12-08",cl:"TK",sale:39997,col:12000,bal:27997,t:39997,nt:"UGA",rr:"RANGE",rn:"5-25k",ph:"561-254-1229",em:"shannonburrowsrealtor@gmail.com"},
-  {id:"h1",nm:"Camille Brown",ev:"Houston",ed:"2025-12-29",cl:"BH",sale:39997,col:10000,bal:29997,t:39997,nt:"UGA",rr:"RANGE",rn:"0-25k",ph:"713-498-6110",em:"admin@reiningmoney.com"},
-  {id:"h2",nm:"Kinshasa Carter",ev:"Houston",ed:"2025-12-29",cl:"CL",sale:25997,col:9995,bal:16002,t:25997,nt:"10k pkg",rr:"DECLINED",rn:"635",ph:"832-483-9893",em:"shasacarter@gmail.com"},
-  {id:"h3",nm:"Raymond DarDar Jr",ev:"Houston",ed:"2025-12-29",cl:"KF",sale:39997,col:1000,bal:38997,t:39997,nt:"",rr:"DECLINED",rn:"702 $0",ph:"337-296-4461",em:"raymonddardar@yahoo.com"},
-  {id:"h4",nm:"Christine Toledo",ev:"Houston",ed:"2025-12-29",cl:"SH",sale:39997,col:5000,bal:34997,t:39997,nt:"HELOC iffy",rr:"DECLINED",rn:"718 re-UW",ph:"832-293-7026",em:"nikebrisnger@gmail.com"},
-  {id:"h5",nm:"Jason Bishop",ev:"Houston",ed:"2025-12-29",cl:"SH",sale:39997,col:9995,bal:30002,t:39997,nt:"",rr:"NEED_INFO",rn:"Verify",ph:"713-882-5552",em:"scoreboarddude@yahoo.com"},
-  {id:"s1",nm:"Cirilo Mendoza",ev:"San Diego",ed:"2026-01-12",cl:"BH",sale:25997,col:2000,bal:23997,t:25997,nt:"",rr:"NEED_INFO",rn:"Need SSN",ph:"619-843-2857",em:"mendozacirilo700@gmail.com"},
-  {id:"s2",nm:"Anne Mohney",ev:"San Diego",ed:"2026-01-12",cl:"TK",sale:46997,col:0,bal:46997,t:46997,nt:"Founder's Club",rr:"RANGE",rn:"20-40k",ph:"619-341-9406",em:"annemohney@gmail.com"},
-  {id:"s3",nm:"Paula Handel",ev:"San Diego",ed:"2026-01-12",cl:"TK",sale:39997,col:0,bal:39997,t:39997,nt:"Divorce?",rr:"APPROVED",rn:"Approved",ph:"619-746-4180",em:"paulashandel@gmail.com"},
-  {id:"s4",nm:"Chenoa Hernandez",ev:"San Diego",ed:"2026-01-12",cl:"TK",sale:25997,col:1000,bal:24997,t:25997,nt:"Retirement acct",rr:"DECLINED",rn:"Settlements",ph:"209-770-0981",em:"chengirl209@gmail.com"},
-  {id:"d1",nm:"Kayla Schultz",ev:"Denver",ed:"2026-01-19",cl:"LT",sale:25997,col:1000,bal:24997,t:25997,nt:"Banker said no",ph:"970-556-4992",em:"kessagirl1@gmail.com"},
-  {id:"d2",nm:"Suzanne Barrett",ev:"Denver",ed:"2026-01-19",cl:"LT",sale:25997,col:2500,bal:23497,t:25997,nt:"$1.5K 2wk + $1K 5wk",ph:"772-882-1245",em:"suzanne@topdocumentation.com"},
-  {id:"d3",nm:"Nancy Frazier",ev:"Denver",ed:"2026-01-19",cl:"SH",sale:25997,col:250,bal:25747,t:25997,nt:"Hail mary",ph:"719-641-6148",em:"nancy@arrowsconstruction.com"},
-  {id:"d4",nm:"Katherine Suazo",ev:"Denver",ed:"2026-01-19",cl:"TK",sale:39997,col:10000,bal:29997,t:39997,nt:"$5K 2wk + $5K 5wk",ph:"720-355-4382",em:"ksuazo2090@gmail.com"},
-  {id:"d5",nm:"Teresa Ries",ev:"Denver",ed:"2026-01-19",cl:"TK",sale:9995,col:4760,bal:5235,t:9995,nt:"",ph:"304-282-8501",em:"cassa26525@gmail.com"},
-  {id:"w1",nm:"Jabbar Thomas",ev:"Fort Worth",ed:"2026-01-26",cl:"BL",sale:39997,col:0,bal:39997,t:39997,nt:"ACH never funded",rr:"DECLINED",rn:"620 re-UW",ph:"469-781-7232",em:"jabgconstruction@engineer.com"},
-  {id:"w2",nm:"Ashley Lillie",ev:"Fort Worth",ed:"2026-01-26",cl:"CL",sale:39997,col:10000,bal:29997,t:39997,nt:"",ph:"",em:""},
-  {id:"k1",nm:"Steven Hooks Sr",ev:"Kansas City",ed:"2026-02-02",cl:"BL",sale:39997,col:3000,bal:36997,t:39997,nt:"RR in 2 weeks",rr:"RANGE",rn:"RR pending",ph:"816-269-5698",em:"shooksld@gmail.com"},
-  {id:"k2",nm:"Shanda Walsh",ev:"Kansas City",ed:"2026-02-02",cl:"LT",sale:39997,col:2500,bal:37497,t:39997,nt:"Bal via RR",rr:"RANGE",rn:"30-50k",ph:"913-406-3700",em:"walshs2006@gmail.com"},
-  {id:"k3",nm:"Sherry Samples",ev:"Kansas City",ed:"2026-02-02",cl:"LT",sale:39997,col:20000,bal:19997,t:39997,nt:"Bal via CC",ph:"913-634-8747",em:"machka_sherry@yahoo.com"},
-  {id:"a1",nm:"Matt Steward",ev:"Albuquerque",ed:"2026-02-09",cl:"CL",sale:39997,col:10000,bal:29997,t:39997,nt:"Bal RR",rr:"RANGE",rn:"5-25k",ph:"979-595-8632",em:"train@mattstewardcoaching.com"},
-  {id:"a2",nm:"Gene Romero",ev:"Albuquerque",ed:"2026-02-09",cl:"CL",sale:25997,col:1000,bal:24997,t:25997,nt:"Bal ACH",ph:"505-720-7001",em:"geno4012@gmail.com"},
-  {id:"a4",nm:"Anthony Lucero",ev:"Albuquerque",ed:"2026-02-09",cl:"LH",sale:39997,col:10000,bal:29997,t:39997,nt:"Bal ACH",rr:"RANGE",rn:"30-40k",ph:"505-269-8788",em:"trluc57@aol.com"},
-  {id:"a5",nm:"Becky Gonzalez",ev:"Albuquerque",ed:"2026-02-09",cl:"TK",sale:39997,col:26997,bal:13000,t:39997,nt:"Bal 3 wks",rr:"DECLINED",rn:"649 thin",ph:"505-688-1064",em:"beckygonzalez30@yahoo.com"},
-  {id:"a6",nm:"Selena Fox-Anderson",ev:"Albuquerque",ed:"2026-02-09",cl:"TK",sale:46997,col:0,bal:46997,t:46997,nt:"FC TSP",rr:"DECLINED",rn:"680 $9.9K",ph:"505-366-4514",em:"selenapfox@gmail.com"},
-  {id:"a7",nm:"Douglas Conrad",ev:"Albuquerque",ed:"2026-02-09",cl:"TK",sale:25997,col:1000,bal:24997,t:25997,nt:"Bal 3 wks",rr:"NEED_INFO",rn:"Verify",ph:"505-702-2902",em:"fr3sh4200@gmail.com"},
-  {id:"a8",nm:"Armando Maestas",ev:"Albuquerque",ed:"2026-02-09",cl:"TK",sale:46997,col:2000,bal:44997,t:46997,nt:"Save @10",rr:"DECLINED",rn:"723 $0",ph:"",em:""},
+var CN={LH:"Les Hill",SH:"Scott Hoffmann",CL:"Chad Lawson",BL:"Bernard Lawson",TK:"Tiffany Knight",BH:"Boyd Hoffmann",LT:"Lisa Toland",KF:"K. Fontaine"};
+var D=[
+{id:"b1",nm:"William DuQuette",ev:"Boston",ed:"2025-11-24",cl:"BL",sale:46997,col:2500,bal:44497,t:46997,nt:"Founder's Club",rr:"DECLINED",rn:"691 $18K",ph:"603-234-4546",em:"billduke32@gmail.com"},
+{id:"b2",nm:"Willy Santana",ev:"Boston",ed:"2025-11-24",cl:"BL",sale:9995,col:3500,bal:6495,t:9995,nt:"",rr:"DECLINED",rn:"<600",ph:"617-686-5290",em:"santana.willy@icloud.com"},
+{id:"b3",nm:"Russell Thompson",ev:"Boston",ed:"2025-11-24",cl:"KF",sale:25997,col:10000,bal:15997,t:25997,nt:"",rr:"DECLINED",rn:"716",ph:"",em:""},
+{id:"f1",nm:"Luce Pierre-Russon",ev:"Ft Lauderdale",ed:"2025-12-08",cl:"LT",sale:39997,col:1000,bal:38997,t:39997,nt:"Lawsuit postponed",rr:"DECLINED",rn:"656 $3K",ph:"816-410-3290",em:"taisharusson@yahoo.com"},
+{id:"f2",nm:"Shannon Burrows",ev:"Ft Lauderdale",ed:"2025-12-08",cl:"TK",sale:39997,col:12000,bal:27997,t:39997,nt:"UGA",rr:"RANGE",rn:"5-25k",ph:"561-254-1229",em:"shannonburrowsrealtor@gmail.com"},
+{id:"h1",nm:"Camille Brown",ev:"Houston",ed:"2025-12-29",cl:"BH",sale:39997,col:10000,bal:29997,t:39997,nt:"UGA",rr:"RANGE",rn:"0-25k",ph:"713-498-6110",em:"admin@reiningmoney.com"},
+{id:"h2",nm:"Kinshasa Carter",ev:"Houston",ed:"2025-12-29",cl:"CL",sale:25997,col:9995,bal:16002,t:25997,nt:"10k pkg",rr:"DECLINED",rn:"635",ph:"832-483-9893",em:"shasacarter@gmail.com"},
+{id:"h3",nm:"Raymond DarDar Jr",ev:"Houston",ed:"2025-12-29",cl:"KF",sale:39997,col:1000,bal:38997,t:39997,nt:"",rr:"DECLINED",rn:"702 $0",ph:"337-296-4461",em:"raymonddardar@yahoo.com"},
+{id:"h4",nm:"Christine Toledo",ev:"Houston",ed:"2025-12-29",cl:"SH",sale:39997,col:5000,bal:34997,t:39997,nt:"HELOC iffy",rr:"DECLINED",rn:"718 re-UW",ph:"832-293-7026",em:"nikebrisnger@gmail.com"},
+{id:"h5",nm:"Jason Bishop",ev:"Houston",ed:"2025-12-29",cl:"SH",sale:39997,col:9995,bal:30002,t:39997,nt:"",rr:"NEED_INFO",rn:"Verify",ph:"713-882-5552",em:"scoreboarddude@yahoo.com"},
+{id:"s1",nm:"Cirilo Mendoza",ev:"San Diego",ed:"2026-01-12",cl:"BH",sale:25997,col:2000,bal:23997,t:25997,nt:"",rr:"NEED_INFO",rn:"Need SSN",ph:"619-843-2857",em:"mendozacirilo700@gmail.com"},
+{id:"s2",nm:"Anne Mohney",ev:"San Diego",ed:"2026-01-12",cl:"TK",sale:46997,col:0,bal:46997,t:46997,nt:"Founder's Club",rr:"RANGE",rn:"20-40k",ph:"619-341-9406",em:"annemohney@gmail.com"},
+{id:"s3",nm:"Paula Handel",ev:"San Diego",ed:"2026-01-12",cl:"TK",sale:39997,col:0,bal:39997,t:39997,nt:"Divorce?",rr:"APPROVED",rn:"Approved",ph:"619-746-4180",em:"paulashandel@gmail.com"},
+{id:"s4",nm:"Chenoa Hernandez",ev:"San Diego",ed:"2026-01-12",cl:"TK",sale:25997,col:1000,bal:24997,t:25997,nt:"Retirement acct",rr:"DECLINED",rn:"Settlements",ph:"209-770-0981",em:"chengirl209@gmail.com"},
+{id:"d1",nm:"Kayla Schultz",ev:"Denver",ed:"2026-01-19",cl:"LT",sale:25997,col:1000,bal:24997,t:25997,nt:"Banker said no",ph:"970-556-4992",em:"kessagirl1@gmail.com"},
+{id:"d2",nm:"Suzanne Barrett",ev:"Denver",ed:"2026-01-19",cl:"LT",sale:25997,col:2500,bal:23497,t:25997,nt:"$1.5K 2wk + $1K 5wk",ph:"772-882-1245",em:"suzanne@topdocumentation.com"},
+{id:"d3",nm:"Nancy Frazier",ev:"Denver",ed:"2026-01-19",cl:"SH",sale:25997,col:250,bal:25747,t:25997,nt:"Hail mary",ph:"719-641-6148",em:"nancy@arrowsconstruction.com"},
+{id:"d4",nm:"Katherine Suazo",ev:"Denver",ed:"2026-01-19",cl:"TK",sale:39997,col:10000,bal:29997,t:39997,nt:"$5K 2wk + $5K 5wk",ph:"720-355-4382",em:"ksuazo2090@gmail.com"},
+{id:"d5",nm:"Teresa Ries",ev:"Denver",ed:"2026-01-19",cl:"TK",sale:9995,col:4760,bal:5235,t:9995,nt:"",ph:"304-282-8501",em:"cassa26525@gmail.com"},
+{id:"w1",nm:"Jabbar Thomas",ev:"Fort Worth",ed:"2026-01-26",cl:"BL",sale:39997,col:0,bal:39997,t:39997,nt:"ACH never funded",rr:"DECLINED",rn:"620 re-UW",ph:"469-781-7232",em:"jabgconstruction@engineer.com"},
+{id:"w2",nm:"Ashley Lillie",ev:"Fort Worth",ed:"2026-01-26",cl:"CL",sale:39997,col:10000,bal:29997,t:39997,nt:"",ph:"",em:""},
+{id:"k1",nm:"Steven Hooks Sr",ev:"Kansas City",ed:"2026-02-02",cl:"BL",sale:39997,col:3000,bal:36997,t:39997,nt:"RR in 2 weeks",rr:"RANGE",rn:"RR pending",ph:"816-269-5698",em:"shooksld@gmail.com"},
+{id:"k2",nm:"Shanda Walsh",ev:"Kansas City",ed:"2026-02-02",cl:"LT",sale:39997,col:2500,bal:37497,t:39997,nt:"Bal via RR",rr:"RANGE",rn:"30-50k",ph:"913-406-3700",em:"walshs2006@gmail.com"},
+{id:"k3",nm:"Sherry Samples",ev:"Kansas City",ed:"2026-02-02",cl:"LT",sale:39997,col:20000,bal:19997,t:39997,nt:"Bal via CC",ph:"913-634-8747",em:"machka_sherry@yahoo.com"},
+{id:"a1",nm:"Matt Steward",ev:"Albuquerque",ed:"2026-02-09",cl:"CL",sale:39997,col:10000,bal:29997,t:39997,nt:"Bal RR",rr:"RANGE",rn:"5-25k",ph:"979-595-8632",em:"train@mattstewardcoaching.com"},
+{id:"a2",nm:"Gene Romero",ev:"Albuquerque",ed:"2026-02-09",cl:"CL",sale:25997,col:1000,bal:24997,t:25997,nt:"Bal ACH",ph:"505-720-7001",em:"geno4012@gmail.com"},
+{id:"a4",nm:"Anthony Lucero",ev:"Albuquerque",ed:"2026-02-09",cl:"LH",sale:39997,col:10000,bal:29997,t:39997,nt:"Bal ACH",rr:"RANGE",rn:"30-40k",ph:"505-269-8788",em:"trluc57@aol.com"},
+{id:"a5",nm:"Becky Gonzalez",ev:"Albuquerque",ed:"2026-02-09",cl:"TK",sale:39997,col:26997,bal:13000,t:39997,nt:"Bal 3 wks",rr:"DECLINED",rn:"649 thin",ph:"505-688-1064",em:"beckygonzalez30@yahoo.com"},
+{id:"a6",nm:"Selena Fox-Anderson",ev:"Albuquerque",ed:"2026-02-09",cl:"TK",sale:46997,col:0,bal:46997,t:46997,nt:"FC TSP",rr:"DECLINED",rn:"680 $9.9K",ph:"505-366-4514",em:"selenapfox@gmail.com"},
+{id:"a7",nm:"Douglas Conrad",ev:"Albuquerque",ed:"2026-02-09",cl:"TK",sale:25997,col:1000,bal:24997,t:25997,nt:"Bal 3 wks",rr:"NEED_INFO",rn:"Verify",ph:"505-702-2902",em:"fr3sh4200@gmail.com"},
+{id:"a8",nm:"Armando Maestas",ev:"Albuquerque",ed:"2026-02-09",cl:"TK",sale:46997,col:2000,bal:44997,t:46997,nt:"Save @10",rr:"DECLINED",rn:"723 $0",ph:"",em:""}
 ];
 
-const sC={not_contacted:"#64748b",contacted:"#fbbf24",committed:"#4ade80",unreachable:"#f87171",collected:"#38bdf8"};
-const sL={not_contacted:"Not Contacted",contacted:"Contacted",committed:"Committed",unreachable:"Unreachable",collected:"Collected"};
+var TS={9995:"$10K",25997:"$26K",39997:"$40K",46997:"$47K"};
+var TC={9995:"#94a3b8",25997:"#38bdf8",39997:"#4ade80",46997:"#fbbf24"};
+var state={filter:"ALL",data:{}};
 
-const Gauge = ({sale, workshopCol, sinceCol, expected}) => {
-  const total = sale;
-  if (total === 0) return null;
-  const w1 = Math.min(workshopCol / total, 1);
-  const w2 = Math.min(sinceCol / total, 1 - w1);
-  const w3 = Math.min(expected / total, 1 - w1 - w2);
-  const totalPaid = workshopCol + sinceCol;
-  const totalPct = totalPaid / total;
-  const r = 44;
-  const circ = Math.PI * r;
-  const a1 = w1 * circ;
-  const a2 = w2 * circ;
-  const a3 = w3 * circ;
-  return React.createElement("div", {style:{position:"relative",width:"96px",height:"56px",flexShrink:0}},
-    React.createElement("svg", {width:"96",height:"56",viewBox:"0 0 100 56"},
-      React.createElement("path", {d:"M 6 52 A 44 44 0 0 1 94 52",fill:"none",stroke:"#1e293b",strokeWidth:"8",strokeLinecap:"round"}),
-      a1 > 0 && React.createElement("path", {d:"M 6 52 A 44 44 0 0 1 94 52",fill:"none",stroke:"#4ade80",strokeWidth:"8",strokeLinecap:"round",strokeDasharray:a1+" "+circ}),
-      a2 > 0 && React.createElement("path", {d:"M 6 52 A 44 44 0 0 1 94 52",fill:"none",stroke:"#38bdf8",strokeWidth:"8",strokeLinecap:"round",strokeDasharray:"0 "+a1+" "+a2+" "+circ}),
-      a3 > 0 && React.createElement("path", {d:"M 6 52 A 44 44 0 0 1 94 52",fill:"none",stroke:"rgba(251,191,36,0.3)",strokeWidth:"8",strokeLinecap:"round",strokeDasharray:"0 "+(a1+a2)+" "+a3+" "+circ}),
-      React.createElement("text", {x:"50",y:"42",textAnchor:"middle",fill:"#e2e8f0",fontSize:"16",fontWeight:"700",fontFamily:"system-ui,sans-serif"}, pct(totalPct)),
-      React.createElement("text", {x:"50",y:"53",textAnchor:"middle",fill:"#475569",fontSize:"7",fontFamily:"monospace"}, "PAID")
-    )
-  );
-};
+function fd(n){return"$"+Math.abs(n).toLocaleString("en-US",{maximumFractionDigits:0})}
+function fp(n){return Math.round(n*100)+"%"}
+function dueDate(sd){var d=new Date(sd+"T12:00:00");var c=0;while(c<3){d.setDate(d.getDate()+1);if(d.getDay()===5)c++}return d}
+function daysLeft(sd){var due=dueDate(sd);var now=new Date();return Math.ceil((due-now)/(1000*60*60*24))}
 
-function App() {
-  const [cf,setCf]=useState("ALL");
-  const [df,setDf]=useState(DEF_FROM);
-  const [dt,setDt]=useState(TODAY);
-  const [td,setTd]=useState({});
-  const [loading,setLoading]=useState(true);
-  const [expId,setExpId]=useState(null);
-  const [sortBy,setSortBy]=useState("bal");
-  const [sortDir,setSortDir]=useState("desc");
-  const [showReset,setShowReset]=useState(false);
-  const [showDates,setShowDates]=useState(false);
-
-  useEffect(function(){try{var v=localStorage.getItem(SK);if(v)setTd(JSON.parse(v))}catch(e){}setLoading(false)},[]);
-  const save=useCallback(function(d){setTd(d);try{localStorage.setItem(SK,JSON.stringify(d))}catch(e){}},[]);
-  const upd=useCallback(function(id,f,v){save(Object.assign({},td,{[id]:Object.assign({},td[id]||{},{[f]:v})}))},[td,save]);
-  const doReset=useCallback(function(){setTd({});try{localStorage.removeItem(SK)}catch(e){}setShowReset(false)},[]);
-  const doSort=function(col){if(sortBy===col)setSortDir(function(d){return d==="asc"?"desc":"asc"});else{setSortBy(col);setSortDir("desc")}};
-  const setPre=function(wk){var d=new Date();d.setDate(d.getDate()-wk*7);setDf(d.toISOString().split("T")[0]);setDt(TODAY)};
-
-  const allW=useMemo(function(){return D.filter(function(c){return c.ed>=df&&c.ed<=dt&&c.bal>0})},[df,dt]);
-  const clients=useMemo(function(){return allW.filter(function(c){return cf==="ALL"||c.cl===cf}).map(function(c){
-    var since=parseFloat((td[c.id]||{}).since)||0;
-    var exp=parseFloat((td[c.id]||{}).exp)||0;
-    return Object.assign({},c,{since:since,exp:exp,edt:(td[c.id]||{}).edt||"",cn:(td[c.id]||{}).cn||"",cs:(td[c.id]||{}).cs||"not_contacted"});
-  }).sort(function(a,b){
-    var av=a[sortBy],bv=b[sortBy];
-    if(typeof av==="string")return sortDir==="asc"?av.localeCompare(bv):bv.localeCompare(av);
-    return sortDir==="asc"?av-bv:bv-av;
-  })},[cf,allW,td,sortBy,sortDir]);
-
-  var tBal=allW.reduce(function(s,c){return s+c.bal},0);
-  var tCol=allW.reduce(function(s,c){return s+c.col},0);
-  var tSold=allW.reduce(function(s,c){return s+c.sale},0);
-  var fBal=clients.reduce(function(s,c){return s+c.bal},0);
-  var fSince=clients.reduce(function(s,c){return s+c.since},0);
-  var fExp=clients.reduce(function(s,c){return s+c.exp},0);
-  var contd=clients.filter(function(c){return c.cs!=="not_contacted"}).length;
-  var gp=tSold>0?(tCol+fSince)/tSold:0;
-  var evsW=useMemo(function(){var s=new Set(allW.map(function(c){return c.ev}));return Array.from(s)},[allW]);
-
-  var clSum=useMemo(function(){return Object.keys(CN).map(function(k){
-    var cc=allW.filter(function(c){return c.cl===k});if(!cc.length)return null;
-    var totalSale=cc.reduce(function(s,c){return s+c.sale},0);
-    var wsCol=cc.reduce(function(s,c){return s+c.col},0);
-    var sinceCol=cc.reduce(function(s,c){return s+(parseFloat((td[c.id]||{}).since)||0)},0);
-    var expCol=cc.reduce(function(s,c){return s+(parseFloat((td[c.id]||{}).exp)||0)},0);
-    return{cl:k,n:CN[k],cnt:cc.length,bal:cc.reduce(function(s,c){return s+c.bal},0),totalSale:totalSale,wsCol:wsCol,sinceCol:sinceCol,expCol:expCol,
-      con:cc.filter(function(c){return((td[c.id]||{}).cs||"not_contacted")!=="not_contacted"}).length};
-  }).filter(Boolean).sort(function(a,b){return b.bal-a.bal})},[allW,td]);
-
-  if(loading) return React.createElement("div",{style:{minHeight:"100vh",background:"#080d13",display:"flex",alignItems:"center",justifyContent:"center",color:"#7dd3fc",fontFamily:"monospace",fontSize:"14px"}},"Loading...");
-
-  var S=function(p){return Object.assign({background:"#0c1117",border:"1px solid rgba(30,58,95,0.15)",borderRadius:"8px",padding:"12px",marginBottom:"10px"},p||{})};
-
-  return React.createElement("div",{style:{minHeight:"100vh",background:"#080d13",color:"#e2e8f0",fontFamily:"'SF Mono',ui-monospace,monospace",fontSize:"13px",maxWidth:"100vw",overflowX:"hidden"}},
-    // Header
-    React.createElement("div",{style:{background:"linear-gradient(180deg,#0a1628,#080d13)",padding:"14px 14px 12px",borderBottom:"1px solid rgba(30,58,95,0.2)"}},
-      React.createElement("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"10px"}},
-        React.createElement("div",{style:{fontSize:"8px",letterSpacing:"4px",color:"#4ade80"}},"TLC COLLECTIONS"),
-        showReset?React.createElement("div",{style:{display:"flex",gap:"6px"}},
-          React.createElement("button",{onClick:doReset,style:{background:"#f87171",border:"none",color:"#fff",padding:"8px 14px",fontSize:"12px",borderRadius:"6px",fontFamily:"inherit"}},"Clear All"),
-          React.createElement("button",{onClick:function(){setShowReset(false)},style:{background:"transparent",border:"1px solid #334155",color:"#64748b",padding:"8px 14px",fontSize:"12px",borderRadius:"6px",fontFamily:"inherit"}},"Cancel")
-        ):React.createElement("button",{onClick:function(){setShowReset(true)},style:{background:"transparent",border:"1px solid rgba(248,113,113,0.2)",color:"#f87171",padding:"6px 12px",fontSize:"11px",borderRadius:"6px",fontFamily:"inherit"}},"Reset")
-      ),
-      // Gauge + numbers
-      React.createElement("div",{style:{display:"flex",alignItems:"center",gap:"14px",marginBottom:"12px"}},
-        React.createElement(Gauge,{sale:tSold,workshopCol:tCol,sinceCol:fSince,expected:fExp}),
-        React.createElement("div",null,
-          React.createElement("div",{style:{fontSize:"22px",fontWeight:700,color:"#fb923c",fontFamily:"system-ui,sans-serif"}},fmt(fBal)),
-          React.createElement("div",{style:{fontSize:"11px",color:"#64748b"}},clients.length+" accts "+contd+" contacted"),
-          React.createElement("div",{style:{display:"flex",gap:"8px",fontSize:"10px",marginTop:"2px"}},
-            React.createElement("span",{style:{color:"#4ade80"}},"WS: "+fmt(tCol)),
-            fSince>0&&React.createElement("span",{style:{color:"#38bdf8"}},"+"+fmt(fSince)),
-            fExp>0&&React.createElement("span",{style:{color:"#fbbf24"}},"Exp: "+fmt(fExp))
-          )
-        )
-      ),
-      // Legend
-      React.createElement("div",{style:{display:"flex",gap:"12px",fontSize:"9px",marginBottom:"10px",color:"#475569"}},
-        React.createElement("span",null,React.createElement("span",{style:{display:"inline-block",width:"8px",height:"8px",background:"#4ade80",borderRadius:"2px",marginRight:"4px"}}),"Workshop"),
-        React.createElement("span",null,React.createElement("span",{style:{display:"inline-block",width:"8px",height:"8px",background:"#38bdf8",borderRadius:"2px",marginRight:"4px"}}),"Since WS"),
-        React.createElement("span",null,React.createElement("span",{style:{display:"inline-block",width:"8px",height:"8px",background:"rgba(251,191,36,0.3)",borderRadius:"2px",marginRight:"4px"}}),"Expected")
-      ),
-      // Presets
-      React.createElement("div",{style:{display:"flex",gap:"5px",marginBottom:"8px"}},
-        [{l:"4W",w:4},{l:"6W",w:6},{l:"8W",w:8},{l:"3M",w:13},{l:"ALL",w:52}].map(function(p){
-          return React.createElement("button",{key:p.l,onClick:function(){setPre(p.w)},style:{flex:1,background:"#0f1a2a",border:"1px solid rgba(30,58,95,0.3)",color:"#94a3b8",padding:"10px 0",fontSize:"13px",borderRadius:"6px",fontFamily:"inherit",fontWeight:600}},p.l)
-        }),
-        React.createElement("button",{onClick:function(){setShowDates(!showDates)},style:{width:"44px",background:showDates?"#1e3a5f":"#0f1a2a",border:"1px solid rgba(30,58,95,0.3)",color:"#7dd3fc",fontSize:"16px",borderRadius:"6px"}},"Cal")
-      ),
-      showDates&&React.createElement("div",{style:{display:"flex",gap:"8px",marginBottom:"8px"}},
-        React.createElement("input",{type:"date",value:df,onChange:function(e){setDf(e.target.value)},style:{flex:1,background:"#0f1a2a",border:"1px solid rgba(30,58,95,0.3)",color:"#cbd5e1",padding:"10px",fontSize:"14px",fontFamily:"inherit",borderRadius:"6px"}}),
-        React.createElement("input",{type:"date",value:dt,onChange:function(e){setDt(e.target.value)},style:{flex:1,background:"#0f1a2a",border:"1px solid rgba(30,58,95,0.3)",color:"#cbd5e1",padding:"10px",fontSize:"14px",fontFamily:"inherit",borderRadius:"6px"}})
-      ),
-      // Closer buttons
-      React.createElement("div",{style:{display:"flex",gap:"5px",overflowX:"auto",WebkitOverflowScrolling:"touch",paddingBottom:"2px"}},
-        React.createElement("button",{onClick:function(){setCf("ALL")},style:{background:cf==="ALL"?"#4ade80":"#0f1a2a",border:cf==="ALL"?"none":"1px solid rgba(30,58,95,0.4)",color:cf==="ALL"?"#080d13":"#94a3b8",padding:"10px 18px",fontSize:"15px",borderRadius:"8px",fontFamily:"inherit",fontWeight:700,whiteSpace:"nowrap",flexShrink:0}},"ALL"),
-        Object.keys(CN).map(function(k){return React.createElement("button",{key:k,onClick:function(){setCf(cf===k?"ALL":k)},style:{background:cf===k?"#7dd3fc":"#0f1a2a",border:cf===k?"none":"1px solid rgba(30,58,95,0.4)",color:cf===k?"#080d13":"#7dd3fc",padding:"10px 16px",fontSize:"15px",borderRadius:"8px",fontFamily:"inherit",fontWeight:700,whiteSpace:"nowrap",flexShrink:0}},k)})
-      )
-    ),
-    // Body
-    React.createElement("div",{style:{padding:"10px"}},
-      // Closer cards
-      React.createElement("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"6px",marginBottom:"10px"}},
-        clSum.map(function(cs,i){
-          var pc=cs.cnt>0?cs.con/cs.cnt:0;
-          return React.createElement("div",{key:i,onClick:function(){setCf(cf===cs.cl?"ALL":cs.cl)},style:S({background:cf===cs.cl?"#0f1a2a":"#0c1117",border:cf===cs.cl?"2px solid rgba(125,211,252,0.25)":"1px solid rgba(30,58,95,0.15)",padding:"10px"})},
-            React.createElement("div",{style:{display:"flex",alignItems:"center",gap:"8px"}},
-              React.createElement(Gauge,{sale:cs.totalSale,workshopCol:cs.wsCol,sinceCol:cs.sinceCol,expected:cs.expCol}),
-              React.createElement("div",{style:{flex:1,minWidth:0}},
-                React.createElement("div",{style:{display:"flex",justifyContent:"space-between"}},
-                  React.createElement("span",{style:{color:"#7dd3fc",fontWeight:700,fontSize:"15px"}},cs.cl),
-                  React.createElement("span",{style:{color:"#fb923c",fontWeight:700}},fmt(cs.bal))
-                ),
-                React.createElement("div",{style:{color:"#64748b",fontSize:"10px",marginTop:"1px"}},cs.n),
-                React.createElement("div",{style:{color:"#475569",fontSize:"10px",marginTop:"2px"}},cs.con+"/"+cs.cnt+" contacted")
-              )
-            )
-          )
-        })
-      ),
-      // Sort
-      React.createElement("div",{style:{display:"flex",gap:"10px",marginBottom:"8px",overflowX:"auto"}},
-        [["bal","Balance"],["nm","Name"],["ev","Event"],["cl","Closer"]].map(function(pair){
-          return React.createElement("span",{key:pair[0],onClick:function(){doSort(pair[0])},style:{color:sortBy===pair[0]?"#7dd3fc":"#475569",fontSize:"12px",whiteSpace:"nowrap",fontWeight:sortBy===pair[0]?700:400}},pair[1]+(sortBy===pair[0]?(sortDir==="asc"?" ^":" v"):""))
-        })
-      ),
-      // Client cards
-      clients.length===0?React.createElement("div",{style:{padding:"40px 10px",textAlign:"center"}},
-        React.createElement("div",{style:{fontSize:"18px",fontFamily:"system-ui,sans-serif",color:"#475569"}},"No open accounts"),
-        React.createElement("div",{style:{fontSize:"12px",color:"#334155",marginTop:"4px"}},"Adjust window or filter")
-      ):clients.map(function(c,i){
-        var isX=expId===c.id;
-        var sc=sC[c.cs];
-        var wks=Math.round((new Date()-new Date(c.ed))/(7*24*60*60*1000));
-        var urg=wks>=4?"URGENT":wks>=3?"DUE":"ACTIVE";
-        var uC=urg==="URGENT"?"#f87171":urg==="DUE"?"#fbbf24":"#4ade80";
-        var remaining=c.bal-c.since;
-
-        return React.createElement("div",{key:c.id,style:S({padding:0,overflow:"hidden",marginBottom:"8px"})},
-          // Top row
-          React.createElement("div",{style:{padding:"12px",display:"flex",gap:"10px",alignItems:"flex-start"}},
-            React.createElement(Gauge,{sale:c.sale,workshopCol:c.col,sinceCol:c.since,expected:c.exp}),
-            React.createElement("div",{style:{flex:1,minWidth:0}},
-              React.createElement("div",{style:{display:"flex",alignItems:"center",gap:"6px",flexWrap:"wrap",marginBottom:"4px"}},
-                React.createElement("span",{style:{fontSize:"9px",fontWeight:700,color:uC,background:uC+"15",padding:"2px 7px",borderRadius:"4px"}},urg+" W"+wks),
-                React.createElement("span",{style:{color:TC[c.t],fontSize:"10px",fontWeight:600,background:TC[c.t]+"15",padding:"1px 7px",borderRadius:"4px"}},TS[c.t]),
-                React.createElement("span",{style:{color:"#7dd3fc",fontSize:"11px",fontWeight:700}},c.cl)
-              ),
-              React.createElement("div",{style:{color:"#e2e8f0",fontWeight:600,fontSize:"15px"}},c.nm),
-              React.createElement("div",{style:{color:"#475569",fontSize:"11px"}},c.ev)
-            ),
-            React.createElement("div",{style:{textAlign:"right",flexShrink:0}},
-              React.createElement("div",{style:{color:"#fb923c",fontWeight:700,fontSize:"17px",fontFamily:"system-ui,sans-serif"}},fmt(remaining>0?remaining:c.bal)),
-              React.createElement("div",{style:{color:"#475569",fontSize:"9px"}},"of "+fmt(c.sale)),
-              c.since>0&&React.createElement("div",{style:{color:"#38bdf8",fontSize:"10px",fontWeight:600}},"+"+fmt(c.since)+" since")
-            )
-          ),
-          // Stats
-          React.createElement("div",{style:{padding:"0 12px 8px",display:"flex",gap:"10px",fontSize:"11px",flexWrap:"wrap"}},
-            React.createElement("span",{style:{color:"#4ade80"}},"WS: "+fmt(c.col)),
-            c.rr&&React.createElement("span",{style:{color:c.rr==="DECLINED"?"#f87171":c.rr==="RANGE"?"#38bdf8":"#fbbf24"}},"RR: "+c.rn),
-            c.nt&&React.createElement("span",{style:{color:"#475569"}},c.nt)
-          ),
-          // Contact
-          (c.ph||c.em)&&React.createElement("div",{style:{padding:"0 12px 8px",display:"flex",gap:"6px",flexWrap:"wrap"}},
-            c.ph&&React.createElement("a",{href:"tel:"+c.ph,style:{color:"#38bdf8",textDecoration:"none",background:"rgba(56,189,248,0.06)",padding:"6px 12px",borderRadius:"6px",fontSize:"12px"}},"Ph "+c.ph),
-            c.em&&React.createElement("a",{href:"mailto:"+c.em,style:{color:"#38bdf8",textDecoration:"none",background:"rgba(56,189,248,0.06)",padding:"6px 12px",borderRadius:"6px",fontSize:"11px",overflow:"hidden",textOverflow:"ellipsis",maxWidth:"220px",whiteSpace:"nowrap"}},"Em "+c.em)
-          ),
-          // Status + expand
-          React.createElement("div",{style:{padding:"6px 12px 8px",display:"flex",gap:"8px",borderTop:"1px solid rgba(30,58,95,0.1)"}},
-            React.createElement("select",{value:c.cs,onChange:function(e){upd(c.id,"cs",e.target.value)},style:{flex:1,background:"#0a0f18",border:"1px solid "+sc+"30",color:sc,padding:"10px",fontSize:"13px",fontFamily:"inherit",borderRadius:"6px",fontWeight:600}},
-              Object.keys(sL).map(function(k){return React.createElement("option",{key:k,value:k},sL[k])})
-            ),
-            React.createElement("button",{onClick:function(){setExpId(isX?null:c.id)},style:{background:isX?"rgba(125,211,252,0.1)":"#0a0f18",border:"1px solid rgba(30,58,95,0.3)",color:"#7dd3fc",padding:"10px 18px",fontSize:"13px",borderRadius:"6px",fontFamily:"inherit",fontWeight:700}},isX?"UP":"DN")
-          ),
-          // Expanded
-          isX&&React.createElement("div",{style:{padding:"12px",background:"#080d13",borderTop:"1px solid rgba(30,58,95,0.15)"}},
-            React.createElement("div",{style:{marginBottom:"12px"}},
-              React.createElement("label",{style:{fontSize:"10px",color:"#38bdf8",letterSpacing:"1px",display:"block",marginBottom:"4px",fontWeight:600}},"COLLECTED SINCE WORKSHOP"),
-              React.createElement("div",{style:{display:"flex",gap:"8px",alignItems:"center"}},
-                React.createElement("input",{type:"number",value:c.since||"",onChange:function(e){upd(c.id,"since",e.target.value)},placeholder:"0",style:{flex:1,background:"#0c1117",border:"1px solid rgba(56,189,248,0.2)",color:"#38bdf8",padding:"12px",fontSize:"16px",fontFamily:"inherit",borderRadius:"6px",fontWeight:700,maxWidth:"160px"}}),
-                React.createElement("button",{onClick:function(){upd(c.id,"since",String(c.bal));upd(c.id,"cs","collected")},style:{background:"rgba(74,222,128,0.1)",border:"1px solid rgba(74,222,128,0.25)",color:"#4ade80",padding:"12px 14px",fontSize:"12px",borderRadius:"6px",fontFamily:"inherit",fontWeight:700,whiteSpace:"nowrap"}},"PIF")
-              )
-            ),
-            React.createElement("div",{style:{marginBottom:"12px"}},
-              React.createElement("label",{style:{fontSize:"10px",color:"#fbbf24",letterSpacing:"1px",display:"block",marginBottom:"4px",fontWeight:600}},"EXPECTED NEXT PAYMENT"),
-              React.createElement("div",{style:{display:"flex",gap:"8px"}},
-                React.createElement("input",{type:"number",value:c.exp||"",onChange:function(e){upd(c.id,"exp",e.target.value)},placeholder:"0",style:{background:"#0c1117",border:"1px solid rgba(251,191,36,0.2)",color:"#fbbf24",padding:"12px",fontSize:"16px",fontFamily:"inherit",borderRadius:"6px",fontWeight:700,width:"140px"}}),
-                React.createElement("input",{type:"date",value:c.edt,onChange:function(e){upd(c.id,"edt",e.target.value)},style:{flex:1,background:"#0c1117",border:"1px solid rgba(30,58,95,0.3)",color:"#cbd5e1",padding:"12px",fontSize:"14px",fontFamily:"inherit",borderRadius:"6px"}})
-              )
-            ),
-            React.createElement("div",null,
-              React.createElement("label",{style:{fontSize:"10px",color:"#64748b",letterSpacing:"1px",display:"block",marginBottom:"4px"}},"NOTES"),
-              React.createElement("input",{value:c.cn,onChange:function(e){upd(c.id,"cn",e.target.value)},placeholder:"Follow-up notes...",style:{width:"100%",background:"#0c1117",border:"1px solid rgba(30,58,95,0.3)",color:"#94a3b8",padding:"12px",fontSize:"14px",fontFamily:"inherit",borderRadius:"6px"}})
-            )
-          ),
-          // Inline summary
-          !isX&&(c.cn||c.since>0||c.exp>0)&&React.createElement("div",{style:{padding:"4px 12px 8px",fontSize:"11px",display:"flex",gap:"8px",flexWrap:"wrap"}},
-            c.since>0&&React.createElement("span",{style:{color:"#38bdf8"}},"+"+fmt(c.since)+" since"),
-            c.exp>0&&React.createElement("span",{style:{color:"#fbbf24"}},"Exp: "+fmt(c.exp)),
-            c.edt&&React.createElement("span",{style:{color:"#94a3b8"}},"by "+c.edt),
-            c.cn&&React.createElement("span",{style:{color:"#64748b"}},'"'+c.cn+'"')
-          )
-        )
-      })
-    )
-  );
+function svg(w,h,ws,si,ex){
+  var r=w*0.4;var lw=w*0.13;var cx=w/2;var cy=h-2;
+  var arc=function(s,e,col){
+    var sa=Math.PI+s*Math.PI,ea=Math.PI+e*Math.PI;
+    var pts=[];for(var i=0;i<=30;i++){var a=sa+i*(ea-sa)/30;pts.push((cx+r*Math.cos(a)).toFixed(1)+","+(cy+r*Math.sin(a)).toFixed(1))}
+    return'<polyline points="'+pts.join(" ")+'" fill="none" stroke="'+col+'" stroke-width="'+lw+'" stroke-linecap="round"/>';
+  };
+  var s='<svg width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'">';
+  s+=arc(0,1,"#1e293b");
+  if(ws>0)s+=arc(0,Math.min(ws,1),"#4ade80");
+  if(si>0)s+=arc(ws,Math.min(ws+si,1),"#38bdf8");
+  if(ex>0)s+=arc(ws+si,Math.min(ws+si+ex,1),"rgba(251,191,36,0.3)");
+  s+='</svg>';return s;
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App));
-</script></body></html>
+function load(){try{var v=localStorage.getItem("tlc-v7");if(v)state.data=JSON.parse(v)}catch(e){}}
+function save(){try{localStorage.setItem("tlc-v7",JSON.stringify(state.data))}catch(e){}}
+function upd(id,f,v){if(!state.data[id])state.data[id]={};state.data[id][f]=v;save();render()}
+function gd(id,f){return(state.data[id]||{})[f]||""}
+
+function render(){
+  var f=state.filter;
+  var now=new Date();
+  var cutoff=new Date();cutoff.setDate(cutoff.getDate()-28);
+  var df=cutoff.toISOString().split("T")[0];
+  var items=D.filter(function(c){return c.bal>0});
+  if(f!=="ALL")items=items.filter(function(c){return c.cl===f});
+  items.sort(function(a,b){return b.bal-a.bal});
+
+  var tSale=0,tWS=0,tBal=0;
+  items.forEach(function(c){tSale+=c.sale;tWS+=c.col;tBal+=c.bal});
+  var pp=tSale>0?tWS/tSale:0;
+
+  var closers={};
+  D.filter(function(c){return c.bal>0}).forEach(function(c){
+    if(!closers[c.cl])closers[c.cl]={bal:0,cnt:0};
+    closers[c.cl].bal+=c.bal;closers[c.cl].cnt++;
+  });
+
+  var h='<div class="hdr">';
+  h+='<div class="tag">TLC COLLECTIONS</div>';
+  h+='<div class="row" style="margin-bottom:12px">';
+  h+='<div class="gauge">'+svg(80,46,pp,0,0)+'<div style="position:absolute;top:14px;left:0;width:80px;text-align:center;font-size:18px;font-weight:700;color:#e2e8f0">'+fp(pp)+'</div></div>';
+  h+='<div class="col" style="flex:1"><div class="big">'+fd(tBal)+'</div>';
+  h+='<div class="sub">'+items.length+' accounts outstanding</div>';
+  h+='<div style="display:flex;gap:8px;font-size:11px;margin-top:2px"><span class="grn">WS: '+fd(tWS)+'</span></div>';
+  h+='</div>';
+  h+='<div class="col" style="align-items:flex-end"><div style="font-size:28px;font-weight:700;color:#fff">'+items.length+'</div><div style="font-size:8px;font-weight:700;color:#475569;letter-spacing:2px">OPEN</div></div>';
+  h+='</div>';
+
+  // Closer pills
+  h+='<div class="pills">';
+  h+='<div class="pill'+(f==="ALL"?" on":"")+'" onclick="state.filter=\'ALL\';render()">ALL</div>';
+  Object.keys(CN).forEach(function(k){
+    if(!closers[k])return;
+    h+='<div class="pill'+(f===k?" on":"")+'" onclick="state.filter=\''+k+'\';render()">'+k+'</div>';
+  });
+  h+='</div></div>';
+
+  // Cards
+  items.forEach(function(c){
+    var dl=daysLeft(c.ed);
+    var dlTxt=dl>0?dl+"d":dl===0?"TODAY":"PAST";
+    var dlCol=dl<=0?"red":dl<=7?"ylw":"grn";
+    var cpd=c.sale>0?c.col/c.sale:0;
+    var rrCol=c.rr==="DECLINED"?"red":c.rr==="RANGE"?"blu":"ylw";
+    var cs=gd(c.id,"cs")||"not_contacted";
+
+    h+='<div class="card">';
+    h+='<div class="card-top"><div>';
+    h+='<span class="badge" style="color:'+({URGENT:"#f87171",DUE:"#fbbf24",ACTIVE:"#4ade80"}[dl<=0?"URGENT":dl<=7?"DUE":"ACTIVE"])+';background:'+({URGENT:"rgba(248,113,113,0.1)",DUE:"rgba(251,191,36,0.1)",ACTIVE:"rgba(74,222,128,0.1)"}[dl<=0?"URGENT":dl<=7?"DUE":"ACTIVE"])+'">'+dlTxt+'</span>';
+    h+='<span class="badge" style="color:'+(TC[c.t]||"#94a3b8")+';background:'+(TC[c.t]||"#94a3b8")+'15">'+(TS[c.t]||"")+'</span>';
+    h+='<span style="color:#7dd3fc;font-size:11px;font-weight:700">'+c.cl+'</span>';
+    h+='<div class="name">'+c.nm+'</div>';
+    h+='<div class="ev">'+c.ev+'</div>';
+    h+='</div>';
+    h+='<div><div class="bal">'+fd(c.bal)+'</div><div class="balsub">of '+fd(c.sale)+' ('+fp(cpd)+')</div></div>';
+    h+='</div>';
+
+    // Stats
+    h+='<div class="stat">';
+    h+='<span class="grn">WS: '+fd(c.col)+'</span>';
+    if(c.rr)h+='<span class="'+rrCol+'">RR: '+c.rn+'</span>';
+    if(c.nt)h+='<span class="gry">'+c.nt+'</span>';
+    h+='</div>';
+
+    // Contact
+    if(c.ph||c.em){
+      h+='<div class="contact">';
+      if(c.ph)h+='<a href="tel:'+c.ph+'">Ph '+c.ph+'</a>';
+      if(c.em)h+='<a href="mailto:'+c.em+'">Em '+c.em+'</a>';
+      h+='</div>';
+    }
+
+    // Status select
+    h+='<select class="sel" style="color:'+({not_contacted:"#64748b",contacted:"#fbbf24",committed:"#4ade80",unreachable:"#f87171",collected:"#38bdf8"}[cs])+'" onchange="upd(\''+c.id+'\',\'cs\',this.value)">';
+    ["not_contacted","contacted","committed","unreachable","collected"].forEach(function(s){
+      h+='<option value="'+s+'"'+(cs===s?" selected":"")+'>'+({not_contacted:"Not Contacted",contacted:"Contacted",committed:"Committed",unreachable:"Unreachable",collected:"Collected"}[s])+'</option>';
+    });
+    h+='</select>';
+    h+='</div>';
+  });
+
+  // Footer
+  h+='<div style="padding:12px 16px;display:flex;justify-content:space-between;font-size:8px;color:#334155">';
+  h+='<span>LH // '+new Date().toLocaleDateString("en-US",{month:"short",day:"numeric"})+'</span>';
+  h+='<span style="color:#7dd3fc;font-weight:700">TLC COLLECTIONS</span>';
+  h+='</div>';
+
+  document.getElementById("app").innerHTML=h;
+}
+
+load();
+render();
+</script>
+</body>
+</html>

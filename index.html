@@ -51,10 +51,10 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
 .pif-anim{animation:pifPop .5s ease,pifGlow .7s ease}
 .done{display:flex;align-items:center;justify-content:center;width:96px;height:56px;flex-shrink:0;background:rgba(74,222,128,.1);border:2px solid rgba(74,222,128,.3);border-radius:12px}
 </style>
+<script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 </head>
 <body>
 <div id="app"></div>
-<script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 <script>
 var CN={LH:'Les Hill',SH:'Scott Hoffmann',CL:'Chad Lawson',BL:'Bernard Lawson',TK:'Tiffany Knight',BH:'Boyd Hoffmann',LT:'Lisa Toland',KF:'K. Fontaine'};
 var D=[
@@ -121,21 +121,22 @@ function togN(k){if(!NC[k])NC[k]={on:true,days:[1,3,7]};else NC[k].on=!NC[k].on;
 function togD(k,d){if(!NC[k])NC[k]={on:true,days:[]};var i=NC[k].days.indexOf(d);if(i>=0)NC[k].days.splice(i,1);else NC[k].days.push(d);saveN();render()}
 
 async function sendACH(name,amount){
+  if(typeof PDFLib==="undefined"&&typeof window.PDFLib==="undefined"){alert("PDF library loading, try again in a sec");return}
   var firstName=name.split(' ')[0];
   var byteChars=atob(ACH_B64);
   var byteArr=new Uint8Array(byteChars.length);
   for(var i=0;i<byteChars.length;i++)byteArr[i]=byteChars.charCodeAt(i);
   
   try{
-    var PDFLib=window.PDFLib||window['pdf-lib'];
-    var pdfDoc=await PDFLib.PDFDocument.load(byteArr);
+    var PL=window.PDFLib||window['PDFLib']||window['pdf-lib'];if(!PL){alert('PDF lib not loaded');return}
+    var pdfDoc=await PL.PDFDocument.load(byteArr);
     var pages=pdfDoc.getPages();
     var pg=pages[0];
-    var font=await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+    var font=await pdfDoc.embedFont(PL.StandardFonts.Helvetica);
     var h=pg.getHeight();
     
     // Amount to be processed only
-    pg.drawText(amount,{x:248,y:h-573,size:14,font:font,color:PDFLib.rgb(0,0,0)});
+    pg.drawText(amount,{x:248,y:h-573,size:14,font:font,color:PL.rgb(0,0,0)});
     
     var filledBytes=await pdfDoc.save();
     var blob=new Blob([filledBytes],{type:'application/pdf'});
@@ -148,7 +149,7 @@ async function sendACH(name,amount){
       var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;a.click();
     }
   }catch(e){
-    console.error('PDF fill error:',e);
+    alert('PDF error: '+e.message);
     // Fallback: send unfilled
     var blob2=new Blob([byteArr],{type:'application/pdf'});
     var file2=new File([blob2],'ACH_Collection_Form_TLC.pdf',{type:'application/pdf'});

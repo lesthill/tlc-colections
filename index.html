@@ -2,199 +2,300 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>TLC Collections</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{background:#080d13;color:#e2e8f0;font-family:-apple-system,system-ui,sans-serif;min-height:100vh;-webkit-overflow-scrolling:touch}
-.hdr{background:linear-gradient(180deg,#0a1628,#080d13);padding:16px;border-bottom:1px solid rgba(30,58,95,0.2)}
-.tag{font-size:9px;letter-spacing:4px;color:#4ade80;margin-bottom:8px}
-.row{display:flex;align-items:center;gap:12px}
-.col{display:flex;flex-direction:column}
-.big{font-size:24px;font-weight:700;color:#fb923c}
-.sub{font-size:12px;color:#64748b;margin-top:2px}
-.pills{display:flex;gap:5px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px;margin-top:10px}
-.pill{background:#0f1a2a;border:1px solid rgba(30,58,95,0.3);color:#94a3b8;padding:10px 14px;font-size:13px;border-radius:8px;font-weight:600;white-space:nowrap;flex-shrink:0;cursor:pointer;font-family:inherit}
+body{background:#080d13;color:#e2e8f0;font-family:-apple-system,system-ui,sans-serif;min-height:100vh;-webkit-overflow-scrolling:touch;padding-bottom:env(safe-area-inset-bottom)}
+input,select,button{outline:none;-webkit-appearance:none;font-family:inherit}
+select option{background:#0f1a2a;color:#cbd5e1}
+::-webkit-scrollbar{width:0;height:0}
+input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+.hdr{background:linear-gradient(180deg,#0a1628,#080d13);padding:14px;border-bottom:1px solid rgba(30,58,95,.2)}
+.fx{display:flex}.fc{flex-direction:column}.ac{align-items:center}.jb{justify-content:space-between}.fw{flex-wrap:wrap}.g6{gap:6px}.g8{gap:8px}.g10{gap:10px}.g12{gap:12px}
+.tag{font-size:8px;letter-spacing:4px;color:#4ade80;margin-bottom:8px}
+.pills{display:flex;gap:5px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px}
+.pill{background:#0f1a2a;border:1px solid rgba(30,58,95,.3);color:#7dd3fc;padding:10px 16px;font-size:15px;border-radius:8px;font-weight:700;white-space:nowrap;flex-shrink:0}
 .pill.on{background:#7dd3fc;color:#080d13;border:none}
-.card{background:#0c1117;border:1px solid rgba(30,58,95,0.15);border-radius:8px;padding:14px;margin:6px 10px}
-.card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
-.name{font-size:15px;font-weight:600;color:#e2e8f0}
+.pill.all{color:#94a3b8}.pill.all.on{background:#4ade80;color:#080d13}
+.pre{flex:1;background:#0f1a2a;border:1px solid rgba(30,58,95,.3);color:#94a3b8;padding:10px 0;font-size:13px;border-radius:6px;font-weight:600;text-align:center}
+.card{background:#0c1117;border:1px solid rgba(30,58,95,.15);border-radius:8px;margin:0 10px 8px;overflow:hidden}
+.card-body{padding:12px}
+.nm{font-size:15px;font-weight:600;color:#e2e8f0}
 .ev{font-size:11px;color:#475569;margin-top:2px}
 .bal{font-size:18px;font-weight:700;color:#fb923c;text-align:right}
-.balsub{font-size:10px;color:#475569;text-align:right}
-.stat{display:flex;gap:10px;font-size:11px;flex-wrap:wrap;margin-bottom:6px}
-.grn{color:#4ade80}.blu{color:#38bdf8}.red{color:#f87171}.ylw{color:#fbbf24}.gry{color:#475569}
-.contact{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
-.contact a{color:#38bdf8;text-decoration:none;background:rgba(56,189,248,0.06);padding:8px 12px;border-radius:6px;font-size:12px}
-.badge{font-size:9px;font-weight:700;padding:3px 8px;border-radius:4px;display:inline-block;margin-right:6px}
-.sel{width:100%;background:#0a0f18;border:1px solid rgba(100,116,139,0.3);color:#64748b;padding:10px;font-size:13px;border-radius:6px;font-weight:600;font-family:inherit;-webkit-appearance:none;margin-top:6px}
-.gauge{position:relative;width:80px;height:46px;flex-shrink:0}
-.gauge svg{width:80px;height:46px}
-.sep{height:1px;background:rgba(30,58,95,0.15);margin:8px 10px}
+.bsub{font-size:10px;color:#475569;text-align:right}
+.stat{display:flex;gap:10px;font-size:11px;flex-wrap:wrap;margin:6px 0}
+.grn{color:#4ade80}.blu{color:#38bdf8}.red{color:#f87171}.ylw{color:#fbbf24}.gry{color:#475569}.wht{color:#e2e8f0}
+.con{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.con a{color:#38bdf8;text-decoration:none;background:rgba(56,189,248,.06);padding:7px 12px;border-radius:6px;font-size:12px}
+.badge{font-size:9px;font-weight:700;padding:2px 8px;border-radius:4px;display:inline-block;margin-right:4px}
+.sel{width:100%;background:#0a0f18;border:1px solid rgba(100,116,139,.3);color:#64748b;padding:10px;font-size:13px;border-radius:6px;font-weight:600}
+.btn{background:#0a0f18;border:1px solid rgba(30,58,95,.3);color:#7dd3fc;padding:10px 18px;font-size:13px;border-radius:6px;font-weight:700}
+.btn-pif{background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.25);color:#4ade80;padding:12px 14px;font-size:12px;border-radius:6px;font-weight:700;white-space:nowrap}
+.inp{width:100%;background:#0c1117;border:1px solid rgba(30,58,95,.3);color:#cbd5e1;padding:12px;font-size:14px;border-radius:6px;font-family:inherit}
+.inp-g{color:#4ade80;font-weight:700;font-size:16px;border-color:rgba(74,222,128,.2)}
+.inp-b{color:#38bdf8;font-weight:700;font-size:16px;border-color:rgba(56,189,248,.2)}
+.inp-y{color:#fbbf24;font-weight:700;font-size:16px;border-color:rgba(251,191,36,.2)}
+.lbl{font-size:10px;letter-spacing:1px;display:block;margin-bottom:4px;font-weight:600}
+.exp-panel{padding:12px;background:#080d13;border-top:1px solid rgba(30,58,95,.15)}
+.sep{height:1px;background:rgba(30,58,95,.15);margin:6px 10px}
+.sort{font-size:12px;white-space:nowrap;font-weight:400;color:#475569}
+.sort.on{color:#7dd3fc;font-weight:700}
+.closer-card{background:#0c1117;border:1px solid rgba(30,58,95,.15);border-radius:8px;padding:10px}
+.closer-card.on{background:#0f1a2a;border:2px solid rgba(125,211,252,.25)}
+.gauge{position:relative;flex-shrink:0}
+.inline{padding:4px 12px 8px;font-size:11px;display:flex;gap:8px;flex-wrap:wrap}
 </style>
 </head>
 <body>
 <div id="app"></div>
 <script>
-var CN={LH:"Les Hill",SH:"Scott Hoffmann",CL:"Chad Lawson",BL:"Bernard Lawson",TK:"Tiffany Knight",BH:"Boyd Hoffmann",LT:"Lisa Toland",KF:"K. Fontaine"};
+var CN={LH:'Les Hill',SH:'Scott Hoffmann',CL:'Chad Lawson',BL:'Bernard Lawson',TK:'Tiffany Knight',BH:'Boyd Hoffmann',LT:'Lisa Toland',KF:'K. Fontaine'};
 var D=[
-{id:"b1",nm:"William DuQuette",ev:"Boston",ed:"2025-11-24",cl:"BL",sale:46997,col:2500,bal:44497,t:46997,nt:"Founder's Club",rr:"DECLINED",rn:"691 $18K",ph:"603-234-4546",em:"billduke32@gmail.com"},
-{id:"b2",nm:"Willy Santana",ev:"Boston",ed:"2025-11-24",cl:"BL",sale:9995,col:3500,bal:6495,t:9995,nt:"",rr:"DECLINED",rn:"<600",ph:"617-686-5290",em:"santana.willy@icloud.com"},
-{id:"b3",nm:"Russell Thompson",ev:"Boston",ed:"2025-11-24",cl:"KF",sale:25997,col:10000,bal:15997,t:25997,nt:"",rr:"DECLINED",rn:"716",ph:"",em:""},
-{id:"f1",nm:"Luce Pierre-Russon",ev:"Ft Lauderdale",ed:"2025-12-08",cl:"LT",sale:39997,col:1000,bal:38997,t:39997,nt:"Lawsuit postponed",rr:"DECLINED",rn:"656 $3K",ph:"816-410-3290",em:"taisharusson@yahoo.com"},
-{id:"f2",nm:"Shannon Burrows",ev:"Ft Lauderdale",ed:"2025-12-08",cl:"TK",sale:39997,col:12000,bal:27997,t:39997,nt:"UGA",rr:"RANGE",rn:"5-25k",ph:"561-254-1229",em:"shannonburrowsrealtor@gmail.com"},
-{id:"h1",nm:"Camille Brown",ev:"Houston",ed:"2025-12-29",cl:"BH",sale:39997,col:10000,bal:29997,t:39997,nt:"UGA",rr:"RANGE",rn:"0-25k",ph:"713-498-6110",em:"admin@reiningmoney.com"},
-{id:"h2",nm:"Kinshasa Carter",ev:"Houston",ed:"2025-12-29",cl:"CL",sale:25997,col:9995,bal:16002,t:25997,nt:"10k pkg",rr:"DECLINED",rn:"635",ph:"832-483-9893",em:"shasacarter@gmail.com"},
-{id:"h3",nm:"Raymond DarDar Jr",ev:"Houston",ed:"2025-12-29",cl:"KF",sale:39997,col:1000,bal:38997,t:39997,nt:"",rr:"DECLINED",rn:"702 $0",ph:"337-296-4461",em:"raymonddardar@yahoo.com"},
-{id:"h4",nm:"Christine Toledo",ev:"Houston",ed:"2025-12-29",cl:"SH",sale:39997,col:5000,bal:34997,t:39997,nt:"HELOC iffy",rr:"DECLINED",rn:"718 re-UW",ph:"832-293-7026",em:"nikebrisnger@gmail.com"},
-{id:"h5",nm:"Jason Bishop",ev:"Houston",ed:"2025-12-29",cl:"SH",sale:39997,col:9995,bal:30002,t:39997,nt:"",rr:"NEED_INFO",rn:"Verify",ph:"713-882-5552",em:"scoreboarddude@yahoo.com"},
-{id:"s1",nm:"Cirilo Mendoza",ev:"San Diego",ed:"2026-01-12",cl:"BH",sale:25997,col:2000,bal:23997,t:25997,nt:"",rr:"NEED_INFO",rn:"Need SSN",ph:"619-843-2857",em:"mendozacirilo700@gmail.com"},
-{id:"s2",nm:"Anne Mohney",ev:"San Diego",ed:"2026-01-12",cl:"TK",sale:46997,col:0,bal:46997,t:46997,nt:"Founder's Club",rr:"RANGE",rn:"20-40k",ph:"619-341-9406",em:"annemohney@gmail.com"},
-{id:"s3",nm:"Paula Handel",ev:"San Diego",ed:"2026-01-12",cl:"TK",sale:39997,col:0,bal:39997,t:39997,nt:"Divorce?",rr:"APPROVED",rn:"Approved",ph:"619-746-4180",em:"paulashandel@gmail.com"},
-{id:"s4",nm:"Chenoa Hernandez",ev:"San Diego",ed:"2026-01-12",cl:"TK",sale:25997,col:1000,bal:24997,t:25997,nt:"Retirement acct",rr:"DECLINED",rn:"Settlements",ph:"209-770-0981",em:"chengirl209@gmail.com"},
-{id:"d1",nm:"Kayla Schultz",ev:"Denver",ed:"2026-01-19",cl:"LT",sale:25997,col:1000,bal:24997,t:25997,nt:"Banker said no",ph:"970-556-4992",em:"kessagirl1@gmail.com"},
-{id:"d2",nm:"Suzanne Barrett",ev:"Denver",ed:"2026-01-19",cl:"LT",sale:25997,col:2500,bal:23497,t:25997,nt:"$1.5K 2wk + $1K 5wk",ph:"772-882-1245",em:"suzanne@topdocumentation.com"},
-{id:"d3",nm:"Nancy Frazier",ev:"Denver",ed:"2026-01-19",cl:"SH",sale:25997,col:250,bal:25747,t:25997,nt:"Hail mary",ph:"719-641-6148",em:"nancy@arrowsconstruction.com"},
-{id:"d4",nm:"Katherine Suazo",ev:"Denver",ed:"2026-01-19",cl:"TK",sale:39997,col:10000,bal:29997,t:39997,nt:"$5K 2wk + $5K 5wk",ph:"720-355-4382",em:"ksuazo2090@gmail.com"},
-{id:"d5",nm:"Teresa Ries",ev:"Denver",ed:"2026-01-19",cl:"TK",sale:9995,col:4760,bal:5235,t:9995,nt:"",ph:"304-282-8501",em:"cassa26525@gmail.com"},
-{id:"w1",nm:"Jabbar Thomas",ev:"Fort Worth",ed:"2026-01-26",cl:"BL",sale:39997,col:0,bal:39997,t:39997,nt:"ACH never funded",rr:"DECLINED",rn:"620 re-UW",ph:"469-781-7232",em:"jabgconstruction@engineer.com"},
-{id:"w2",nm:"Ashley Lillie",ev:"Fort Worth",ed:"2026-01-26",cl:"CL",sale:39997,col:10000,bal:29997,t:39997,nt:"",ph:"",em:""},
-{id:"k1",nm:"Steven Hooks Sr",ev:"Kansas City",ed:"2026-02-02",cl:"BL",sale:39997,col:3000,bal:36997,t:39997,nt:"RR in 2 weeks",rr:"RANGE",rn:"RR pending",ph:"816-269-5698",em:"shooksld@gmail.com"},
-{id:"k2",nm:"Shanda Walsh",ev:"Kansas City",ed:"2026-02-02",cl:"LT",sale:39997,col:2500,bal:37497,t:39997,nt:"Bal via RR",rr:"RANGE",rn:"30-50k",ph:"913-406-3700",em:"walshs2006@gmail.com"},
-{id:"k3",nm:"Sherry Samples",ev:"Kansas City",ed:"2026-02-02",cl:"LT",sale:39997,col:20000,bal:19997,t:39997,nt:"Bal via CC",ph:"913-634-8747",em:"machka_sherry@yahoo.com"},
-{id:"a1",nm:"Matt Steward",ev:"Albuquerque",ed:"2026-02-09",cl:"CL",sale:39997,col:10000,bal:29997,t:39997,nt:"Bal RR",rr:"RANGE",rn:"5-25k",ph:"979-595-8632",em:"train@mattstewardcoaching.com"},
-{id:"a2",nm:"Gene Romero",ev:"Albuquerque",ed:"2026-02-09",cl:"CL",sale:25997,col:1000,bal:24997,t:25997,nt:"Bal ACH",ph:"505-720-7001",em:"geno4012@gmail.com"},
-{id:"a4",nm:"Anthony Lucero",ev:"Albuquerque",ed:"2026-02-09",cl:"LH",sale:39997,col:10000,bal:29997,t:39997,nt:"Bal ACH",rr:"RANGE",rn:"30-40k",ph:"505-269-8788",em:"trluc57@aol.com"},
-{id:"a5",nm:"Becky Gonzalez",ev:"Albuquerque",ed:"2026-02-09",cl:"TK",sale:39997,col:26997,bal:13000,t:39997,nt:"Bal 3 wks",rr:"DECLINED",rn:"649 thin",ph:"505-688-1064",em:"beckygonzalez30@yahoo.com"},
-{id:"a6",nm:"Selena Fox-Anderson",ev:"Albuquerque",ed:"2026-02-09",cl:"TK",sale:46997,col:0,bal:46997,t:46997,nt:"FC TSP",rr:"DECLINED",rn:"680 $9.9K",ph:"505-366-4514",em:"selenapfox@gmail.com"},
-{id:"a7",nm:"Douglas Conrad",ev:"Albuquerque",ed:"2026-02-09",cl:"TK",sale:25997,col:1000,bal:24997,t:25997,nt:"Bal 3 wks",rr:"NEED_INFO",rn:"Verify",ph:"505-702-2902",em:"fr3sh4200@gmail.com"},
-{id:"a8",nm:"Armando Maestas",ev:"Albuquerque",ed:"2026-02-09",cl:"TK",sale:46997,col:2000,bal:44997,t:46997,nt:"Save @10",rr:"DECLINED",rn:"723 $0",ph:"",em:""}
+{id:'b1',nm:'William DuQuette',ev:'Boston',ed:'2025-11-24',cl:'BL',sale:46997,col:2500,bal:44497,t:46997,nt:"Founder's Club",rr:'DECLINED',rn:'691 $18K',ph:'603-234-4546',em:'billduke32@gmail.com'},
+{id:'b2',nm:'Willy Santana',ev:'Boston',ed:'2025-11-24',cl:'BL',sale:9995,col:3500,bal:6495,t:9995,nt:'',rr:'DECLINED',rn:'<600',ph:'617-686-5290',em:'santana.willy@icloud.com'},
+{id:'b3',nm:'Russell Thompson',ev:'Boston',ed:'2025-11-24',cl:'KF',sale:25997,col:10000,bal:15997,t:25997,nt:'',rr:'DECLINED',rn:'716',ph:'',em:''},
+{id:'f1',nm:'Luce Pierre-Russon',ev:'Ft Lauderdale',ed:'2025-12-08',cl:'LT',sale:39997,col:1000,bal:38997,t:39997,nt:'Lawsuit postponed',rr:'DECLINED',rn:'656 $3K',ph:'816-410-3290',em:'taisharusson@yahoo.com'},
+{id:'f2',nm:'Shannon Burrows',ev:'Ft Lauderdale',ed:'2025-12-08',cl:'TK',sale:39997,col:12000,bal:27997,t:39997,nt:'UGA',rr:'RANGE',rn:'5-25k',ph:'561-254-1229',em:'shannonburrowsrealtor@gmail.com'},
+{id:'h1',nm:'Camille Brown',ev:'Houston',ed:'2025-12-29',cl:'BH',sale:39997,col:10000,bal:29997,t:39997,nt:'UGA',rr:'RANGE',rn:'0-25k',ph:'713-498-6110',em:'admin@reiningmoney.com'},
+{id:'h2',nm:'Kinshasa Carter',ev:'Houston',ed:'2025-12-29',cl:'CL',sale:25997,col:9995,bal:16002,t:25997,nt:'10k pkg',rr:'DECLINED',rn:'635',ph:'832-483-9893',em:'shasacarter@gmail.com'},
+{id:'h3',nm:'Raymond DarDar Jr',ev:'Houston',ed:'2025-12-29',cl:'KF',sale:39997,col:1000,bal:38997,t:39997,nt:'',rr:'DECLINED',rn:'702 $0',ph:'337-296-4461',em:'raymonddardar@yahoo.com'},
+{id:'h4',nm:'Christine Toledo',ev:'Houston',ed:'2025-12-29',cl:'SH',sale:39997,col:5000,bal:34997,t:39997,nt:'HELOC iffy',rr:'DECLINED',rn:'718 re-UW',ph:'832-293-7026',em:'nikebrisnger@gmail.com'},
+{id:'h5',nm:'Jason Bishop',ev:'Houston',ed:'2025-12-29',cl:'SH',sale:39997,col:9995,bal:30002,t:39997,nt:'',rr:'NEED_INFO',rn:'Verify',ph:'713-882-5552',em:'scoreboarddude@yahoo.com'},
+{id:'s1',nm:'Cirilo Mendoza',ev:'San Diego',ed:'2026-01-12',cl:'BH',sale:25997,col:2000,bal:23997,t:25997,nt:'',rr:'NEED_INFO',rn:'Need SSN',ph:'619-843-2857',em:'mendozacirilo700@gmail.com'},
+{id:'s2',nm:'Anne Mohney',ev:'San Diego',ed:'2026-01-12',cl:'TK',sale:46997,col:0,bal:46997,t:46997,nt:"Founder's Club",rr:'RANGE',rn:'20-40k',ph:'619-341-9406',em:'annemohney@gmail.com'},
+{id:'s3',nm:'Paula Handel',ev:'San Diego',ed:'2026-01-12',cl:'TK',sale:39997,col:0,bal:39997,t:39997,nt:'Divorce?',rr:'APPROVED',rn:'Approved',ph:'619-746-4180',em:'paulashandel@gmail.com'},
+{id:'s4',nm:'Chenoa Hernandez',ev:'San Diego',ed:'2026-01-12',cl:'TK',sale:25997,col:1000,bal:24997,t:25997,nt:'Retirement acct',rr:'DECLINED',rn:'Settlements',ph:'209-770-0981',em:'chengirl209@gmail.com'},
+{id:'d1',nm:'Kayla Schultz',ev:'Denver',ed:'2026-01-19',cl:'LT',sale:25997,col:1000,bal:24997,t:25997,nt:'Banker said no',ph:'970-556-4992',em:'kessagirl1@gmail.com'},
+{id:'d2',nm:'Suzanne Barrett',ev:'Denver',ed:'2026-01-19',cl:'LT',sale:25997,col:2500,bal:23497,t:25997,nt:'$1.5K 2wk + $1K 5wk',ph:'772-882-1245',em:'suzanne@topdocumentation.com'},
+{id:'d3',nm:'Nancy Frazier',ev:'Denver',ed:'2026-01-19',cl:'SH',sale:25997,col:250,bal:25747,t:25997,nt:'Hail mary',ph:'719-641-6148',em:'nancy@arrowsconstruction.com'},
+{id:'d4',nm:'Katherine Suazo',ev:'Denver',ed:'2026-01-19',cl:'TK',sale:39997,col:10000,bal:29997,t:39997,nt:'$5K 2wk + $5K 5wk',ph:'720-355-4382',em:'ksuazo2090@gmail.com'},
+{id:'d5',nm:'Teresa Ries',ev:'Denver',ed:'2026-01-19',cl:'TK',sale:9995,col:4760,bal:5235,t:9995,nt:'',ph:'304-282-8501',em:'cassa26525@gmail.com'},
+{id:'w1',nm:'Jabbar Thomas',ev:'Fort Worth',ed:'2026-01-26',cl:'BL',sale:39997,col:0,bal:39997,t:39997,nt:'ACH never funded',rr:'DECLINED',rn:'620 re-UW',ph:'469-781-7232',em:'jabgconstruction@engineer.com'},
+{id:'w2',nm:'Ashley Lillie',ev:'Fort Worth',ed:'2026-01-26',cl:'CL',sale:39997,col:10000,bal:29997,t:39997,nt:'',ph:'',em:''},
+{id:'k1',nm:'Steven Hooks Sr',ev:'Kansas City',ed:'2026-02-02',cl:'BL',sale:39997,col:3000,bal:36997,t:39997,nt:'RR in 2 weeks',rr:'RANGE',rn:'RR pending',ph:'816-269-5698',em:'shooksld@gmail.com'},
+{id:'k2',nm:'Shanda Walsh',ev:'Kansas City',ed:'2026-02-02',cl:'LT',sale:39997,col:2500,bal:37497,t:39997,nt:'Bal via RR',rr:'RANGE',rn:'30-50k',ph:'913-406-3700',em:'walshs2006@gmail.com'},
+{id:'k3',nm:'Sherry Samples',ev:'Kansas City',ed:'2026-02-02',cl:'LT',sale:39997,col:20000,bal:19997,t:39997,nt:'Bal via CC',ph:'913-634-8747',em:'machka_sherry@yahoo.com'},
+{id:'a1',nm:'Matt Steward',ev:'Albuquerque',ed:'2026-02-09',cl:'CL',sale:39997,col:10000,bal:29997,t:39997,nt:'Bal RR',rr:'RANGE',rn:'5-25k',ph:'979-595-8632',em:'train@mattstewardcoaching.com'},
+{id:'a2',nm:'Gene Romero',ev:'Albuquerque',ed:'2026-02-09',cl:'CL',sale:25997,col:1000,bal:24997,t:25997,nt:'Bal ACH',ph:'505-720-7001',em:'geno4012@gmail.com'},
+{id:'a4',nm:'Anthony Lucero',ev:'Albuquerque',ed:'2026-02-09',cl:'LH',sale:39997,col:10000,bal:29997,t:39997,nt:'Bal ACH',rr:'RANGE',rn:'30-40k',ph:'505-269-8788',em:'trluc57@aol.com'},
+{id:'a5',nm:'Becky Gonzalez',ev:'Albuquerque',ed:'2026-02-09',cl:'TK',sale:39997,col:26997,bal:13000,t:39997,nt:'Bal 3 wks',rr:'DECLINED',rn:'649 thin',ph:'505-688-1064',em:'beckygonzalez30@yahoo.com'},
+{id:'a6',nm:'Selena Fox-Anderson',ev:'Albuquerque',ed:'2026-02-09',cl:'TK',sale:46997,col:0,bal:46997,t:46997,nt:'FC TSP',rr:'DECLINED',rn:'680 $9.9K',ph:'505-366-4514',em:'selenapfox@gmail.com'},
+{id:'a7',nm:'Douglas Conrad',ev:'Albuquerque',ed:'2026-02-09',cl:'TK',sale:25997,col:1000,bal:24997,t:25997,nt:'Bal 3 wks',rr:'NEED_INFO',rn:'Verify',ph:'505-702-2902',em:'fr3sh4200@gmail.com'},
+{id:'a8',nm:'Armando Maestas',ev:'Albuquerque',ed:'2026-02-09',cl:'TK',sale:46997,col:2000,bal:44997,t:46997,nt:'Save @10',rr:'DECLINED',rn:'723 $0',ph:'',em:''}
 ];
+var TS={9995:'$10K',25997:'$26K',39997:'$40K',46997:'$47K'};
+var TC={9995:'#94a3b8',25997:'#38bdf8',39997:'#4ade80',46997:'#fbbf24'};
+var SN={not_contacted:'Not Contacted',contacted:'Contacted',committed:'Committed',unreachable:'Unreachable',collected:'Collected'};
+var SC={not_contacted:'#64748b',contacted:'#fbbf24',committed:'#4ade80',unreachable:'#f87171',collected:'#38bdf8'};
+var S={f:'ALL',sb:'bal',sd:'desc',exp:null,dates:false,reset:false};
+var TD={};
+var SK='tlc-v8';
 
-var TS={9995:"$10K",25997:"$26K",39997:"$40K",46997:"$47K"};
-var TC={9995:"#94a3b8",25997:"#38bdf8",39997:"#4ade80",46997:"#fbbf24"};
-var state={filter:"ALL",data:{}};
+function fd(n){return '$'+Math.abs(n).toLocaleString('en-US',{maximumFractionDigits:0})}
+function fp(n){return Math.round(n*100)+'%'}
+function gd(id,f){return(TD[id]||{})[f]||''}
+function gdn(id,f){return parseFloat((TD[id]||{})[f])||0}
+function upd(id,f,v){if(!TD[id])TD[id]={};TD[id][f]=v;try{localStorage.setItem(SK,JSON.stringify(TD))}catch(e){}render()}
+function pif(id,bal){upd(id,'since',String(bal));upd(id,'cs','collected')}
 
-function fd(n){return"$"+Math.abs(n).toLocaleString("en-US",{maximumFractionDigits:0})}
-function fp(n){return Math.round(n*100)+"%"}
-function dueDate(sd){var d=new Date(sd+"T12:00:00");var c=0;while(c<3){d.setDate(d.getDate()+1);if(d.getDay()===5)c++}return d}
-function daysLeft(sd){var due=dueDate(sd);var now=new Date();return Math.ceil((due-now)/(1000*60*60*24))}
+function dueDate(sd){var d=new Date(sd+'T12:00:00');var c=0;while(c<3){d.setDate(d.getDate()+1);if(d.getDay()===5)c++;}return d}
+function daysLeft(sd){return Math.ceil((dueDate(sd)-new Date())/(864e5))}
 
-function svg(w,h,ws,si,ex){
-  var r=w*0.4;var lw=w*0.13;var cx=w/2;var cy=h-2;
-  var arc=function(s,e,col){
-    var sa=Math.PI+s*Math.PI,ea=Math.PI+e*Math.PI;
-    var pts=[];for(var i=0;i<=30;i++){var a=sa+i*(ea-sa)/30;pts.push((cx+r*Math.cos(a)).toFixed(1)+","+(cy+r*Math.sin(a)).toFixed(1))}
-    return'<polyline points="'+pts.join(" ")+'" fill="none" stroke="'+col+'" stroke-width="'+lw+'" stroke-linecap="round"/>';
-  };
+function svg(w,h,ws,si,ex,txt){
+  var r=w*.4,lw=w*.13,cx=w/2,cy=h-2;
+  function arc(s,e,col){
+    var sa=Math.PI+s*Math.PI,ea=Math.PI+e*Math.PI,pts=[];
+    for(var i=0;i<=30;i++){var a=sa+i*(ea-sa)/30;pts.push((cx+r*Math.cos(a)).toFixed(1)+','+(cy+r*Math.sin(a)).toFixed(1))}
+    return '<polyline points="'+pts.join(' ')+'" fill="none" stroke="'+col+'" stroke-width="'+lw+'" stroke-linecap="round"/>'
+  }
   var s='<svg width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'">';
-  s+=arc(0,1,"#1e293b");
-  if(ws>0)s+=arc(0,Math.min(ws,1),"#4ade80");
-  if(si>0)s+=arc(ws,Math.min(ws+si,1),"#38bdf8");
-  if(ex>0)s+=arc(ws+si,Math.min(ws+si+ex,1),"rgba(251,191,36,0.3)");
-  s+='</svg>';return s;
+  s+=arc(0,1,'#1e293b');
+  if(ws>0)s+=arc(0,Math.min(ws,1),'#4ade80');
+  if(si>0)s+=arc(ws,Math.min(ws+si,1),'#38bdf8');
+  if(ex>0)s+=arc(ws+si,Math.min(ws+si+ex,1),'rgba(251,191,36,.3)');
+  if(txt)s+='<text x="'+cx+'" y="'+(cy-4)+'" text-anchor="middle" fill="#e2e8f0" font-size="'+(w*.22)+'" font-weight="700" font-family="system-ui">'+txt+'</text>';
+  return s+'</svg>'
 }
 
-function load(){try{var v=localStorage.getItem("tlc-v7");if(v)state.data=JSON.parse(v)}catch(e){}}
-function save(){try{localStorage.setItem("tlc-v7",JSON.stringify(state.data))}catch(e){}}
-function upd(id,f,v){if(!state.data[id])state.data[id]={};state.data[id][f]=v;save();render()}
-function gd(id,f){return(state.data[id]||{})[f]||""}
-
 function render(){
-  var f=state.filter;
-  var now=new Date();
-  var cutoff=new Date();cutoff.setDate(cutoff.getDate()-28);
-  var df=cutoff.toISOString().split("T")[0];
-  var items=D.filter(function(c){return c.bal>0});
-  if(f!=="ALL")items=items.filter(function(c){return c.cl===f});
-  items.sort(function(a,b){return b.bal-a.bal});
-
-  var tSale=0,tWS=0,tBal=0;
-  items.forEach(function(c){tSale+=c.sale;tWS+=c.col;tBal+=c.bal});
-  var pp=tSale>0?tWS/tSale:0;
-
-  var closers={};
-  D.filter(function(c){return c.bal>0}).forEach(function(c){
-    if(!closers[c.cl])closers[c.cl]={bal:0,cnt:0};
-    closers[c.cl].bal+=c.bal;closers[c.cl].cnt++;
+  var f=S.f,items=D.filter(function(c){return c.bal>0});
+  if(f!=='ALL')items=items.filter(function(c){return c.cl===f});
+  var col=S.sb,dir=S.sd;
+  items.sort(function(a,b){
+    var av=col==='since'?gdn(a.id,'since'):a[col],bv=col==='since'?gdn(b.id,'since'):b[col];
+    if(typeof av==='string')return dir==='asc'?av.localeCompare(bv):bv.localeCompare(av);
+    return dir==='asc'?av-bv:bv-av
   });
 
+  var all=D.filter(function(c){return c.bal>0});
+  var tSale=0,tWS=0,tBal=0,tSince=0,tExp=0;
+  all.forEach(function(c){tSale+=c.sale;tWS+=c.col;tBal+=c.bal;tSince+=gdn(c.id,'since');tExp+=gdn(c.id,'exp')});
+  var pp=tSale>0?(tWS+tSince)/tSale:0;
+
+  // Closer summaries
+  var cls={};
+  all.forEach(function(c){
+    if(!cls[c.cl])cls[c.cl]={bal:0,cnt:0,sale:0,ws:0,si:0,ex:0,con:0};
+    cls[c.cl].bal+=c.bal;cls[c.cl].cnt++;cls[c.cl].sale+=c.sale;cls[c.cl].ws+=c.col;
+    cls[c.cl].si+=gdn(c.id,'since');cls[c.cl].ex+=gdn(c.id,'exp');
+    if(gd(c.id,'cs')&&gd(c.id,'cs')!=='not_contacted')cls[c.cl].con++;
+  });
+  var clKeys=Object.keys(cls).sort(function(a,b){return cls[b].bal-cls[a].bal});
+
   var h='<div class="hdr">';
-  h+='<div class="tag">TLC COLLECTIONS</div>';
-  h+='<div class="row" style="margin-bottom:12px">';
-  h+='<div class="gauge">'+svg(80,46,pp,0,0)+'<div style="position:absolute;top:14px;left:0;width:80px;text-align:center;font-size:18px;font-weight:700;color:#e2e8f0">'+fp(pp)+'</div></div>';
-  h+='<div class="col" style="flex:1"><div class="big">'+fd(tBal)+'</div>';
-  h+='<div class="sub">'+items.length+' accounts outstanding</div>';
-  h+='<div style="display:flex;gap:8px;font-size:11px;margin-top:2px"><span class="grn">WS: '+fd(tWS)+'</span></div>';
+  // Title + reset
+  h+='<div class="fx jb ac" style="margin-bottom:8px"><div class="tag">TLC COLLECTIONS</div>';
+  if(S.reset){h+='<div class="fx g6"><button class="btn" style="background:#f87171;color:#fff;border:none" onclick="TD={};try{localStorage.removeItem(SK)}catch(e){}S.reset=false;render()">Clear All</button><button class="btn" onclick="S.reset=false;render()">Cancel</button></div>'}
+  else{h+='<button style="background:transparent;border:1px solid rgba(248,113,113,.2);color:#f87171;padding:6px 12px;font-size:11px;border-radius:6px" onclick="S.reset=true;render()">Reset</button>'}
   h+='</div>';
-  h+='<div class="col" style="align-items:flex-end"><div style="font-size:28px;font-weight:700;color:#fff">'+items.length+'</div><div style="font-size:8px;font-weight:700;color:#475569;letter-spacing:2px">OPEN</div></div>';
+
+  // Main gauge + stats
+  h+='<div class="fx ac g12" style="margin-bottom:10px">';
+  h+='<div class="gauge" style="width:96px;height:56px">'+svg(96,56,tSale>0?tWS/tSale:0,tSale>0?tSince/tSale:0,tSale>0?tExp/tSale:0,fp(pp))+'</div>';
+  h+='<div class="fc" style="flex:1"><div style="font-size:22px;font-weight:700;color:#fb923c">'+fd(tBal-tSince)+'</div>';
+  h+='<div style="font-size:11px;color:#64748b">'+items.length+' accts outstanding</div>';
+  h+='<div class="fx g8" style="font-size:10px;margin-top:2px"><span class="grn">WS: '+fd(tWS)+'</span>';
+  if(tSince>0)h+='<span class="blu">+'+fd(tSince)+'</span>';
+  if(tExp>0)h+='<span class="ylw">Exp: '+fd(tExp)+'</span>';
+  h+='</div></div>';
+  h+='<div class="fc" style="align-items:flex-end"><div style="font-size:28px;font-weight:700;color:#fff">'+items.length+'</div><div style="font-size:8px;font-weight:700;color:#475569;letter-spacing:2px">OPEN</div></div>';
+  h+='</div>';
+
+  // Legend
+  h+='<div class="fx g12" style="font-size:9px;color:#475569;margin-bottom:10px">';
+  h+='<span><span style="display:inline-block;width:8px;height:8px;background:#4ade80;border-radius:2px;margin-right:4px"></span>Workshop</span>';
+  h+='<span><span style="display:inline-block;width:8px;height:8px;background:#38bdf8;border-radius:2px;margin-right:4px"></span>Since</span>';
+  h+='<span><span style="display:inline-block;width:8px;height:8px;background:rgba(251,191,36,.3);border-radius:2px;margin-right:4px"></span>Expected</span>';
   h+='</div>';
 
   // Closer pills
-  h+='<div class="pills">';
-  h+='<div class="pill'+(f==="ALL"?" on":"")+'" onclick="state.filter=\'ALL\';render()">ALL</div>';
-  Object.keys(CN).forEach(function(k){
-    if(!closers[k])return;
-    h+='<div class="pill'+(f===k?" on":"")+'" onclick="state.filter=\''+k+'\';render()">'+k+'</div>';
-  });
+  h+='<div class="pills" style="margin-bottom:8px">';
+  h+='<div class="pill all'+(f==='ALL'?' on':'')+'" onclick="S.f=\'ALL\';render()">ALL</div>';
+  clKeys.forEach(function(k){h+='<div class="pill'+(f===k?' on':'')+'" onclick="S.f=\''+k+'\';render()">'+k+'</div>'});
   h+='</div></div>';
 
-  // Cards
+  // Closer cards
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:10px 10px 6px">';
+  clKeys.forEach(function(k){
+    var c=cls[k],pc=c.cnt>0?c.con/c.cnt:0;
+    var wp=c.sale>0?c.ws/c.sale:0,sp=c.sale>0?c.si/c.sale:0,ep=c.sale>0?c.ex/c.sale:0;
+    var paid=c.sale>0?(c.ws+c.si)/c.sale:0;
+    h+='<div class="closer-card'+(f===k?' on':'')+'" onclick="S.f=S.f===\''+k+'\'?\'ALL\':\''+k+'\';render()">';
+    h+='<div class="fx ac g8">';
+    h+='<div style="width:60px;height:36px;flex-shrink:0">'+svg(60,36,wp,sp,ep,fp(paid))+'</div>';
+    h+='<div style="flex:1;min-width:0">';
+    h+='<div class="fx jb"><span style="color:#7dd3fc;font-weight:700;font-size:15px">'+k+'</span><span style="color:#fb923c;font-weight:700;font-size:13px">'+fd(c.bal)+'</span></div>';
+    h+='<div style="color:#64748b;font-size:10px;margin-top:1px">'+CN[k]+'</div>';
+    h+='<div style="color:#475569;font-size:10px;margin-top:2px">'+c.con+'/'+c.cnt+' contacted</div>';
+    h+='</div></div></div>'
+  });
+  h+='</div>';
+
+  // Sort bar
+  h+='<div class="fx g10" style="padding:6px 14px;overflow-x:auto">';
+  [['bal','Balance'],['nm','Name'],['ev','Event'],['cl','Closer']].forEach(function(p){
+    var on=S.sb===p[0];
+    h+='<span class="sort'+(on?' on':'')+'" onclick="if(S.sb===\''+p[0]+'\')S.sd=S.sd===\'asc\'?\'desc\':\'asc\';else{S.sb=\''+p[0]+'\';S.sd=\'desc\'};render()">'+p[1]+(on?(S.sd==='asc'?' ^':' v'):'')+'</span>'
+  });
+  h+='</div>';
+
+  // Client cards
   items.forEach(function(c){
-    var dl=daysLeft(c.ed);
-    var dlTxt=dl>0?dl+"d":dl===0?"TODAY":"PAST";
-    var dlCol=dl<=0?"red":dl<=7?"ylw":"grn";
+    var dl=daysLeft(c.ed),dlTxt=dl>0?dl+'d':dl===0?'TODAY':'PAST';
+    var dlCol=dl<=0?'#f87171':dl<=7?'#fbbf24':'#4ade80';
+    var urg=dl<=0?'URGENT':dl<=7?'DUE':'ACTIVE';
+    var urgBg=dl<=0?'rgba(248,113,113,.1)':dl<=7?'rgba(251,191,36,.1)':'rgba(74,222,128,.1)';
     var cpd=c.sale>0?c.col/c.sale:0;
-    var rrCol=c.rr==="DECLINED"?"red":c.rr==="RANGE"?"blu":"ylw";
-    var cs=gd(c.id,"cs")||"not_contacted";
+    var rrCol=c.rr==='DECLINED'?'red':c.rr==='RANGE'?'blu':c.rr==='APPROVED'?'grn':'ylw';
+    var cs=gd(c.id,'cs')||'not_contacted';
+    var since=gdn(c.id,'since');
+    var exp=gdn(c.id,'exp');
+    var edt=gd(c.id,'edt');
+    var cn=gd(c.id,'cn');
+    var isX=S.exp===c.id;
+    var wp=c.sale>0?c.col/c.sale:0,sp=c.sale>0?since/c.sale:0,ep=c.sale>0?exp/c.sale:0;
+    var remaining=c.bal-since;
 
     h+='<div class="card">';
-    h+='<div class="card-top"><div>';
-    h+='<span class="badge" style="color:'+({URGENT:"#f87171",DUE:"#fbbf24",ACTIVE:"#4ade80"}[dl<=0?"URGENT":dl<=7?"DUE":"ACTIVE"])+';background:'+({URGENT:"rgba(248,113,113,0.1)",DUE:"rgba(251,191,36,0.1)",ACTIVE:"rgba(74,222,128,0.1)"}[dl<=0?"URGENT":dl<=7?"DUE":"ACTIVE"])+'">'+dlTxt+'</span>';
-    h+='<span class="badge" style="color:'+(TC[c.t]||"#94a3b8")+';background:'+(TC[c.t]||"#94a3b8")+'15">'+(TS[c.t]||"")+'</span>';
+    // Top: gauge + info + balance
+    h+='<div class="card-body fx g10" style="align-items:flex-start">';
+    h+='<div style="width:80px;height:46px;flex-shrink:0">'+svg(80,46,wp,sp,ep,fp((c.col+since)/(c.sale||1)))+'</div>';
+    h+='<div style="flex:1;min-width:0">';
+    h+='<div class="fx ac g6 fw" style="margin-bottom:4px">';
+    h+='<span class="badge" style="color:'+dlCol+';background:'+urgBg+'">'+dlTxt+'</span>';
+    h+='<span class="badge" style="color:'+(TC[c.t]||'#94a3b8')+';background:'+(TC[c.t]||'#94a3b8')+'15">'+(TS[c.t]||'')+'</span>';
     h+='<span style="color:#7dd3fc;font-size:11px;font-weight:700">'+c.cl+'</span>';
-    h+='<div class="name">'+c.nm+'</div>';
+    h+='</div>';
+    h+='<div class="nm">'+c.nm+'</div>';
     h+='<div class="ev">'+c.ev+'</div>';
     h+='</div>';
-    h+='<div><div class="bal">'+fd(c.bal)+'</div><div class="balsub">of '+fd(c.sale)+' ('+fp(cpd)+')</div></div>';
-    h+='</div>';
+    h+='<div style="text-align:right;flex-shrink:0"><div class="bal">'+fd(remaining>0?remaining:c.bal)+'</div>';
+    h+='<div class="bsub">of '+fd(c.sale)+'</div>';
+    if(since>0)h+='<div style="color:#38bdf8;font-size:10px;font-weight:600">+'+fd(since)+' since</div>';
+    h+='</div></div>';
 
     // Stats
-    h+='<div class="stat">';
+    h+='<div style="padding:0 12px 8px"><div class="stat">';
     h+='<span class="grn">WS: '+fd(c.col)+'</span>';
     if(c.rr)h+='<span class="'+rrCol+'">RR: '+c.rn+'</span>';
     if(c.nt)h+='<span class="gry">'+c.nt+'</span>';
-    h+='</div>';
+    h+='</div></div>';
 
     // Contact
     if(c.ph||c.em){
-      h+='<div class="contact">';
+      h+='<div style="padding:0 12px 8px"><div class="con">';
       if(c.ph)h+='<a href="tel:'+c.ph+'">Ph '+c.ph+'</a>';
-      if(c.em)h+='<a href="mailto:'+c.em+'">Em '+c.em+'</a>';
-      h+='</div>';
+      if(c.em)h+='<a href="mailto:'+c.em+'" style="overflow:hidden;text-overflow:ellipsis;max-width:220px;white-space:nowrap">Em '+c.em+'</a>';
+      h+='</div></div>'
     }
 
-    // Status select
-    h+='<select class="sel" style="color:'+({not_contacted:"#64748b",contacted:"#fbbf24",committed:"#4ade80",unreachable:"#f87171",collected:"#38bdf8"}[cs])+'" onchange="upd(\''+c.id+'\',\'cs\',this.value)">';
-    ["not_contacted","contacted","committed","unreachable","collected"].forEach(function(s){
-      h+='<option value="'+s+'"'+(cs===s?" selected":"")+'>'+({not_contacted:"Not Contacted",contacted:"Contacted",committed:"Committed",unreachable:"Unreachable",collected:"Collected"}[s])+'</option>';
-    });
+    // Status + expand
+    h+='<div class="fx g8" style="padding:6px 12px 8px;border-top:1px solid rgba(30,58,95,.1)">';
+    h+='<select class="sel" style="color:'+SC[cs]+'" onchange="upd(\''+c.id+'\',\'cs\',this.value)">';
+    Object.keys(SN).forEach(function(k){h+='<option value="'+k+'"'+(cs===k?' selected':'')+'>'+SN[k]+'</option>'});
     h+='</select>';
+    h+='<button class="btn" onclick="S.exp=S.exp===\''+c.id+'\'?null:\''+c.id+'\';render()">'+(isX?'UP':'DN')+'</button>';
     h+='</div>';
+
+    // Expanded panel
+    if(isX){
+      h+='<div class="exp-panel">';
+      h+='<div style="margin-bottom:12px"><label class="lbl blu">COLLECTED SINCE WORKSHOP</label>';
+      h+='<div class="fx g8 ac"><input type="number" class="inp inp-b" style="max-width:160px" value="'+(since||'')+'" placeholder="0" onchange="upd(\''+c.id+'\',\'since\',this.value)">';
+      h+='<button class="btn-pif" onclick="pif(\''+c.id+'\','+c.bal+')">PIF</button></div></div>';
+      h+='<div style="margin-bottom:12px"><label class="lbl ylw">EXPECTED NEXT PAYMENT</label>';
+      h+='<div class="fx g8"><input type="number" class="inp inp-y" style="width:140px" value="'+(exp||'')+'" placeholder="0" onchange="upd(\''+c.id+'\',\'exp\',this.value)">';
+      h+='<input type="date" class="inp" value="'+edt+'" onchange="upd(\''+c.id+'\',\'edt\',this.value)"></div></div>';
+      h+='<div><label class="lbl gry">NOTES</label>';
+      h+='<input class="inp" value="'+cn.replace(/"/g,'&quot;')+'" placeholder="Follow-up notes..." onchange="upd(\''+c.id+'\',\'cn\',this.value)"></div>';
+      h+='</div>'
+    }
+
+    // Inline summary when collapsed
+    if(!isX&&(cn||since>0||exp>0)){
+      h+='<div class="inline">';
+      if(since>0)h+='<span class="blu">+'+fd(since)+' since</span>';
+      if(exp>0)h+='<span class="ylw">Exp: '+fd(exp)+'</span>';
+      if(edt)h+='<span class="gry">by '+edt+'</span>';
+      if(cn)h+='<span class="gry">"'+cn+'"</span>';
+      h+='</div>'
+    }
+    h+='</div>'
   });
 
   // Footer
-  h+='<div style="padding:12px 16px;display:flex;justify-content:space-between;font-size:8px;color:#334155">';
-  h+='<span>LH // '+new Date().toLocaleDateString("en-US",{month:"short",day:"numeric"})+'</span>';
-  h+='<span style="color:#7dd3fc;font-weight:700">TLC COLLECTIONS</span>';
-  h+='</div>';
+  h+='<div class="fx jb ac" style="padding:14px 16px;font-size:8px;color:#334155">';
+  h+='<span>LH // '+new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'})+'</span>';
+  h+='<span style="color:#7dd3fc;font-weight:700">TLC COLLECTIONS</span></div>';
 
-  document.getElementById("app").innerHTML=h;
+  document.getElementById('app').innerHTML=h
 }
 
-load();
+try{var v=localStorage.getItem(SK);if(v)TD=JSON.parse(v)}catch(e){}
 render();
 </script>
 </body>

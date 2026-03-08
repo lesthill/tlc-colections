@@ -234,7 +234,7 @@ function testNotif(){
   var dl=daysLeft(pick.ed);
   try{
     var n=new Notification('Time to collect '+fd(rem),{
-      body:'Call '+pick.nm+' ('+pick.ev+') - '+dl+' days left to collect.',
+      body:'Call '+pick.nm+' ('+pick.ev+') - '+(dl<=0?'PAST DEADLINE - collect now!':dl+' days left to collect.'),
       tag:'test-'+Date.now()
     });
     n.onclick=function(){window.focus();if(pick.id)jumpTo(pick.id)};

@@ -54,6 +54,7 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
 </head>
 <body>
 <div id="app"></div>
+<script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 <script>
 var CN={LH:'Les Hill',SH:'Scott Hoffmann',CL:'Chad Lawson',BL:'Bernard Lawson',TK:'Tiffany Knight',BH:'Boyd Hoffmann',LT:'Lisa Toland',KF:'K. Fontaine'};
 var D=[
@@ -119,18 +120,49 @@ function saveN(){try{localStorage.setItem(NK,JSON.stringify(NC))}catch(e){}}
 function togN(k){if(!NC[k])NC[k]={on:true,days:[1,3,7]};else NC[k].on=!NC[k].on;saveN();render()}
 function togD(k,d){if(!NC[k])NC[k]={on:true,days:[]};var i=NC[k].days.indexOf(d);if(i>=0)NC[k].days.splice(i,1);else NC[k].days.push(d);saveN();render()}
 
-function sendACH(name,amount){
+async function sendACH(name,amount){
   var firstName=name.split(' ')[0];
   var byteChars=atob(ACH_B64);
   var byteArr=new Uint8Array(byteChars.length);
   for(var i=0;i<byteChars.length;i++)byteArr[i]=byteChars.charCodeAt(i);
-  var blob=new Blob([byteArr],{type:'application/pdf'});
-  var file=new File([blob],'ACH_Collection_Form_TLC.pdf',{type:'application/pdf'});
-  var msg='Hi '+firstName+',\n\nPlease fill out the attached ACH Collection Form and return it at your earliest convenience.\n\nAmount Due: '+amount+'\n\nThank you,\nTax Lien Code\n(888) 333-9403';
-  if(navigator.canShare&&navigator.canShare({files:[file]})){
-    navigator.share({title:'ACH Collection Form - Tax Lien Code',text:msg,files:[file]}).catch(function(){});
-  } else {
-    var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='ACH_Collection_Form_TLC.pdf';a.click();
+  
+  try{
+    var PDFLib=window.PDFLib||window['pdf-lib'];
+    var pdfDoc=await PDFLib.PDFDocument.load(byteArr);
+    var pages=pdfDoc.getPages();
+    var pg=pages[0];
+    var font=await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+    var h=pg.getHeight();
+    
+    // Account Holder Name - right of the label, in the form field area
+    pg.drawText(name,{x:248,y:h-286,size:12,font:font,color:PDFLib.rgb(0.1,0.1,0.3)});
+    
+    // Amount to be processed
+    pg.drawText(amount,{x:248,y:h-573,size:12,font:font,color:PDFLib.rgb(0.1,0.1,0.3)});
+    
+    // Date to be processed - today's date
+    var today=new Date().toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'});
+    pg.drawText(today,{x:248,y:h-607,size:12,font:font,color:PDFLib.rgb(0.1,0.1,0.3)});
+    
+    var filledBytes=await pdfDoc.save();
+    var blob=new Blob([filledBytes],{type:'application/pdf'});
+    var file=new File([blob],'ACH_Form_'+name.replace(/\s+/g,'_')+'.pdf',{type:'application/pdf'});
+    var msg='Hi '+firstName+',\n\nPlease fill out the attached ACH Collection Form and return it at your earliest convenience.\n\nAmount Due: '+amount+'\n\nThank you,\nTax Lien Code\n(888) 333-9403';
+    
+    if(navigator.canShare&&navigator.canShare({files:[file]})){
+      await navigator.share({title:'ACH Collection Form - Tax Lien Code',text:msg,files:[file]});
+    } else {
+      var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;a.click();
+    }
+  }catch(e){
+    console.error('PDF fill error:',e);
+    // Fallback: send unfilled
+    var blob2=new Blob([byteArr],{type:'application/pdf'});
+    var file2=new File([blob2],'ACH_Collection_Form_TLC.pdf',{type:'application/pdf'});
+    var msg2='Hi '+firstName+',\n\nPlease fill out the attached ACH form. Amount Due: '+amount+'\n\nTax Lien Code (888) 333-9403';
+    if(navigator.canShare&&navigator.canShare({files:[file2]})){
+      await navigator.share({title:'ACH Form',text:msg2,files:[file2]});
+    }
   }
 }
 function testNotif(){if(!('Notification' in window)){alert('Install to Home Screen first');return}if(Notification.permission!=='granted'){alert('Enable notifications first');return}try{var n=new Notification('TLC Collections',{body:'Notifications working!',tag:'test'});n.onclick=function(){window.focus()}}catch(e){alert('Error: '+e.message)}}

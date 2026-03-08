@@ -140,7 +140,7 @@ async function sendACH(name,amount,withAmount){
     var h=pg.getHeight();
     
     // Amount to be processed only
-    if(withAmount)pg.drawText(amount,{x:290,y:h-432,size:12,font:font,color:PL.rgb(0,0,0)});
+    if(withAmount)pg.drawText(amount,{x:290,y:h-437,size:12,font:font,color:PL.rgb(0,0,0)});
     
     var filledBytes=await pdfDoc.save();
     var blob=new Blob([filledBytes],{type:'application/pdf'});

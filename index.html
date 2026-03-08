@@ -239,14 +239,14 @@ function svg(w,h,ws,si,ex,txt){
   if(txt)s+='<text x="'+cx+'" y="'+(cy-4)+'" text-anchor="middle" fill="#e2e8f0" font-size="'+(w*.22)+'" font-weight="700" font-family="system-ui">'+txt+'</text>';
   return s+'</svg>'}
 
-function doRefresh(){if(window.caches){caches.keys().then(function(n){n.forEach(function(k){caches.delete(k)})});setTimeout(function(){window.location.href=window.location.pathname+'?v=51&t='+Date.now()},300)}else{window.location.href=window.location.pathname+'?v=51&t='+Date.now()}}
+function doRefresh(){if(window.caches){caches.keys().then(function(n){n.forEach(function(k){caches.delete(k)})});setTimeout(function(){window.location.href=window.location.pathname+'?v=53&t='+Date.now()},300)}else{window.location.href=window.location.pathname+'?v=53&t='+Date.now()}}
 function render(){
   var f=S.f;
   // Only show events within last 5 weeks
   var cutoff=new Date();cutoff.setDate(cutoff.getDate()-35);var cutStr=cutoff.toISOString().split('T')[0];
   var now=Date.now();var DAY=24*60*60*1000;
   var allOpen=D.filter(function(c){if(c.bal<=0||c.ed<cutStr)return false;var cs=gd(c.id,'cs');var ct=gdn(c.id,'ct');if(cs==='collected'&&ct>0&&(now-ct)>DAY)return false;return true});
-  var evSet={};allOpen.forEach(function(c){evSet[c.ev]=true});var evList=Object.keys(evSet);
+  var evSet={};var evBal={};allOpen.forEach(function(c){evSet[c.ev]=true;if(!evBal[c.ev])evBal[c.ev]=0;evBal[c.ev]+=c.bal-gdn(c.id,'since')});var evList=Object.keys(evSet);
   var activeEvs=Object.keys(S.evs).filter(function(k){return S.evs[k]});var showAllEvs=activeEvs.length===0;
   var evFiltered=showAllEvs?allOpen:allOpen.filter(function(c){return S.evs[c.ev]});
   var items=f==='ALL'?evFiltered:evFiltered.filter(function(c){return c.cl===f});
@@ -261,7 +261,7 @@ function render(){
   // ===== STICKY TOP =====
   var h='<div class="ftop">';
   h+='<div class="hdr">';
-  h+='<div class="fx jb ac" style="margin-bottom:8px"><div><div class="tag">TLC COLLECTIONS</div><div style="font-size:9px;color:#334155;letter-spacing:1px" onclick="doRefresh()">v52</div></div>';
+  h+='<div class="fx jb ac" style="margin-bottom:8px"><div><div class="tag">TLC COLLECTIONS</div><div style="font-size:9px;color:#334155;letter-spacing:1px" onclick="doRefresh()">v53</div></div>';
   h+='<div class="fx g6">';
   h+='<button style="background:transparent;border:1px solid rgba(30,58,95,.3);color:#7dd3fc;padding:6px 10px;font-size:16px;border-radius:6px" onclick="S.settings=!S.settings;render()">&#9881;</button>';
   h+='<button style="background:transparent;border:1px solid rgba(74,222,128,.25);color:#4ade80;padding:6px 10px;font-size:13px;border-radius:6px" onclick="doRefresh()">&#x21bb;</button>';
@@ -318,7 +318,7 @@ function render(){
     ['ALL'].concat(Object.keys(CN)).forEach(function(k){
       var cfg=NC[k]||{on:false,days:[]};
       h+='<div class="fx jb ac" style="padding:10px 0;border-bottom:1px solid rgba(30,58,95,.1)">';
-      h+='<span style="font-size:13px;font-weight:700;color:'+(k==='ALL'?'#4ade80':'#7dd3fc')+'">'+(k==='ALL'?'ALL CLOSERS':k+' - '+CN[k])+'</span>';
+      h+='<span style="font-size:13px;font-weight:700;color:'+(k==='ALL'?'#4ade80':'#7dd3fc')+'">'+(k==='ALL'?'ALL':k+' '+CN[k])+'</span>';
       h+='<button style="width:48px;height:26px;border-radius:13px;border:none;background:'+(cfg.on?'#4ade80':'#1e293b')+';position:relative" onclick="togN(\''+k+'\')">';
       h+='<div style="width:20px;height:20px;border-radius:10px;background:#fff;position:absolute;top:3px;'+(cfg.on?'right:3px':'left:3px')+'"></div></button></div>';
       if(cfg.on){h+='<div class="fx g4" style="padding:6px 0">';[1,3,5,7,14].forEach(function(d){var isOn=cfg.days&&cfg.days.indexOf(d)>=0;h+='<button style="padding:6px 10px;border-radius:6px;font-size:11px;font-weight:600;border:1px solid '+(isOn?'#7dd3fc':'rgba(30,58,95,.3)')+';background:'+(isOn?'rgba(125,211,252,.15)':'transparent')+';color:'+(isOn?'#7dd3fc':'#475569')+'" onclick="togD(\''+k+'\','+d+')">'+d+'d</button>'});h+='</div>'}
@@ -360,7 +360,7 @@ function render(){
   // Event pills
   h+='<div style="padding:8px 10px"><div class="pills">';
   h+='<div class="evpill'+(showAllEvs?' on':'')+'" onclick="togEv(\'ALL\')">ALL</div>';
-  evList.forEach(function(ev){h+='<div class="evpill'+(S.evs[ev]?' on':'')+'" onclick="togEv(\''+ev+'\')">'+iata(ev)+'</div>'});
+  evList.forEach(function(ev){var eb=evBal[ev]||0;var ebs=eb>=1000?(Math.round(eb/1000)+'K'):fd(eb);h+='<div class="evpill'+(S.evs[ev]?' on':'')+'" onclick="togEv(\''+ev+'\')">'+iata(ev)+' <span style="font-size:10px;color:#fb923c;font-weight:700">'+ebs+'</span></div>'});
   h+='</div></div>';
 
   // Closer cards (only when ALL)
@@ -390,7 +390,7 @@ function render(){
     var cs=gd(c.id,'cs')||'not_contacted';var isPif=gd(c.id,'_pif')==='1';
     var isX=S.exp===c.id;var isJ=S.jump===c.id;
     var dl=daysLeft(c.ed),dueD=dueDate(c.ed),dueFmt=(dueD.getMonth()+1)+'/'+dueD.getDate();
-    var dlTxt=dl>0?dl+'d':dl===0?'TODAY':'PAST';var dlCol=dl<=0?'#f87171':dl<=7?'#fbbf24':'#4ade80';
+    var dlTxt=dl>0?dl+'d to Fdn':dl===0?'FDN TODAY':'PAST FDN';var dlCol=dl<=0?'#f87171':dl<=7?'#fbbf24':'#4ade80';
     var urgBg=dl<=0?'rgba(248,113,113,.1)':dl<=7?'rgba(251,191,36,.1)':'rgba(74,222,128,.1)';
     var wp=c.sale>0?c.col/c.sale:0,sp=c.sale>0?since/c.sale:0,ep=c.sale>0?exp/c.sale:0;
     var totalPaid=c.col+since;var fullPaid=totalPaid>=c.sale&&c.sale>0;var remaining=c.bal-since;var pifAmt=Math.max(0,c.sale-c.col-since);

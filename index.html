@@ -92,7 +92,7 @@ var TS={9995:'$10K',25997:'$26K',39997:'$40K',46997:'$47K'};
 var TC={9995:'#94a3b8',25997:'#38bdf8',39997:'#4ade80',46997:'#fbbf24'};
 var SN={not_contacted:'Tap to disposition',contacted:'Contacted',committed:'Committed',unreachable:'Unreachable',collected:'Collected'};
 var SC={not_contacted:'#64748b',contacted:'#fbbf24',committed:'#4ade80',unreachable:'#f87171',collected:'#38bdf8'};
-var S={f:'ALL',sb:'bal',sd:'desc',exp:null,dates:false,reset:false};
+var S={f:'ALL',sb:'bal',sd:'desc',exp:null,dates:false,reset:false,settings:false,jump:null};
 var DF=(function(){var d=new Date();d.setDate(d.getDate()-28);return d.toISOString().split('T')[0]})();
 var DT=new Date().toISOString().split('T')[0];
 function setPre(w){var d=new Date();d.setDate(d.getDate()-w*7);DF=d.toISOString().split('T')[0];DT=new Date().toISOString().split('T')[0];render()}
@@ -125,6 +125,26 @@ function svg(w,h,ws,si,ex,txt){
   return s+'</svg>'
 }
 
+
+var NK='tlc-notif';var NC={};
+try{var nv=localStorage.getItem(NK);if(nv)NC=JSON.parse(nv)}catch(e){}
+function saveN(){try{localStorage.setItem(NK,JSON.stringify(NC))}catch(e){}}
+function togN(k){if(!NC[k])NC[k]={on:true,days:[1,3,7]};else NC[k].on=!NC[k].on;saveN();render()}
+function togD(k,d){if(!NC[k])NC[k]={on:true,days:[]};var i=NC[k].days.indexOf(d);if(i>=0)NC[k].days.splice(i,1);else NC[k].days.push(d);saveN();render()}
+function reqPerm(){if('Notification' in window)Notification.requestPermission().then(function(){render()})}
+function jumpTo(id){S.jump=id;S.exp=id;S.settings=false;S.f='ALL';render();
+setTimeout(fireNotifs,2000);setTimeout(function(){var el=document.getElementById('c-'+id);if(el)el.scrollIntoView({behavior:'smooth',block:'center'})},150)}
+function fireNotifs(){
+  if(!('Notification' in window)||Notification.permission!=='granted')return;
+  D.filter(function(c){return c.bal>0}).forEach(function(cl){
+    var cfg=NC[cl.cl]||NC['ALL'];if(!cfg||!cfg.on)return;
+    var dl=daysLeft(cl.ed);if(cfg.days.indexOf(dl)<0)return;
+    var rem=cl.bal-gdn(cl.id,'since');if(rem<=0)return;
+    var n=new Notification('TLC: '+cl.nm+' - '+fd(rem),{body:cl.ev+' | '+cl.cl+' | Due in '+dl+'d',tag:cl.id});
+    n.onclick=function(){window.focus();jumpTo(cl.id)};
+  });
+}
+
 function render(){
   var f=S.f,items=D.filter(function(c){return c.bal>0&&c.ed>=DF&&c.ed<=DT});
   if(f!=='ALL')items=items.filter(function(c){return c.cl===f});
@@ -153,8 +173,11 @@ function render(){
   var h='<div class="hdr">';
   // Title + reset
   h+='<div class="fx jb ac" style="margin-bottom:8px"><div class="tag">TLC COLLECTIONS</div>';
+  h+='<div class="fx g6">';
+  h+='<button style="background:transparent;border:1px solid rgba(30,58,95,.3);color:#7dd3fc;padding:6px 10px;font-size:16px;border-radius:6px" onclick="S.settings=!S.settings;render()">\u2699</button>';
   if(S.reset){h+='<div class="fx g6"><button class="btn" style="background:#f87171;color:#fff;border:none" onclick="TD={};try{localStorage.removeItem(SK)}catch(e){}S.reset=false;render()">Clear All</button><button class="btn" onclick="S.reset=false;render()">Cancel</button></div>'}
   else{h+='<button style="background:transparent;border:1px solid rgba(248,113,113,.2);color:#f87171;padding:6px 12px;font-size:11px;border-radius:6px" onclick="S.reset=true;render()">Reset</button>'}
+  h+='</div>';
   h+='</div>';
 
   // Main gauge + stats
@@ -202,6 +225,44 @@ function render(){
   clKeys.forEach(function(k){h+='<div class="pill'+(f===k?' on':'')+'" onclick="S.f=\''+k+'\';render()">'+k+'</div>'});
   h+='</div></div>';
 
+
+  if(S.settings){
+    h+='<div style="padding:14px;margin:0 10px 10px;background:#0c1117;border:1px solid rgba(30,58,95,.15);border-radius:8px">';
+    h+='<div class="fx jb ac" style="margin-bottom:12px"><div style="font-size:14px;font-weight:700;color:#e2e8f0">\\u{1F514} Notification Settings</div>';
+    h+='<button style="background:transparent;border:1px solid rgba(30,58,95,.3);color:#475569;padding:6px 12px;font-size:11px;border-radius:6px" onclick="S.settings=false;render()">Close</button></div>';
+    var perm="Notification" in window?Notification.permission:"none";
+    if(perm==="none"||perm==="default"){
+      h+='<button style="width:100%;background:#4ade80;border:none;color:#080d13;padding:14px;font-size:14px;font-weight:700;border-radius:8px;margin-bottom:12px" onclick="reqPerm()">Enable Notifications</button>';
+    } else if(perm==="denied"){
+      h+='<div style="padding:12px;background:rgba(248,113,113,.1);border-radius:6px;margin-bottom:12px;font-size:12px;color:#f87171">Blocked. Go to Settings to enable.</div>';
+    } else {
+      h+='<div style="padding:8px 12px;background:rgba(74,222,128,.1);border-radius:6px;margin-bottom:12px;font-size:12px;color:#4ade80">\\u2705 Notifications enabled</div>';
+    }
+    h+='<div style="font-size:10px;color:#64748b;letter-spacing:1px;margin-bottom:8px;font-weight:600">NOTIFY FOR CLOSERS</div>';
+    var nKeys=["ALL"].concat(Object.keys(CN));
+    nKeys.forEach(function(k){
+      if(k!=="ALL"&&!cls[k])return;
+      var cfg=NC[k]||{on:false,days:[]};
+      var label=k==="ALL"?"ALL CLOSERS":k+" - "+CN[k];
+      var col=k==="ALL"?"#4ade80":"#7dd3fc";
+      h+='<div class="fx jb ac" style="padding:10px 0;border-bottom:1px solid rgba(30,58,95,.1)">';
+      h+='<span style="font-size:13px;font-weight:700;color:'+col+'">'+label+'</span>';
+      h+='<button style="width:48px;height:26px;border-radius:13px;border:none;background:'+(cfg.on?"#4ade80":"#1e293b")+';position:relative" onclick="togN(\''+k+'\')">';
+      h+='<div style="width:20px;height:20px;border-radius:10px;background:#fff;position:absolute;top:3px;'+(cfg.on?"right:3px":"left:3px")+'"></div></button></div>';
+      if(cfg.on){
+        h+='<div class="fx g6" style="padding:8px 0 4px">';
+        h+='<span style="font-size:10px;color:#64748b;margin-right:4px">Alert at:</span>';
+        [1,3,5,7,14].forEach(function(d){
+          var isOn=cfg.days&&cfg.days.indexOf(d)>=0;
+          h+='<button style="padding:6px 10px;border-radius:6px;font-size:11px;font-weight:600;border:1px solid '+(isOn?"#7dd3fc":"rgba(30,58,95,.3)")+";background:"+(isOn?"rgba(125,211,252,.15)":"transparent")+";color:"+(isOn?"#7dd3fc":"#475569")+'" onclick="togD(\''+k+'\','+d+')">'+d+'d</button>';
+        });
+        h+='</div>';
+      }
+    });
+    h+='<button style="width:100%;margin-top:14px;background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.2);color:#38bdf8;padding:12px;font-size:13px;font-weight:700;border-radius:8px" onclick="fireNotifs()">Test Notifications Now</button>';
+    h+='</div>';
+  }
+
   // Closer cards
   h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:10px 10px 6px">';
   clKeys.forEach(function(k){
@@ -244,9 +305,9 @@ function render(){
     var wp=c.sale>0?c.col/c.sale:0,sp=c.sale>0?since/c.sale:0,ep=c.sale>0?exp/c.sale:0;
     var remaining=c.bal-since;
 
-    h+='<div class="card">';
+    h+='<div class="card" id="c-'+c.id+'">';
     // Top: gauge + info + balance
-    h+='<div class="card-body fx g10" style="align-items:flex-start">';
+    var isJ=S.jump===c.id;h+='<div class="card-body fx g10" style="align-items:flex-start'+(isJ?';box-shadow:inset 0 0 0 2px #7dd3fc':'')+'">'; if(isJ)setTimeout(function(){S.jump=null;render()},2500);
     h+='<div style="width:80px;height:46px;flex-shrink:0">'+svg(80,46,wp,sp,ep,fp((c.col+since)/(c.sale||1)))+'</div>';
     h+='<div style="flex:1;min-width:0">';
     h+='<div class="fx ac g6 fw" style="margin-bottom:4px">';
@@ -325,6 +386,7 @@ function render(){
 
 try{var v=localStorage.getItem(SK);if(v)TD=JSON.parse(v)}catch(e){}
 render();
+setTimeout(fireNotifs,2000);
 </script>
 </body>
 </html>

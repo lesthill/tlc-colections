@@ -48,6 +48,16 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
 .closer-card.on{background:#0f1a2a;border:2px solid rgba(125,211,252,.25)}
 .gauge{position:relative;flex-shrink:0}
 .pre{flex:1;background:#0f1a2a;border:1px solid rgba(30,58,95,.3);color:#94a3b8;padding:10px 0;font-size:13px;border-radius:6px;font-weight:600;text-align:center}
+@keyframes pifPulse{0%{transform:scale(1)}50%{transform:scale(1.08)}100%{transform:scale(1)}}
+@keyframes pifGlow{0%{box-shadow:0 0 0 0 rgba(74,222,128,.4)}70%{box-shadow:0 0 0 15px rgba(74,222,128,0)}100%{box-shadow:0 0 0 0 rgba(74,222,128,0)}}
+@keyframes checkPop{0%{transform:scale(0) rotate(-45deg);opacity:0}50%{transform:scale(1.3) rotate(0deg);opacity:1}100%{transform:scale(1) rotate(0deg);opacity:1}}
+@keyframes confetti{0%{opacity:1;transform:translateY(0) rotate(0deg)}100%{opacity:0;transform:translateY(-40px) rotate(360deg)}}
+.pif-anim{animation:pifPulse .6s ease,pifGlow .8s ease}
+.done-badge{display:flex;align-items:center;justify-content:center;width:96px;height:56px;flex-shrink:0;background:rgba(74,222,128,.1);border:2px solid rgba(74,222,128,.3);border-radius:12px;position:relative}
+.done-check{font-size:24px;animation:checkPop .5s ease forwards}
+.done-text{font-size:10px;font-weight:700;color:#4ade80;letter-spacing:2px;margin-top:2px}
+.confetti-wrap{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden}
+.conf{position:absolute;width:6px;height:6px;border-radius:50%;animation:confetti 1s ease forwards}
 .inline{padding:4px 12px 8px;font-size:11px;display:flex;gap:8px;flex-wrap:wrap}
 </style>
 </head>
@@ -104,7 +114,7 @@ function fp(n){return Math.round(n*100)+'%'}
 function gd(id,f){return(TD[id]||{})[f]||''}
 function gdn(id,f){return parseFloat((TD[id]||{})[f])||0}
 function upd(id,f,v){if(!TD[id])TD[id]={};TD[id][f]=v;try{localStorage.setItem(SK,JSON.stringify(TD))}catch(e){}render()}
-function pif(id,bal){upd(id,'since',String(bal));upd(id,'cs','collected')}
+function pif(id,bal){upd(id,'_justPif','1');upd(id,'since',String(bal));upd(id,'cs','collected')}
 
 function dueDate(sd){var d=new Date(sd+'T12:00:00');var c=0;while(c<3){d.setDate(d.getDate()+1);if(d.getDay()===5)c++;}return d}
 function daysLeft(sd){return Math.ceil((dueDate(sd)-new Date())/(864e5))}
@@ -271,7 +281,11 @@ function render(){
     var paid=c.sale>0?(c.ws+c.si)/c.sale:0;
     h+='<div class="closer-card'+(f===k?' on':'')+'" onclick="S.f=S.f===\''+k+'\'?\'ALL\':\''+k+'\';render()">';
     h+='<div class="fx ac g8">';
-    h+='<div style="width:60px;height:36px;flex-shrink:0">'+svg(60,36,wp,sp,ep,fp(paid))+'</div>';
+    if(paid>=.999){
+      h+='<div style="width:60px;height:36px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);border-radius:8px"><span style="font-size:14px">\u2705</span></div>';
+    } else {
+      h+='<div style="width:60px;height:36px;flex-shrink:0">'+svg(60,36,wp,sp,ep,fp(paid))+'</div>';
+    }
     h+='<div style="flex:1;min-width:0">';
     h+='<div class="fx jb"><span style="color:#7dd3fc;font-weight:700;font-size:15px">'+k+'</span><span style="color:#fb923c;font-weight:700;font-size:13px">'+fd(c.bal)+'</span></div>';
     h+='<div style="color:#64748b;font-size:10px;margin-top:1px">'+CN[k]+'</div>';
@@ -308,7 +322,24 @@ function render(){
     h+='<div class="card" id="c-'+c.id+'">';
     // Top: gauge + info + balance
     var isJ=S.jump===c.id;h+='<div class="card-body fx g10" style="align-items:flex-start'+(isJ?';box-shadow:inset 0 0 0 2px #7dd3fc':'')+'">'; if(isJ)setTimeout(function(){S.jump=null;render()},2500);
-    h+='<div style="width:80px;height:46px;flex-shrink:0">'+svg(80,46,wp,sp,ep,fp((c.col+since)/(c.sale||1)))+'</div>';
+    var totalPaid=c.col+since;var isPaid=totalPaid>=c.sale&&c.sale>0;
+    var justPaid=gd(c.id,'_justPif')==='1';
+    if(isPaid){
+      h+='<div class="done-badge'+(justPaid?' pif-anim':'')+'">';
+      if(justPaid){
+        h+='<div class="confetti-wrap">';
+        var colors=['#4ade80','#38bdf8','#fbbf24','#fb923c','#e879f9'];
+        for(var ci=0;ci<8;ci++){
+          var col=colors[ci%5];var left=Math.random()*80+10;var delay=Math.random()*.5;
+          h+='<div class="conf" style="left:'+left+'%;top:50%;background:'+col+';animation-delay:'+delay.toFixed(1)+'s"></div>';
+        }
+        h+='</div>';
+      }
+      h+='<div style="text-align:center"><div class="done-check">\u2705</div><div class="done-text">PAID</div></div></div>';
+      if(justPaid)setTimeout(function(){upd(c.id,'_justPif','0')},2000);
+    } else {
+      h+='<div style="width:96px;height:56px;flex-shrink:0">'+svg(96,56,wp,sp,ep,fp(totalPaid/(c.sale||1)))+'</div>';
+    }
     h+='<div style="flex:1;min-width:0">';
     h+='<div class="fx ac g6 fw" style="margin-bottom:4px">';
     var dueD=dueDate(c.ed);var dueFmt=(dueD.getMonth()+1)+'/'+dueD.getDate();

@@ -102,7 +102,7 @@ var TS={9995:'$10K',25997:'$26K',39997:'$40K',46997:'$47K'};
 var TC={9995:'#94a3b8',25997:'#38bdf8',39997:'#4ade80',46997:'#fbbf24'};
 var SN={not_contacted:'Tap to disposition',contacted:'Contacted',committed:'Committed',unreachable:'Unreachable',collected:'Collected'};
 var SC={not_contacted:'#64748b',contacted:'#fbbf24',committed:'#4ade80',unreachable:'#f87171',collected:'#38bdf8'};
-var S={f:'ALL',sb:'bal',sd:'desc',exp:null,dates:false,reset:false,settings:false,jump:null};
+var S={f:'ALL',sb:'bal',sd:'desc',exp:null,dates:false,reset:false,settings:false,jump:null,alerts:[]};
 var DF=(function(){var d=new Date();d.setDate(d.getDate()-28);return d.toISOString().split('T')[0]})();
 var DT=new Date().toISOString().split('T')[0];
 function setPre(w){var d=new Date();d.setDate(d.getDate()-w*7);DF=d.toISOString().split('T')[0];DT=new Date().toISOString().split('T')[0];render()}
@@ -143,17 +143,35 @@ function togN(k){if(!NC[k])NC[k]={on:true,days:[1,3,7]};else NC[k].on=!NC[k].on;
 function togD(k,d){if(!NC[k])NC[k]={on:true,days:[]};var i=NC[k].days.indexOf(d);if(i>=0)NC[k].days.splice(i,1);else NC[k].days.push(d);saveN();render()}
 function reqPerm(){if('Notification' in window)Notification.requestPermission().then(function(){render()})}
 function jumpTo(id){S.jump=id;S.exp=id;S.settings=false;S.f='ALL';render();
-setTimeout(fireNotifs,2000);setTimeout(function(){var el=document.getElementById('c-'+id);if(el)el.scrollIntoView({behavior:'smooth',block:'center'})},150)}
+setTimeout(function(){var a=fireNotifs();if(a&&a.length>0)render()},1500);setTimeout(function(){var el=document.getElementById('c-'+id);if(el)el.scrollIntoView({behavior:'smooth',block:'center'})},150)}
 function fireNotifs(){
-  if(!('Notification' in window)||Notification.permission!=='granted')return;
+  var alerts=[];
   D.filter(function(c){return c.bal>0}).forEach(function(cl){
     var cfg=NC[cl.cl]||NC['ALL'];if(!cfg||!cfg.on)return;
-    var dl=daysLeft(cl.ed);if(cfg.days.indexOf(dl)<0)return;
+    var dl=daysLeft(cl.ed);
     var rem=cl.bal-gdn(cl.id,'since');if(rem<=0)return;
-    var n=new Notification('TLC: '+cl.nm+' - '+fd(rem),{body:cl.ev+' | '+cl.cl+' | Due in '+dl+'d',tag:cl.id});
-    n.onclick=function(){window.focus();jumpTo(cl.id)};
+    var match=false;
+    cfg.days.forEach(function(d){if(dl<=d)match=true});
+    if(!match)return;
+    alerts.push({id:cl.id,nm:cl.nm,ev:cl.ev,cl:cl.cl,rem:rem,dl:dl});
+    if('Notification' in window&&Notification.permission==='granted'){
+      try{
+        var n=new Notification('TLC: '+cl.nm+' - '+fd(rem),{body:cl.ev+' | '+cl.cl+' | '+(dl<=0?'PAST DUE':'Due in '+dl+'d'),tag:cl.id});
+        n.onclick=function(){window.focus();jumpTo(cl.id)};
+      }catch(e){}
+    }
   });
+  if(alerts.length>0){
+    S.alerts=alerts;
+    render();
+  }
+  return alerts;
 }
+function dismissAlert(id){
+  if(S.alerts)S.alerts=S.alerts.filter(function(a){return a.id!==id});
+  render();
+}
+function dismissAllAlerts(){S.alerts=[];render()}
 
 function render(){
   var f=S.f,items=D.filter(function(c){return c.bal>0&&c.ed>=DF&&c.ed<=DT});
@@ -269,8 +287,28 @@ function render(){
         h+='</div>';
       }
     });
-    h+='<button style="width:100%;margin-top:14px;background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.2);color:#38bdf8;padding:12px;font-size:13px;font-weight:700;border-radius:8px" onclick="fireNotifs()">Test Notifications Now</button>';
+    h+='<button style="width:100%;margin-top:14px;background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.2);color:#38bdf8;padding:12px;font-size:13px;font-weight:700;border-radius:8px" onclick="fireNotifs()">Fire Alerts Now</button>';
     h+='</div>';
+  }
+
+  // Alert banners
+  if(S.alerts&&S.alerts.length>0){
+    h+='<div style="margin:0 10px 8px">';
+    h+='<div style="background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.2);border-radius:8px;overflow:hidden">';
+    h+='<div class="fx jb ac" style="padding:10px 12px;border-bottom:1px solid rgba(251,191,36,.1)">';
+    h+='<span style="font-size:12px;font-weight:700;color:#fbbf24">\u{1F514} '+S.alerts.length+' Collection Alert'+(S.alerts.length>1?'s':'')+'</span>';
+    h+='<button style="background:transparent;border:1px solid rgba(251,191,36,.2);color:#fbbf24;padding:4px 10px;font-size:10px;border-radius:4px" onclick="dismissAllAlerts()">Dismiss All</button>';
+    h+='</div>';
+    S.alerts.forEach(function(a){
+      h+='<div class="fx jb ac" style="padding:8px 12px;border-bottom:1px solid rgba(30,58,95,.1)">';
+      h+='<div style="flex:1;cursor:pointer" onclick="jumpTo(\''+a.id+'\')">';
+      h+='<div style="font-size:13px;font-weight:600;color:#e2e8f0">'+a.nm+'</div>';
+      h+='<div style="font-size:11px;color:#475569">'+a.ev+' | '+a.cl+' | <span style="color:'+(a.dl<=0?'#f87171':a.dl<=7?'#fbbf24':'#4ade80')+'">'+(a.dl<=0?'PAST DUE':'Due in '+a.dl+'d')+'</span> | <span style="color:#fb923c">'+fd(a.rem)+'</span></div>';
+      h+='</div>';
+      h+='<button style="background:transparent;border:none;color:#475569;font-size:18px;padding:4px 8px" onclick="dismissAlert(\''+a.id+'\')">x</button>';
+      h+='</div>';
+    });
+    h+='</div></div>';
   }
 
   // Closer cards
@@ -426,7 +464,7 @@ function render(){
 
 try{var v=localStorage.getItem(SK);if(v)TD=JSON.parse(v)}catch(e){}
 render();
-setTimeout(fireNotifs,2000);
+setTimeout(function(){var a=fireNotifs();if(a&&a.length>0)render()},1500);
 </script>
 </body>
 </html>

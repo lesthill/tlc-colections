@@ -370,6 +370,13 @@ function render(){
       h+='</div></div>'
     }
 
+    // NMI collect payment
+    if(remaining>0){
+      h+='<div style="padding:0 12px 8px">';
+      h+='<a href="https://secure.nmi.com/merchants/login.php?cookie_check=1&referrer=L21lcmNoYW50cy92aXJ0dWFsdGVybWluYWwucGhwP3RpZD1lODY3NTc1Y2RhODdmM2Y1YzVhMjc4YjAwNTZiMzhhOQ&qed=983885f206e87e86abb4ac5df39f9ca7a7b242fe380841cb9fc93ac31df7bcad" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:8px;background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.2);color:#38bdf8;padding:10px 14px;border-radius:6px;text-decoration:none;font-size:13px;font-weight:600">';
+      h+='<span style="font-size:16px">&#128179;</span> Collect Payment via NMI</a></div>';
+    }
+
     // Status + expand
     h+='<div class="fx g8" style="padding:6px 12px 8px;border-top:1px solid rgba(30,58,95,.1)">';
     h+='<select class="sel" style="color:'+SC[cs]+'" onchange="upd(\''+c.id+'\',\'cs\',this.value)">';

@@ -121,11 +121,11 @@ function togN(k){if(!NC[k])NC[k]={on:true,days:[1,3,7]};else NC[k].on=!NC[k].on;
 function togD(k,d){if(!NC[k])NC[k]={on:true,days:[]};var i=NC[k].days.indexOf(d);if(i>=0)NC[k].days.splice(i,1);else NC[k].days.push(d);saveN();render()}
 
 var achPending=null;
-function askACH(name,amount){
-  achPending={name:name,amount:amount};
+function askACH(id,name,amount){
+  achPending={id:id,name:name,amount:amount};
   render();
 }
-async function sendACH(name,amount,withAmount){
+async function sendACH(id,name,amount,withAmount){
   var firstName=name.split(' ')[0];
   var byteChars=atob(ACH_B64);
   var byteArr=new Uint8Array(byteChars.length);
@@ -150,6 +150,7 @@ async function sendACH(name,amount,withAmount){
     
     if(navigator.canShare&&navigator.canShare({files:[file]})){
       await navigator.share({title:'ACH Collection Form - Tax Lien Code',text:msg,files:[file]});
+    if(id){var now=new Date();var ts=now.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' '+now.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});var prev=gd(id,'cn');var note='ACH sent '+ts+(withAmount?' ('+amount+')':' (blank)');upd(id,'cn',prev?(prev+' | '+note):note)}
     } else {
       var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;a.click();
     }
@@ -337,7 +338,7 @@ function render(){
     h+='<div style="text-align:right;flex-shrink:0"><div class="bal">'+fd(remaining>0?remaining:c.bal)+'</div>';
     h+='<div class="bsub">of '+fd(c.sale)+'</div>';
     if(since>0)h+='<div style="color:#38bdf8;font-size:10px;font-weight:600">+'+fd(since)+'</div>';
-    if(remaining>0)h+='<div style="margin-top:4px;display:flex;gap:14px;justify-content:flex-end"><a href="javascript:void(0)" onclick="var info=\''+c.nm+'\\n'+(c.em||"")+'\\n'+(remaining>0?fd(remaining):fd(c.bal))+'\';navigator.clipboard.writeText(info).then(function(){}).catch(function(){});var el=document.createElement(\'a\');el.href=\''+NMI+'\';el.target=\'_blank\';el.rel=\'noopener noreferrer\';document.body.appendChild(el);el.click();document.body.removeChild(el)" style="color:#38bdf8;text-decoration:none;font-size:22px">&#128179;</a><a href="javascript:void(0)" onclick="askACH(\''+c.nm+'\',\''+(remaining>0?fd(remaining):fd(c.bal))+'\');return false" style="color:#4ade80;text-decoration:none;font-size:22px">&#127974;</a></div>';
+    if(remaining>0)h+='<div style="margin-top:4px;display:flex;gap:14px;justify-content:flex-end"><a href="javascript:void(0)" onclick="var info=\''+c.nm+'\\n'+(c.em||"")+'\\n'+(remaining>0?fd(remaining):fd(c.bal))+'\';navigator.clipboard.writeText(info).then(function(){}).catch(function(){});var el=document.createElement(\'a\');el.href=\''+NMI+'\';el.target=\'_blank\';el.rel=\'noopener noreferrer\';document.body.appendChild(el);el.click();document.body.removeChild(el)" style="color:#38bdf8;text-decoration:none;font-size:22px">&#128179;</a><a href="javascript:void(0)" onclick="askACH(\''+c.id+'\',\''+c.nm+'\',\''+(remaining>0?fd(remaining):fd(c.bal))+'\');return false" style="color:#4ade80;text-decoration:none;font-size:22px">&#127974;</a></div>';
     h+='</div></div>';
     // Stats
     h+='<div style="padding:0 12px 6px" class="fx g8 fw" style="font-size:11px">';
@@ -383,8 +384,8 @@ function render(){
     h+='<div style="background:#0c1117;border:1px solid rgba(30,58,95,.3);border-radius:16px;padding:24px;margin:20px;max-width:320px;width:100%" onclick="event.stopPropagation()">';
     h+='<div style="font-size:16px;font-weight:700;color:#e2e8f0;margin-bottom:4px">Send ACH Form</div>';
     h+='<div style="font-size:12px;color:#475569;margin-bottom:20px">'+achPending.name+'</div>';
-    h+='<button onclick="var p=achPending;achPending=null;render();sendACH(p.name,p.amount,true)" style="width:100%;padding:16px;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.25);color:#4ade80;font-size:15px;font-weight:700;border-radius:10px;margin-bottom:10px">With Balance ('+achPending.amount+')</button>';
-    h+='<button onclick="var p=achPending;achPending=null;render();sendACH(p.name,p.amount,false)" style="width:100%;padding:16px;background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.25);color:#38bdf8;font-size:15px;font-weight:700;border-radius:10px;margin-bottom:10px">Send Blank</button>';
+    h+='<button onclick="var p=achPending;achPending=null;render();sendACH(p.id,p.name,p.amount,true)" style="width:100%;padding:16px;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.25);color:#4ade80;font-size:15px;font-weight:700;border-radius:10px;margin-bottom:10px">With Balance ('+achPending.amount+')</button>';
+    h+='<button onclick="var p=achPending;achPending=null;render();sendACH(p.id,p.name,p.amount,false)" style="width:100%;padding:16px;background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.25);color:#38bdf8;font-size:15px;font-weight:700;border-radius:10px;margin-bottom:10px">Send Blank</button>';
     h+='<button onclick="achPending=null;render()" style="width:100%;padding:12px;background:transparent;border:1px solid rgba(30,58,95,.3);color:#475569;font-size:13px;border-radius:10px">Cancel</button>';
     h+='</div></div>';
   }

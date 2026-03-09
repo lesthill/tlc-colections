@@ -15,6 +15,15 @@ import './styles.css';
 
 const CLOSER_KEYS = Object.keys(CLOSER_NAMES);
 
+function nextSatForPocket(ts) {
+  const d = new Date(ts);
+  const day = d.getDay();
+  const diff = day === 6 ? 7 : 6 - day;
+  d.setDate(d.getDate() + diff);
+  d.setHours(23, 59, 59, 999);
+  return d;
+}
+
 export default function App() {
   const { trackedData, loading, gd, gdn, upd, doPif, undoPif, addPayment, removePayment, getPayments, addExpected, removeExpected, getExpected, collectExpected, pocketDeals, addPocketDeal, updatePocketDeal, removePocketDeal, doReset } = useStorage();
 
@@ -139,6 +148,22 @@ export default function App() {
     cls[k].ex += ex;
     cls[k].bal += c.bal - si;
     if (cs && cs !== 'not_contacted') cls[k].con++;
+  });
+
+  // Filter pocket deals by closer + count them in stats
+  const activePockets = pocketDeals.filter(d => {
+    const exp = nextSatForPocket(d.created);
+    return exp > now;
+  });
+  const filteredPockets = filter === 'ALL' ? activePockets : activePockets.filter(d => d.closer === filter);
+  activePockets.forEach(d => {
+    if (d.closer && cls[d.closer]) {
+      cls[d.closer].cnt++;
+      if (d.amount > 0) {
+        cls[d.closer].sale += d.amount;
+        cls[d.closer].bal += d.amount;
+      }
+    }
   });
 
   // Unique visible events + event outstanding balances
@@ -384,15 +409,15 @@ export default function App() {
         </div>
 
         {/* Pocket Deals */}
-        {pocketDeals.length > 0 && (
+        {filteredPockets.length > 0 && (
           <div style={{ padding: '0 10px 4px' }}>
-            {pocketDeals.map(d => (
+            {filteredPockets.map(d => (
               <PocketDealCard key={d.id} deal={d} onUpdate={updatePocketDeal} onRemove={removePocketDeal} />
             ))}
           </div>
         )}
         <div style={{ padding: '0 10px 8px' }}>
-          <span onClick={() => addPocketDeal({ name: '', amount: 0, event: '', closer: '', phone: '', email: '', notes: '' })} style={{
+          <span onClick={() => addPocketDeal({ name: '', amount: 0, event: '', closer: filter !== 'ALL' ? filter : '', phone: '', email: '', notes: '' })} style={{
             display: 'block', textAlign: 'center', padding: '10px 0', borderRadius: 8,
             background: 'rgba(167,139,250,.06)', border: '1px dashed rgba(167,139,250,.25)',
             color: '#a78bfa', fontSize: 12, fontWeight: 700, cursor: 'pointer',

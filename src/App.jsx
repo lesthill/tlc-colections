@@ -333,15 +333,28 @@ export default function App() {
             setShowReset={setShowReset}
             onReset={doReset}
           />
-          {filter === 'ALL' ? (
-            <SpiffTracker gdn={gdn} />
-          ) : (
-            <CloserPanel
-              closerKey={filter}
-              closerStats={cls[filter]}
-              closerNames={CLOSER_NAMES}
-            />
-          )}
+          <div style={{ position: 'relative', height: 156 }}>
+            <div style={{
+              position: 'absolute', top: 0, left: 0, right: 0,
+              opacity: filter === 'ALL' ? 1 : 0,
+              transition: 'opacity .25s ease',
+              pointerEvents: filter === 'ALL' ? 'auto' : 'none',
+            }}>
+              <SpiffTracker gdn={gdn} />
+            </div>
+            {filter !== 'ALL' && cls[filter] && (
+              <div style={{
+                position: 'absolute', top: 0, left: 0, right: 0,
+                animation: 'fadeIn .25s ease',
+              }}>
+                <CloserPanel
+                  closerKey={filter}
+                  closerStats={cls[filter]}
+                  closerNames={CLOSER_NAMES}
+                />
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Closer pills */}

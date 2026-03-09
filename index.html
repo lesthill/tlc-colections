@@ -55,7 +55,7 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
 .closer-card.on{background:#0f1a2a;border:2px solid rgba(125,211,252,.25)}
 
 @keyframes pifPop{0%{transform:scale(1)}50%{transform:scale(1.06)}100%{transform:scale(1)}}
-@keyframes spiffGlow{0%,100%{box-shadow:0 0 4px rgba(74,222,128,.3)}50%{box-shadow:0 0 12px rgba(74,222,128,.6),0 0 20px rgba(56,189,248,.3)}}
+@keyframes spiffGlow{0%,100%{box-shadow:0 0 2px rgba(74,222,128,.15)}50%{box-shadow:0 0 6px rgba(74,222,128,.25),0 0 10px rgba(56,189,248,.1)}}
 @keyframes spiffShimmer{0%{left:-100%}100%{left:200%}}
 @keyframes tierPulse{0%,100%{opacity:.85;transform:scale(1)}50%{opacity:1;transform:scale(1.02)}}
 @keyframes amtGlow{0%,100%{text-shadow:0 0 4px rgba(255,255,255,.2)}50%{text-shadow:0 0 12px rgba(255,255,255,.6),0 0 20px rgba(74,222,128,.4)}}
@@ -323,7 +323,7 @@ function render(){
     var fillColor=dcSPH>=10000?'linear-gradient(90deg,#4ade80,#38bdf8,#a78bfa,#fb923c)':dcSPH>=9000?'linear-gradient(90deg,#4ade80,#38bdf8,#a78bfa)':dcSPH>=8500?'linear-gradient(90deg,#4ade80,#38bdf8)':dcSPH>=4500?'linear-gradient(90deg,#4ade80,#22c55e)':'linear-gradient(90deg,#334155,#475569)';
     h+='<div style="position:absolute;top:0;left:0;height:100%;width:'+Math.round(pctFill*100)+'%;background:'+fillColor+';border-radius:7px;transition:width .8s ease"></div>';
     // Shimmer effect on fill
-    h+='<div style="position:absolute;top:0;left:0;height:100%;width:'+Math.round(pctFill*100)+'%;overflow:hidden;border-radius:7px"><div style="position:absolute;top:0;width:50%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);animation:spiffShimmer 2.5s ease-in-out infinite"></div></div>';
+    h+='<div style="position:absolute;top:0;left:0;height:100%;width:'+Math.round(pctFill*100)+'%;overflow:hidden;border-radius:7px"><div style="position:absolute;top:0;width:60%;height:100%;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.35) 45%,rgba(255,255,255,.5) 50%,rgba(255,255,255,.35) 55%,transparent 100%);animation:spiffShimmer 2s ease-in-out infinite"></div></div>';
     spiffTiers.forEach(function(t){var pos=Math.round((t.sph/maxSPH)*100);h+='<div style="position:absolute;top:0;left:'+pos+'%;width:1px;height:100%;background:'+(dcSPH>=t.sph?'rgba(255,255,255,.4)':'rgba(71,85,105,.5)')+'"></div>'});
     h+='</div>';
     // Tier roadmap — 4 equal cards

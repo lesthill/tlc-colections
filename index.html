@@ -301,30 +301,34 @@ function render(){
     dcClients.forEach(function(c){dcColTotal+=c.col;dcSinceTotal+=gdn(c.id,'since')});
     var dcCollected=dcColTotal+dcSinceTotal;
     var dcSPH=dcHeads>0?Math.round(dcCollected/dcHeads):0;
-    var spiffTiers=[{sph:4500,label:'I',bonus:'$500',color:'#4ade80'},{sph:8500,label:'II',bonus:'$500',color:'#38bdf8'},{sph:9000,label:'II+',bonus:'$750',color:'#a78bfa'},{sph:10000,label:'II++',bonus:'$1K',color:'#fb923c'}];
+    var spiffTiers=[{sph:4500,label:'TIER I',bonus:'$500',color:'#4ade80'},{sph:8500,label:'TIER II',bonus:'$500',color:'#38bdf8'},{sph:9000,label:'II+',bonus:'$750',color:'#a78bfa'},{sph:10000,label:'II++',bonus:'$1,000',color:'#fb923c'}];
     var maxSPH=11000;var pctFill=Math.min(dcSPH/maxSPH,1);
-    // Row 1: label + SPH + collected
-    h+='<div class="fx jb ac" style="margin-bottom:4px"><div style="font-size:8px;font-weight:700;color:#64748b;letter-spacing:1px">DC SPIFF</div>';
-    h+='<div style="font-size:15px;font-weight:800;color:'+(dcSPH>=4500?'#4ade80':'#e2e8f0')+'">$'+dcSPH.toLocaleString()+' <span style="font-size:8px;font-weight:600;color:#64748b">SPH</span></div>';
-    h+='<div style="font-size:8px;color:#475569">'+fd(dcCollected)+'/'+dcHeads+'hd</div></div>';
-    // Row 2: thermometer
-    h+='<div style="position:relative;height:14px;background:rgba(15,23,42,.8);border-radius:7px;overflow:hidden;border:1px solid rgba(51,65,85,.5);margin-bottom:4px">';
+    // Find next tier
+    var nextTier=null;
+    for(var ti=0;ti<spiffTiers.length;ti++){if(dcSPH<spiffTiers[ti].sph){nextTier=spiffTiers[ti];break}}
+    var nextNeed=nextTier?Math.max(0,nextTier.sph*dcHeads-dcCollected):0;
+    // Row 1: SPH big + thermometer
+    h+='<div class="fx ac g6" style="margin-bottom:4px">';
+    h+='<div style="font-size:16px;font-weight:800;color:'+(dcSPH>=4500?'#4ade80':'#e2e8f0')+'">$'+dcSPH.toLocaleString()+'</div>';
+    h+='<div style="font-size:8px;color:#64748b;line-height:1.1">per head<br>'+fd(dcCollected)+' / '+dcHeads+' hds</div>';
+    h+='<div style="flex:1;position:relative;height:12px;background:rgba(15,23,42,.8);border-radius:6px;overflow:hidden;border:1px solid rgba(51,65,85,.5)">';
     var fillColor=dcSPH>=10000?'linear-gradient(90deg,#4ade80,#38bdf8,#a78bfa,#fb923c)':dcSPH>=9000?'linear-gradient(90deg,#4ade80,#38bdf8,#a78bfa)':dcSPH>=8500?'linear-gradient(90deg,#4ade80,#38bdf8)':dcSPH>=4500?'linear-gradient(90deg,#4ade80,#22c55e)':'linear-gradient(90deg,#334155,#475569)';
-    h+='<div style="position:absolute;top:0;left:0;height:100%;width:'+Math.round(pctFill*100)+'%;background:'+fillColor+';border-radius:7px"></div>';
-    spiffTiers.forEach(function(t){var pos=Math.round((t.sph/maxSPH)*100);h+='<div style="position:absolute;top:0;left:'+pos+'%;width:1px;height:100%;background:'+(dcSPH>=t.sph?'rgba(255,255,255,.3)':'rgba(71,85,105,.5)')+'"></div>'});
-    h+='<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.5)">$'+dcSPH.toLocaleString()+' SPH</div>';
-    h+='</div>';
-    // Row 3: tier pills
-    h+='<div class="fx g3">';
-    spiffTiers.forEach(function(t){
-      var hit=dcSPH>=t.sph;var need=Math.max(0,t.sph*dcHeads-dcCollected);
-      h+='<div style="flex:1;padding:2px 4px;border-radius:5px;background:'+(hit?'rgba(74,222,128,.08)':'rgba(30,41,59,.5)')+';border:1px solid '+(hit?t.color+'33':'rgba(51,65,85,.3)')+';text-align:center">';
-      h+='<div style="font-size:7px;font-weight:700;color:'+(hit?t.color:'#64748b')+'">'+t.label+(hit?' &#10003;':'')+'</div>';
-      h+='<div style="font-size:8px;font-weight:700;color:'+(hit?'#e2e8f0':'#94a3b8')+'">'+t.bonus+'</div>';
-      if(!hit)h+='<div style="font-size:7px;color:#475569">'+fd(need)+'</div>';
-      h+='</div>'
-    });
-    h+='</div>';
+    h+='<div style="position:absolute;top:0;left:0;height:100%;width:'+Math.round(pctFill*100)+'%;background:'+fillColor+';border-radius:6px"></div>';
+    spiffTiers.forEach(function(t){var pos=Math.round((t.sph/maxSPH)*100);h+='<div style="position:absolute;top:0;left:'+pos+'%;width:1px;height:100%;background:'+(dcSPH>=t.sph?'rgba(255,255,255,.4)':'rgba(71,85,105,.5)')+'"></div>'});
+    h+='</div></div>';
+    // Row 2: next tier callout OR all tiers hit
+    if(nextTier){
+      h+='<div style="font-size:9px;color:#94a3b8;line-height:1.3">';
+      h+='Collect <span style="color:#fff;font-weight:700">'+fd(nextNeed)+'</span> more for <span style="color:'+nextTier.color+';font-weight:700">'+nextTier.label+'</span> (<span style="color:'+nextTier.color+'">'+nextTier.bonus+' ea</span>)';
+      // Show remaining tiers after next
+      for(var tj=spiffTiers.indexOf(nextTier)+1;tj<spiffTiers.length;tj++){
+        var ft=spiffTiers[tj];var fn=Math.max(0,ft.sph*dcHeads-dcCollected);
+        h+=' &middot; <span style="color:'+ft.color+'">'+fd(fn)+'</span> for <span style="color:'+ft.color+'">'+ft.label+'</span> ('+ft.bonus+')';
+      }
+      h+='</div>';
+    } else {
+      h+='<div style="font-size:9px;color:#4ade80;font-weight:700">&#127881; ALL TIERS HIT!</div>';
+    }
   }
   h+='</div>';
 

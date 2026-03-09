@@ -1,6 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export function LockScreen() {
+  // One-time cleanup of old Face ID data
+  useEffect(() => {
+    try { localStorage.removeItem('tlc-webauthn-cred'); localStorage.removeItem('tlc-unlock-ts'); } catch (e) {}
+  }, []);
   const [visible, setVisible] = useState(true);
   const [fading, setFading] = useState(false);
 

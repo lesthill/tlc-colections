@@ -433,7 +433,7 @@ function render(){
 
   // Sort
   h+='<div class="fx g10" style="padding:4px 14px 8px">';
-  [['bal','Balance'],['nm','Name'],['ev','Event'],['cl','Closer']].forEach(function(p){var on=S.sb===p[0];h+='<span class="sort'+(on?' on':'')+'" onclick="if(S.sb===\''+p[0]+'\')S.sd=S.sd===\'asc\'?\'desc\':\'asc\';else{S.sb=\''+p[0]+'\';S.sd=\'desc\'};render()">'+p[1]+(on?(S.sd==='asc'?' &#9650;':' &#9660;'):'')+'</span>'});
+  [['bal','Balance'],['nm','Name'],['ev','Event'],['cl','Closer'],['ed','Deadline']].forEach(function(p){var on=S.sb===p[0];h+='<span class="sort'+(on?' on':'')+'" onclick="if(S.sb===\''+p[0]+'\')S.sd=S.sd===\'asc\'?\'desc\':\'asc\';else{S.sb=\''+p[0]+'\';S.sd='+(p[0]==='ed'?'\'asc\'':'\'desc\'')+'};render()">'+p[1]+(on?(S.sd==='asc'?' &#9650;':' &#9660;'):'')+'</span>'});
   h+='</div>';
 
   // Client cards

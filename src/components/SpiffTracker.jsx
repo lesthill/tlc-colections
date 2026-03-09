@@ -19,17 +19,19 @@ export function SpiffTracker({ gdn }) {
   }
   const nextNeed = nextTier ? Math.max(0, nextTier.sph * DC_HEADS - dcCollected) : 0;
 
-  const fillColor = dcSPH >= 10000
+  const fillColor = dcSPH >= 11000
     ? 'linear-gradient(90deg,#4ade80,#38bdf8,#a78bfa,#fb923c)'
-    : dcSPH >= 9000 ? 'linear-gradient(90deg,#4ade80,#38bdf8,#a78bfa)'
-    : dcSPH >= 8000 ? 'linear-gradient(90deg,#4ade80,#38bdf8)'
-    : '#4ade80';
+    : dcSPH >= 9500 ? 'linear-gradient(90deg,#4ade80,#38bdf8,#a78bfa)'
+    : dcSPH >= 8500 ? 'linear-gradient(90deg,#4ade80,#38bdf8)'
+    : dcSPH >= 4500 ? 'linear-gradient(90deg,#4ade80,#22c55e)'
+    : 'linear-gradient(90deg,#334155,#475569)';
 
   return (
     <div style={{
-      background: 'rgba(15,26,42,.6)', border: '1px solid rgba(74,222,128,.15)',
+      background: 'linear-gradient(135deg,rgba(8,18,35,.97),rgba(15,30,55,.95))',
+      border: '1px solid rgba(74,222,128,.25)',
+      boxShadow: '0 0 20px rgba(74,222,128,.06)',
       borderRadius: 10, padding: '10px 14px', marginBottom: 8, height: 140, overflow: 'hidden',
-      animation: 'spiffGlow 3s ease-in-out infinite',
     }}>
       {/* Row 1: title + SPH */}
       <div className="fx jb ac" style={{ marginBottom: 6 }}>
@@ -56,8 +58,9 @@ export function SpiffTracker({ gdn }) {
       {/* Thermometer */}
       <div style={{
         position: 'relative', height: 14, background: 'rgba(15,23,42,.9)',
-        borderRadius: 7, overflow: 'visible', marginBottom: 8,
-        border: '1px solid rgba(74,222,128,.1)',
+        borderRadius: 7, overflow: 'hidden', marginBottom: 8,
+        border: '1px solid rgba(51,65,85,.5)',
+        animation: 'spiffGlow 2s ease-in-out infinite',
       }}>
         <div style={{
           position: 'absolute', top: 0, left: 0, height: '100%',
@@ -84,7 +87,7 @@ export function SpiffTracker({ gdn }) {
           return (
             <div key={t.sph} style={{
               position: 'absolute', top: -2, bottom: -2, left: pos + '%',
-              width: 1, background: t.color + '40',
+              width: 1, background: dcSPH >= t.sph ? 'rgba(255,255,255,.4)' : 'rgba(71,85,105,.5)',
             }} />
           );
         })}

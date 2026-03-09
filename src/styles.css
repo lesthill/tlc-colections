@@ -49,7 +49,7 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
 
 /* Header */
 .hdr { background: var(--bg-header); padding: 60px 14px 10px 14px; border-bottom: 1px solid rgba(30,58,95,.2); }
-.closer-bar { background: var(--bg-primary); padding: 6px 10px 8px; border-bottom: 1px solid var(--border-subtle); }
+.closer-bar { background: var(--bg-primary); padding: 5px 8px 7px; border-bottom: 1px solid var(--border-subtle); }
 .tag { font-size: 8px; letter-spacing: 4px; color: var(--green); }
 
 /* Frame (used for spiff, settings panels) */
@@ -57,11 +57,11 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
 .frame-title { font-size: 9px; letter-spacing: 2px; color: var(--text-dim); margin-bottom: 10px; font-weight: 600; }
 
 /* Pills */
-.pills { display: flex; gap: 4px; flex-wrap: nowrap; padding-bottom: 2px; }
-.pill { background: var(--bg-button); border: 1px solid var(--border-light); color: var(--sky); padding: 5px 0; font-size: 11px; border-radius: 6px; font-weight: 700; white-space: nowrap; flex: 1; text-align: center; cursor: pointer; min-width: 0; }
-.pill.on { background: var(--sky); color: var(--bg-primary); border: none; }
+.pills { display: flex; gap: 3px; flex-wrap: nowrap; }
+.pill { background: var(--bg-button); border: 1px solid var(--border-light); color: var(--sky); padding: 5px 0; font-size: 10px; border-radius: 5px; font-weight: 700; white-space: nowrap; flex: 1; text-align: center; cursor: pointer; min-width: 0; }
+.pill.on { background: var(--sky); color: var(--bg-primary); border-color: var(--sky); }
 .pill.all { color: var(--text-secondary); }
-.pill.all.on { background: var(--green); color: var(--bg-primary); }
+.pill.all.on { background: var(--green); color: var(--bg-primary); border-color: var(--green); }
 .pill.gry { opacity: .35; }
 
 /* Event pills */

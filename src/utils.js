@@ -35,4 +35,4 @@ export function fmtNotif(tpl, nm, ev, amt, dl) {
 
 // Default notification templates
 export const DEF_NTITLE = 'Time to collect {amount}';
-export const DEF_NBODY = 'Call {name} ({event}) - {days} days left to collect';
+export const DEF_NBODY = 'Call {name} ({event}) - {days} days left to collect.';

@@ -226,7 +226,8 @@ export default function App() {
     } catch (e) { alert('Error: ' + e.message); }
   }
 
-  function reqPerm() { if ('Notification' in window) Notification.requestPermission(); }
+  const [, forceRender] = useState(0);
+  function reqPerm() { if ('Notification' in window) Notification.requestPermission().then(() => forceRender(n => n + 1)); }
 
   function toggleSort(field) {
     if (sortBy === field) setSortDir(d => d === 'desc' ? 'asc' : 'desc');
@@ -240,7 +241,8 @@ export default function App() {
 
   function toggleNotif(k) {
     setNotifConfig(prev => {
-      const cfg = prev[k] || { on: false, days: [] };
+      const cfg = prev[k];
+      if (!cfg) return { ...prev, [k]: { on: true, days: [1, 3, 7] } };
       return { ...prev, [k]: { ...cfg, on: !cfg.on } };
     });
   }

@@ -128,8 +128,8 @@ export function ClientCard({ client, gd, gdn, upd, doPif, undoPif, addPayment, r
         <div style={{ background: '#080d13', borderTop: '1px solid rgba(30,58,95,.15)' }}>
 
           {/* === COLLECTIONS SECTION === */}
-          <div style={{ padding: '12px 12px 8px' }}>
-            <div className="fx jb ac" style={{ marginBottom: 8 }}>
+          <div style={{ padding: '14px 14px 10px' }}>
+            <div className="fx jb ac" style={{ marginBottom: 10 }}>
               <label style={{ fontSize: 10, fontWeight: 700, color: '#38bdf8', letterSpacing: 1 }}>
                 COLLECTED &middot; {fd(since)}
               </label>
@@ -149,10 +149,10 @@ export function ClientCard({ client, gd, gdn, upd, doPif, undoPif, addPayment, r
               )}
             </div>
 
-            {/* Add collection row */}
-            <div className="fx g6 ac fw" style={{ marginBottom: 6 }}>
+            {/* Add collection: amount + button */}
+            <div className="fx g6 ac" style={{ marginBottom: 6 }}>
               <input type="text" inputMode="numeric" pattern="[0-9]*" className="inp"
-                style={{ color: '#38bdf8', fontWeight: 700, fontSize: 14, borderColor: 'rgba(56,189,248,.15)', flex: 1, minWidth: 80 }}
+                style={{ color: '#38bdf8', fontWeight: 700, fontSize: 14, borderColor: 'rgba(56,189,248,.15)', flex: 1 }}
                 value={newPayAmt} placeholder="Amount"
                 onChange={e => setNewPayAmt(e.target.value)}
                 onKeyDown={e => {
@@ -161,16 +161,6 @@ export function ClientCard({ client, gd, gdn, upd, doPif, undoPif, addPayment, r
                     setNewPayAmt(''); setNewPayType('');
                   }
                 }} />
-              <div className="fx g3 ac">
-                {['ACH', 'CC', 'Other'].map(t => (
-                  <span key={t} onClick={() => setNewPayType(newPayType === t ? '' : t)} style={{
-                    padding: '6px 8px', borderRadius: 5, fontSize: 10, fontWeight: 700, cursor: 'pointer',
-                    background: newPayType === t ? 'rgba(56,189,248,.2)' : 'rgba(15,26,42,.5)',
-                    border: '1px solid ' + (newPayType === t ? 'rgba(56,189,248,.5)' : 'rgba(30,58,95,.2)'),
-                    color: newPayType === t ? '#38bdf8' : '#475569',
-                  }}>{t}</span>
-                ))}
-              </div>
               <span onClick={() => {
                 if (newPayAmt && parseFloat(newPayAmt) > 0) {
                   addPayment(c.id, newPayAmt, newPayType);
@@ -181,6 +171,18 @@ export function ClientCard({ client, gd, gdn, upd, doPif, undoPif, addPayment, r
                 color: '#38bdf8', padding: '10px 14px', fontSize: 12, borderRadius: 6,
                 fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap',
               }}>+ ADD</span>
+            </div>
+            {/* Payment type pills */}
+            <div className="fx g4 ac" style={{ marginBottom: 8 }}>
+              {['ACH', 'CC', 'Other'].map(t => (
+                <span key={t} onClick={() => setNewPayType(newPayType === t ? '' : t)} style={{
+                  padding: '5px 12px', borderRadius: 5, fontSize: 10, fontWeight: 700, cursor: 'pointer',
+                  background: newPayType === t ? 'rgba(56,189,248,.2)' : 'rgba(15,26,42,.5)',
+                  border: '1px solid ' + (newPayType === t ? 'rgba(56,189,248,.5)' : 'rgba(30,58,95,.2)'),
+                  color: newPayType === t ? '#38bdf8' : '#475569',
+                }}>{t}</span>
+              ))}
+              <span style={{ fontSize: 9, color: '#334155', marginLeft: 2 }}>type</span>
             </div>
 
             {/* Payment ledger */}
@@ -203,7 +205,7 @@ export function ClientCard({ client, gd, gdn, upd, doPif, undoPif, addPayment, r
                         {p.note && <span style={{ fontSize: 8, fontWeight: 700, color: '#38bdf8', background: 'rgba(56,189,248,.12)', padding: '1px 5px', borderRadius: 3 }}>{p.note}</span>}
                         <span style={{ fontSize: 9, color: '#475569' }}>{dateFmt}</span>
                       </div>
-                      <span onClick={() => removePayment(c.id, i)} style={{
+                      <span onClick={() => { if (confirm('Remove ' + fd(p.amt) + ' payment?')) removePayment(c.id, i); }} style={{
                         color: '#f87171', fontSize: 11, cursor: 'pointer', padding: '2px 6px',
                         opacity: 0.6,
                       }}>{'\u2715'}</span>
@@ -215,33 +217,23 @@ export function ClientCard({ client, gd, gdn, upd, doPif, undoPif, addPayment, r
           </div>
 
           {/* === EXPECTED PAYMENTS SECTION === */}
-          <div style={{ padding: '8px 12px' }}>
-            <div className="fx jb ac" style={{ marginBottom: 8 }}>
+          <div style={{ padding: '10px 14px 10px' }}>
+            <div className="fx jb ac" style={{ marginBottom: 10 }}>
               <label style={{ fontSize: 10, fontWeight: 700, color: '#fbbf24', letterSpacing: 1 }}>
                 EXPECTED &middot; {fd(exp)}
               </label>
             </div>
 
-            {/* Add expected row */}
-            <div className="fx g6 ac fw" style={{ marginBottom: 6 }}>
+            {/* Add expected: amount + date + button */}
+            <div className="fx g6 ac" style={{ marginBottom: 6 }}>
               <input type="text" inputMode="numeric" pattern="[0-9]*" className="inp"
-                style={{ color: '#fbbf24', fontWeight: 700, fontSize: 14, borderColor: 'rgba(251,191,36,.15)', flex: 1, minWidth: 80 }}
+                style={{ color: '#fbbf24', fontWeight: 700, fontSize: 14, borderColor: 'rgba(251,191,36,.15)', flex: 1 }}
                 value={newExpAmt} placeholder="Amount"
                 onChange={e => setNewExpAmt(e.target.value)} />
               <input type="date" className="inp"
                 style={{ fontSize: 12, borderColor: 'rgba(251,191,36,.15)', width: 130 }}
                 value={newExpDate}
                 onChange={e => setNewExpDate(e.target.value)} />
-              <div className="fx g3 ac">
-                {['ACH', 'CC', 'Other'].map(t => (
-                  <span key={t} onClick={() => setNewExpType(newExpType === t ? '' : t)} style={{
-                    padding: '6px 8px', borderRadius: 5, fontSize: 10, fontWeight: 700, cursor: 'pointer',
-                    background: newExpType === t ? 'rgba(251,191,36,.2)' : 'rgba(15,26,42,.5)',
-                    border: '1px solid ' + (newExpType === t ? 'rgba(251,191,36,.5)' : 'rgba(30,58,95,.2)'),
-                    color: newExpType === t ? '#fbbf24' : '#475569',
-                  }}>{t}</span>
-                ))}
-              </div>
               <span onClick={() => {
                 if (newExpAmt && parseFloat(newExpAmt) > 0) {
                   addExpected(c.id, newExpAmt, newExpDate, newExpType);
@@ -252,6 +244,18 @@ export function ClientCard({ client, gd, gdn, upd, doPif, undoPif, addPayment, r
                 color: '#fbbf24', padding: '10px 14px', fontSize: 12, borderRadius: 6,
                 fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap',
               }}>+ ADD</span>
+            </div>
+            {/* Expected type pills */}
+            <div className="fx g4 ac" style={{ marginBottom: 8 }}>
+              {['ACH', 'CC', 'Other'].map(t => (
+                <span key={t} onClick={() => setNewExpType(newExpType === t ? '' : t)} style={{
+                  padding: '5px 12px', borderRadius: 5, fontSize: 10, fontWeight: 700, cursor: 'pointer',
+                  background: newExpType === t ? 'rgba(251,191,36,.2)' : 'rgba(15,26,42,.5)',
+                  border: '1px solid ' + (newExpType === t ? 'rgba(251,191,36,.5)' : 'rgba(30,58,95,.2)'),
+                  color: newExpType === t ? '#fbbf24' : '#475569',
+                }}>{t}</span>
+              ))}
+              <span style={{ fontSize: 9, color: '#334155', marginLeft: 2 }}>type</span>
             </div>
 
             {/* Expected payments list */}
@@ -277,7 +281,7 @@ export function ClientCard({ client, gd, gdn, upd, doPif, undoPif, addPayment, r
                         background: 'rgba(74,222,128,.1)', padding: '3px 6px', borderRadius: 3,
                         border: '1px solid rgba(74,222,128,.2)',
                       }}>RECV'D</span>
-                      <span onClick={() => removeExpected(c.id, i)} style={{
+                      <span onClick={() => { if (confirm('Remove ' + fd(e.amt) + ' expected?')) removeExpected(c.id, i); }} style={{
                         color: '#f87171', fontSize: 11, cursor: 'pointer', padding: '2px 6px',
                         opacity: 0.6,
                       }}>{'\u2715'}</span>
@@ -289,7 +293,7 @@ export function ClientCard({ client, gd, gdn, upd, doPif, undoPif, addPayment, r
           </div>
 
           {/* === NOTES SECTION === */}
-          <div style={{ padding: '8px 12px 12px' }}>
+          <div style={{ padding: '10px 14px 14px' }}>
             <label style={{ fontSize: 10, fontWeight: 700, color: '#64748b', letterSpacing: 1, marginBottom: 4, display: 'block' }}>NOTES</label>
             <input className="inp" value={cn || ''} placeholder="Follow-up notes..."
               onChange={e => upd(c.id, 'cn', e.target.value)} />

@@ -54,16 +54,17 @@ export function Settings({
                 </button>
               </div>
               {cfg.on && (
-                <div className="fx g4" style={{ padding: '6px 0' }}>
-                  {[1, 3, 5, 7, 14].map(d => {
+                <div className="fx g4 fw" style={{ padding: '6px 0' }}>
+                  {[1, 2, 3, 4, 5, 7, 14].map(d => {
                     const isOn = cfg.days && cfg.days.indexOf(d) >= 0;
+                    const label = d === 2 ? 'every 2d' : d === 4 ? 'every 4d' : d + 'd';
                     return (
                       <button key={d} style={{
                         padding: '6px 10px', borderRadius: 6, fontSize: 11, fontWeight: 600, cursor: 'pointer',
                         border: '1px solid ' + (isOn ? '#7dd3fc' : 'rgba(30,58,95,.3)'),
                         background: isOn ? 'rgba(125,211,252,.15)' : 'transparent',
                         color: isOn ? '#7dd3fc' : '#475569',
-                      }} onClick={() => onToggleDay(k, d)}>{d}d</button>
+                      }} onClick={() => onToggleDay(k, d)}>{label}</button>
                     );
                   })}
                 </div>

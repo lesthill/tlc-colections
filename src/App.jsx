@@ -346,7 +346,7 @@ export default function App() {
 
         {/* Closer pills */}
         <div className="closer-bar">
-          <div className="pills" style={{ overflowX: 'auto' }}>
+          <div className="pills">
             <span className={'pill all' + (filter === 'ALL' ? ' on' : '')} onClick={() => setFilter('ALL')}>ALL</span>
             {CLOSER_KEYS.map(k => {
               const hasCl = cls[k].cnt > 0;

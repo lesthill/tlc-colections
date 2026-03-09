@@ -3,13 +3,15 @@ import { TIER_LABELS, TIER_COLORS, STATUS_NAMES, STATUS_COLORS, NMI_URL } from '
 import { fd, fp, dueDate, daysLeft, weeksAgo } from '../utils.js';
 import { Gauge, DoneBadge } from './Gauge.jsx';
 
-export function ClientCard({ client, gd, gdn, upd, doPif, undoPif, doPifExp, undoPifExp, addPayment, removePayment, getPayments, expanded, onToggleExpand, jump, onAskACH, onDialGoTo }) {
+export function ClientCard({ client, gd, gdn, upd, doPif, undoPif, addPayment, removePayment, getPayments, addExpected, removeExpected, getExpected, collectExpected, expanded, onToggleExpand, jump, onAskACH, onDialGoTo }) {
   const c = client;
   const [newPayAmt, setNewPayAmt] = useState('');
+  const [newExpAmt, setNewExpAmt] = useState('');
+  const [newExpDate, setNewExpDate] = useState('');
   const payments = getPayments(c.id);
+  const expectedPayments = getExpected(c.id);
   const since = gdn(c.id, 'since');
   const exp = gdn(c.id, 'exp');
-  const edt = gd(c.id, 'edt');
   const cn = gd(c.id, 'cn');
   const cs = gd(c.id, 'cs') || 'not_contacted';
   const isPif = gd(c.id, '_pif') === '1';
@@ -28,20 +30,12 @@ export function ClientCard({ client, gd, gdn, upd, doPif, undoPif, doPifExp, und
   const fullPaid = totalPaid >= c.sale && c.sale > 0;
   const remaining = c.bal - since;
   const pifAmt = Math.max(0, c.sale - c.col - since);
-  const isExpPif = exp >= pifAmt && pifAmt > 0 && gd(c.id, '_prevExp');
 
   // CC button handler: copy info to clipboard, open NMI
-  function handleCC(e) {
-    e.preventDefault();
+  function handleCC() {
     const info = c.nm + '\n' + (c.em || '') + '\n' + (remaining > 0 ? fd(remaining) : fd(c.bal));
-    navigator.clipboard.writeText(info).catch(() => {});
-    const a = document.createElement('a');
-    a.href = NMI_URL;
-    a.target = '_blank';
-    a.rel = 'noopener noreferrer';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    try { navigator.clipboard.writeText(info); } catch (e) {}
+    window.location.href = NMI_URL;
   }
 
   return (
@@ -79,8 +73,8 @@ export function ClientCard({ client, gd, gdn, upd, doPif, undoPif, doPifExp, und
           {since > 0 && <div style={{ color: '#38bdf8', fontSize: 10, fontWeight: 600 }}>+{fd(since)}</div>}
           {remaining > 0 && (
             <div style={{ marginTop: 4, display: 'flex', gap: 14, justifyContent: 'flex-end' }}>
-              <a href="#" onClick={handleCC} style={{ color: '#38bdf8', textDecoration: 'none', fontSize: 22 }}>&#128179;</a>
-              <a href="#" onClick={e => { e.preventDefault(); onAskACH(c.id, c.nm, fd(remaining)); }} style={{ color: '#4ade80', textDecoration: 'none', fontSize: 22 }}>&#127974;</a>
+              <span onClick={handleCC} style={{ color: '#38bdf8', fontSize: 22, cursor: 'pointer' }}>&#128179;</span>
+              <span onClick={() => onAskACH(c.id, c.nm, fd(remaining))} style={{ color: '#4ade80', fontSize: 22, cursor: 'pointer' }}>&#127974;</span>
             </div>
           )}
         </div>
@@ -96,52 +90,91 @@ export function ClientCard({ client, gd, gdn, upd, doPif, undoPif, doPifExp, und
       {/* Contact row */}
       {(c.ph || c.em) && (
         <div style={{ padding: '0 12px 6px' }} className="fx g6 fw con">
-          {c.ph && <a href="#" onClick={e => { e.preventDefault(); onDialGoTo(c.ph); }}>&#128222; {c.ph}</a>}
+          {c.ph && <span onClick={() => onDialGoTo(c.ph)} style={{ color: '#38bdf8', cursor: 'pointer', background: 'rgba(56,189,248,.06)', padding: '7px 12px', borderRadius: 6, fontSize: 12 }}>&#128222; {c.ph}</span>}
           {c.em && <a href={'mailto:' + c.em} style={{ overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 200, whiteSpace: 'nowrap' }}>&#9993; {c.em}</a>}
         </div>
       )}
 
-      {/* Status + expand */}
-      <div className="fx g8" style={{ padding: '6px 12px 8px', borderTop: '1px solid rgba(30,58,95,.1)' }}>
-        <select className="sel" style={{ color: STATUS_COLORS[cs] }} value={cs}
-          onChange={e => upd(c.id, 'cs', e.target.value)}>
-          {Object.keys(STATUS_NAMES).map(k => (
-            <option key={k} value={k}>{STATUS_NAMES[k]}</option>
-          ))}
-        </select>
-        <button className="btn" onClick={onToggleExpand}>{expanded ? '\u25B2' : '\u25BC'}</button>
+      {/* Disposition pills */}
+      <div style={{ padding: '8px 12px', borderTop: '1px solid rgba(30,58,95,.1)' }}>
+        <div className="fx g4 fw">
+          {Object.keys(STATUS_NAMES).map(k => {
+            const active = cs === k;
+            return (
+              <span key={k} onClick={() => upd(c.id, 'cs', k)} style={{
+                padding: '6px 10px', borderRadius: 6, fontSize: 11, fontWeight: 600,
+                cursor: 'pointer', transition: 'all .15s',
+                background: active ? STATUS_COLORS[k] + '25' : 'rgba(15,26,42,.5)',
+                border: '1px solid ' + (active ? STATUS_COLORS[k] + '66' : 'rgba(30,58,95,.2)'),
+                color: active ? STATUS_COLORS[k] : '#475569',
+              }}>{STATUS_NAMES[k]}</span>
+            );
+          })}
+        </div>
+        <div className="fx jb ac" style={{ marginTop: 6 }}>
+          <span style={{ fontSize: 9, color: '#475569' }}>
+            {cs !== 'not_contacted' && 'Status: '}{cs !== 'not_contacted' && <span style={{ color: STATUS_COLORS[cs], fontWeight: 700 }}>{STATUS_NAMES[cs]}</span>}
+          </span>
+          <span onClick={onToggleExpand} style={{ fontSize: 14, color: '#475569', cursor: 'pointer', padding: '4px 8px' }}>
+            {expanded ? '\u25B2' : '\u25BC'}
+          </span>
+        </div>
       </div>
 
       {/* Expanded section */}
       {expanded && (
-        <div style={{ padding: 12, background: '#080d13', borderTop: '1px solid rgba(30,58,95,.15)' }}>
-          <div style={{ marginBottom: 12 }}>
-            <label className="lbl blu">COLLECTED SINCE WORKSHOP &middot; {fd(since)}</label>
+        <div style={{ background: '#080d13', borderTop: '1px solid rgba(30,58,95,.15)' }}>
 
-            {/* Add payment row */}
-            <div className="fx g8 ac" style={{ marginBottom: 8 }}>
+          {/* === COLLECTIONS SECTION === */}
+          <div style={{ padding: '12px 12px 8px' }}>
+            <div className="fx jb ac" style={{ marginBottom: 8 }}>
+              <label style={{ fontSize: 10, fontWeight: 700, color: '#38bdf8', letterSpacing: 1 }}>
+                COLLECTED &middot; {fd(since)}
+              </label>
+              {!isPif && pifAmt > 0 && (
+                <span onClick={() => doPif(c.id)} style={{
+                  fontSize: 10, fontWeight: 700, color: '#4ade80', cursor: 'pointer',
+                  background: 'rgba(74,222,128,.1)', padding: '3px 8px', borderRadius: 4,
+                  border: '1px solid rgba(74,222,128,.25)',
+                }}>PIF {fd(pifAmt)}</span>
+              )}
+              {isPif && (
+                <span onClick={() => undoPif(c.id)} style={{
+                  fontSize: 10, fontWeight: 700, color: '#f87171', cursor: 'pointer',
+                  background: 'rgba(248,113,113,.1)', padding: '3px 8px', borderRadius: 4,
+                  border: '1px solid rgba(248,113,113,.25)',
+                }}>UNDO PIF</span>
+              )}
+            </div>
+
+            {/* Add collection row */}
+            <div className="fx g6 ac" style={{ marginBottom: 6 }}>
               <input type="text" inputMode="numeric" pattern="[0-9]*" className="inp"
-                style={{ color: '#38bdf8', fontWeight: 700, fontSize: 16, borderColor: 'rgba(56,189,248,.2)', flex: 1 }}
+                style={{ color: '#38bdf8', fontWeight: 700, fontSize: 14, borderColor: 'rgba(56,189,248,.15)', flex: 1 }}
                 value={newPayAmt} placeholder="Amount"
-                onChange={e => setNewPayAmt(e.target.value)} />
-              <button className="btn-pif" style={{ fontSize: 11, padding: '10px 12px' }}
-                onClick={() => {
-                  if (newPayAmt && parseFloat(newPayAmt) > 0) {
+                onChange={e => setNewPayAmt(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' && newPayAmt && parseFloat(newPayAmt) > 0) {
                     addPayment(c.id, newPayAmt, '');
                     setNewPayAmt('');
                   }
-                }}>+ ADD</button>
-              {isPif ? (
-                <button className="btn-undo" onClick={() => undoPif(c.id)}>UNDO PIF</button>
-              ) : (
-                <button className="btn-pif" onClick={() => doPif(c.id)}>PIF</button>
-              )}
+                }} />
+              <span onClick={() => {
+                if (newPayAmt && parseFloat(newPayAmt) > 0) {
+                  addPayment(c.id, newPayAmt, '');
+                  setNewPayAmt('');
+                }
+              }} style={{
+                background: 'rgba(56,189,248,.1)', border: '1px solid rgba(56,189,248,.25)',
+                color: '#38bdf8', padding: '10px 14px', fontSize: 12, borderRadius: 6,
+                fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap',
+              }}>+ ADD</span>
             </div>
 
             {/* Payment ledger */}
             {payments.length > 0 && (
               <div style={{
-                background: 'rgba(56,189,248,.04)', border: '1px solid rgba(56,189,248,.1)',
+                background: 'rgba(56,189,248,.03)', border: '1px solid rgba(56,189,248,.08)',
                 borderRadius: 6, overflow: 'hidden',
               }}>
                 {payments.map((p, i) => {
@@ -150,20 +183,18 @@ export function ClientCard({ client, gd, gdn, upd, doPif, undoPif, doPifExp, und
                     d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
                   return (
                     <div key={p.ts + '-' + i} className="fx jb ac" style={{
-                      padding: '8px 10px',
-                      borderBottom: i < payments.length - 1 ? '1px solid rgba(30,58,95,.1)' : 'none',
+                      padding: '7px 10px',
+                      borderBottom: i < payments.length - 1 ? '1px solid rgba(30,58,95,.08)' : 'none',
                     }}>
-                      <div>
-                        <div style={{ fontSize: 13, fontWeight: 700, color: '#38bdf8' }}>{fd(p.amt)}</div>
-                        <div style={{ fontSize: 9, color: '#475569' }}>
-                          {dateFmt}{p.note ? ' \u00b7 ' + p.note : ''}
-                        </div>
+                      <div className="fx ac g6">
+                        <span style={{ fontSize: 13, fontWeight: 700, color: '#38bdf8' }}>{fd(p.amt)}</span>
+                        <span style={{ fontSize: 9, color: '#475569' }}>{dateFmt}</span>
+                        {p.note && <span style={{ fontSize: 9, color: '#64748b' }}>{p.note}</span>}
                       </div>
-                      <button onClick={() => removePayment(c.id, i)} style={{
-                        background: 'rgba(248,113,113,.1)', border: '1px solid rgba(248,113,113,.2)',
-                        color: '#f87171', fontSize: 10, fontWeight: 700, padding: '4px 8px',
-                        borderRadius: 4, cursor: 'pointer',
-                      }}>{'\u2715'}</button>
+                      <span onClick={() => removePayment(c.id, i)} style={{
+                        color: '#f87171', fontSize: 11, cursor: 'pointer', padding: '2px 6px',
+                        opacity: 0.6,
+                      }}>{'\u2715'}</span>
                     </div>
                   );
                 })}
@@ -171,31 +202,74 @@ export function ClientCard({ client, gd, gdn, upd, doPif, undoPif, doPifExp, und
             )}
           </div>
 
-          <div style={{ marginBottom: 12 }}>
-            <label className="lbl ylw">EXPECTED NEXT PAYMENT</label>
-            <div className="fx g8 ac">
+          {/* === EXPECTED PAYMENTS SECTION === */}
+          <div style={{ padding: '8px 12px' }}>
+            <div className="fx jb ac" style={{ marginBottom: 8 }}>
+              <label style={{ fontSize: 10, fontWeight: 700, color: '#fbbf24', letterSpacing: 1 }}>
+                EXPECTED &middot; {fd(exp)}
+              </label>
+            </div>
+
+            {/* Add expected row */}
+            <div className="fx g6 ac" style={{ marginBottom: 6 }}>
               <input type="text" inputMode="numeric" pattern="[0-9]*" className="inp"
-                style={{ color: '#fbbf24', fontWeight: 700, fontSize: 16, borderColor: 'rgba(251,191,36,.2)', width: 140 }}
-                value={exp || ''} placeholder="0"
-                onChange={e => upd(c.id, 'exp', e.target.value)} />
-              {isExpPif ? (
-                <button className="btn-undo" onClick={() => undoPifExp(c.id)}>UNDO</button>
-              ) : pifAmt > 0 ? (
-                <button style={{
-                  background: 'rgba(251,191,36,.1)', border: '1px solid rgba(251,191,36,.25)',
-                  color: '#fbbf24', padding: '12px 8px', fontSize: 11, borderRadius: 6,
-                  fontWeight: 700, whiteSpace: 'nowrap', cursor: 'pointer',
-                }} onClick={() => doPifExp(c.id)}>PIF {fd(pifAmt)}</button>
-              ) : null}
+                style={{ color: '#fbbf24', fontWeight: 700, fontSize: 14, borderColor: 'rgba(251,191,36,.15)', flex: 1 }}
+                value={newExpAmt} placeholder="Amount"
+                onChange={e => setNewExpAmt(e.target.value)} />
+              <input type="date" className="inp"
+                style={{ fontSize: 12, borderColor: 'rgba(251,191,36,.15)', width: 130 }}
+                value={newExpDate}
+                onChange={e => setNewExpDate(e.target.value)} />
+              <span onClick={() => {
+                if (newExpAmt && parseFloat(newExpAmt) > 0) {
+                  addExpected(c.id, newExpAmt, newExpDate, '');
+                  setNewExpAmt('');
+                  setNewExpDate('');
+                }
+              }} style={{
+                background: 'rgba(251,191,36,.1)', border: '1px solid rgba(251,191,36,.25)',
+                color: '#fbbf24', padding: '10px 14px', fontSize: 12, borderRadius: 6,
+                fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap',
+              }}>+ ADD</span>
             </div>
-            <div style={{ marginTop: 8 }}>
-              <input type="date" className="inp" value={edt || ''}
-                onChange={e => upd(c.id, 'edt', e.target.value)} />
-            </div>
+
+            {/* Expected payments list */}
+            {expectedPayments.length > 0 && (
+              <div style={{
+                background: 'rgba(251,191,36,.03)', border: '1px solid rgba(251,191,36,.08)',
+                borderRadius: 6, overflow: 'hidden',
+              }}>
+                {expectedPayments.map((e, i) => (
+                  <div key={e.ts + '-' + i} className="fx jb ac" style={{
+                    padding: '7px 10px',
+                    borderBottom: i < expectedPayments.length - 1 ? '1px solid rgba(30,58,95,.08)' : 'none',
+                  }}>
+                    <div className="fx ac g6">
+                      <span style={{ fontSize: 13, fontWeight: 700, color: '#fbbf24' }}>{fd(e.amt)}</span>
+                      {e.date && <span style={{ fontSize: 9, color: '#475569' }}>{e.date}</span>}
+                      {e.note && <span style={{ fontSize: 9, color: '#64748b' }}>{e.note}</span>}
+                    </div>
+                    <div className="fx g4 ac">
+                      {/* Mark as collected button */}
+                      <span onClick={() => collectExpected(c.id, i)} style={{
+                        color: '#4ade80', fontSize: 9, fontWeight: 700, cursor: 'pointer',
+                        background: 'rgba(74,222,128,.1)', padding: '3px 6px', borderRadius: 3,
+                        border: '1px solid rgba(74,222,128,.2)',
+                      }}>RECV'D</span>
+                      <span onClick={() => removeExpected(c.id, i)} style={{
+                        color: '#f87171', fontSize: 11, cursor: 'pointer', padding: '2px 6px',
+                        opacity: 0.6,
+                      }}>{'\u2715'}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          <div>
-            <label className="lbl gry">NOTES</label>
+          {/* === NOTES SECTION === */}
+          <div style={{ padding: '8px 12px 12px' }}>
+            <label style={{ fontSize: 10, fontWeight: 700, color: '#64748b', letterSpacing: 1, marginBottom: 4, display: 'block' }}>NOTES</label>
             <input className="inp" value={cn || ''} placeholder="Follow-up notes..."
               onChange={e => upd(c.id, 'cn', e.target.value)} />
           </div>
@@ -206,8 +280,8 @@ export function ClientCard({ client, gd, gdn, upd, doPif, undoPif, doPifExp, und
       {!expanded && (cn || since > 0 || exp > 0) && (
         <div style={{ padding: '4px 12px 8px', fontSize: 11 }} className="fx g8 fw">
           {since > 0 && <span className="blu">+{fd(since)}</span>}
-          {exp > 0 && <span className="ylw">Potential:{fd(exp)}</span>}
-          {edt && <span className="gry">by {edt}</span>}
+          {exp > 0 && <span className="ylw">Pipeline:{fd(exp)}</span>}
+          {expectedPayments.length > 0 && <span className="gry">{expectedPayments.length} pending</span>}
           {cn && <span className="gry">"{cn}"</span>}
         </div>
       )}

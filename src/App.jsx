@@ -15,7 +15,7 @@ import './styles.css';
 const CLOSER_KEYS = Object.keys(CLOSER_NAMES);
 
 export default function App() {
-  const { trackedData, loading, gd, gdn, upd, doPif, undoPif, doPifExp, undoPifExp, doReset, addPayment, removePayment, getPayments } = useStorage();
+  const { trackedData, loading, gd, gdn, upd, doPif, undoPif, addPayment, removePayment, getPayments, addExpected, removeExpected, getExpected, collectExpected, doReset } = useStorage();
 
   // UI state
   const [filter, setFilter] = useState('ALL');
@@ -390,8 +390,10 @@ export default function App() {
             upd={upd}
             doPif={id => doPif(id, c.bal - gdn(c.id, 'since'))}
             undoPif={undoPif}
-            doPifExp={id => doPifExp(id, Math.max(0, c.sale - c.col - gdn(c.id, 'since')))}
-            undoPifExp={undoPifExp}
+            addExpected={addExpected}
+            removeExpected={removeExpected}
+            getExpected={getExpected}
+            collectExpected={collectExpected}
             expanded={expanded === c.id}
             onToggleExpand={() => setExpanded(expanded === c.id ? null : c.id)}
             jump={jump === c.id}

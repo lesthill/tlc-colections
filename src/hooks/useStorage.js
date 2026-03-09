@@ -56,17 +56,49 @@ export function useStorage() {
     save(next);
   }, [trackedData, save, gd]);
 
-  // Set expected to PIF amount
-  const doPifExp = useCallback((id, amount) => {
-    const next = { ...trackedData, [id]: { ...(trackedData[id] || {}), _prevExp: gd(id, 'exp'), exp: String(amount) } };
+  // Add an expected payment entry
+  const addExpected = useCallback((id, amount, date, note) => {
+    const amt = parseFloat(amount);
+    if (!amt || amt <= 0) return;
+    const rec = trackedData[id] || {};
+    const expected = JSON.parse(rec._expected || '[]');
+    expected.push({ amt, date: date || '', note: note || '', ts: Date.now() });
+    const total = expected.reduce((s, e) => s + e.amt, 0);
+    const next = { ...trackedData, [id]: { ...rec, _expected: JSON.stringify(expected), exp: String(total) } };
     save(next);
-  }, [trackedData, save, gd]);
+  }, [trackedData, save]);
 
-  // Undo expected PIF
-  const undoPifExp = useCallback((id) => {
-    const next = { ...trackedData, [id]: { ...(trackedData[id] || {}), exp: gd(id, '_prevExp') || '0', _prevExp: '' } };
+  // Remove an expected payment entry by index
+  const removeExpected = useCallback((id, index) => {
+    const rec = trackedData[id] || {};
+    const expected = JSON.parse(rec._expected || '[]');
+    expected.splice(index, 1);
+    const total = expected.reduce((s, e) => s + e.amt, 0);
+    const next = { ...trackedData, [id]: { ...rec, _expected: JSON.stringify(expected), exp: String(total) } };
     save(next);
-  }, [trackedData, save, gd]);
+  }, [trackedData, save]);
+
+  // Get expected payments array for a client
+  const getExpected = useCallback((id) => {
+    try { return JSON.parse((trackedData[id] || {})._expected || '[]'); } catch (e) { return []; }
+  }, [trackedData]);
+
+  // Move an expected payment to collected (payments)
+  const collectExpected = useCallback((id, index) => {
+    const rec = trackedData[id] || {};
+    const expected = JSON.parse(rec._expected || '[]');
+    if (index < 0 || index >= expected.length) return;
+    const entry = expected[index];
+    // Remove from expected
+    expected.splice(index, 1);
+    const expTotal = expected.reduce((s, e) => s + e.amt, 0);
+    // Add to payments
+    const payments = JSON.parse(rec._payments || '[]');
+    payments.push({ amt: entry.amt, ts: Date.now(), note: entry.note || 'Expected → Collected' });
+    const sinceTotal = payments.reduce((s, p) => s + p.amt, 0);
+    const next = { ...trackedData, [id]: { ...rec, _expected: JSON.stringify(expected), exp: String(expTotal), _payments: JSON.stringify(payments), since: String(sinceTotal) } };
+    save(next);
+  }, [trackedData, save]);
 
   // Add a payment entry
   const addPayment = useCallback((id, amount, note) => {
@@ -101,5 +133,5 @@ export function useStorage() {
     try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
   }, []);
 
-  return { trackedData, loading, gd, gdn, upd, doPif, undoPif, doPifExp, undoPifExp, addPayment, removePayment, getPayments, doReset };
+  return { trackedData, loading, gd, gdn, upd, doPif, undoPif, addExpected, removeExpected, getExpected, collectExpected, addPayment, removePayment, getPayments, doReset };
 }

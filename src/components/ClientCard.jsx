@@ -6,8 +6,10 @@ import { Gauge, DoneBadge } from './Gauge.jsx';
 export function ClientCard({ client, gd, gdn, upd, doPif, undoPif, addPayment, removePayment, getPayments, addExpected, removeExpected, getExpected, collectExpected, expanded, onToggleExpand, jump, onAskACH, onDialGoTo }) {
   const c = client;
   const [newPayAmt, setNewPayAmt] = useState('');
+  const [newPayType, setNewPayType] = useState('');
   const [newExpAmt, setNewExpAmt] = useState('');
   const [newExpDate, setNewExpDate] = useState('');
+  const [newExpType, setNewExpType] = useState('');
   const payments = getPayments(c.id);
   const expectedPayments = getExpected(c.id);
   const since = gdn(c.id, 'since');
@@ -148,21 +150,31 @@ export function ClientCard({ client, gd, gdn, upd, doPif, undoPif, addPayment, r
             </div>
 
             {/* Add collection row */}
-            <div className="fx g6 ac" style={{ marginBottom: 6 }}>
+            <div className="fx g6 ac fw" style={{ marginBottom: 6 }}>
               <input type="text" inputMode="numeric" pattern="[0-9]*" className="inp"
-                style={{ color: '#38bdf8', fontWeight: 700, fontSize: 14, borderColor: 'rgba(56,189,248,.15)', flex: 1 }}
+                style={{ color: '#38bdf8', fontWeight: 700, fontSize: 14, borderColor: 'rgba(56,189,248,.15)', flex: 1, minWidth: 80 }}
                 value={newPayAmt} placeholder="Amount"
                 onChange={e => setNewPayAmt(e.target.value)}
                 onKeyDown={e => {
                   if (e.key === 'Enter' && newPayAmt && parseFloat(newPayAmt) > 0) {
-                    addPayment(c.id, newPayAmt, '');
-                    setNewPayAmt('');
+                    addPayment(c.id, newPayAmt, newPayType);
+                    setNewPayAmt(''); setNewPayType('');
                   }
                 }} />
+              <div className="fx g3 ac">
+                {['ACH', 'CC', 'Other'].map(t => (
+                  <span key={t} onClick={() => setNewPayType(newPayType === t ? '' : t)} style={{
+                    padding: '6px 8px', borderRadius: 5, fontSize: 10, fontWeight: 700, cursor: 'pointer',
+                    background: newPayType === t ? 'rgba(56,189,248,.2)' : 'rgba(15,26,42,.5)',
+                    border: '1px solid ' + (newPayType === t ? 'rgba(56,189,248,.5)' : 'rgba(30,58,95,.2)'),
+                    color: newPayType === t ? '#38bdf8' : '#475569',
+                  }}>{t}</span>
+                ))}
+              </div>
               <span onClick={() => {
                 if (newPayAmt && parseFloat(newPayAmt) > 0) {
-                  addPayment(c.id, newPayAmt, '');
-                  setNewPayAmt('');
+                  addPayment(c.id, newPayAmt, newPayType);
+                  setNewPayAmt(''); setNewPayType('');
                 }
               }} style={{
                 background: 'rgba(56,189,248,.1)', border: '1px solid rgba(56,189,248,.25)',
@@ -188,8 +200,8 @@ export function ClientCard({ client, gd, gdn, upd, doPif, undoPif, addPayment, r
                     }}>
                       <div className="fx ac g6">
                         <span style={{ fontSize: 13, fontWeight: 700, color: '#38bdf8' }}>{fd(p.amt)}</span>
+                        {p.note && <span style={{ fontSize: 8, fontWeight: 700, color: '#38bdf8', background: 'rgba(56,189,248,.12)', padding: '1px 5px', borderRadius: 3 }}>{p.note}</span>}
                         <span style={{ fontSize: 9, color: '#475569' }}>{dateFmt}</span>
-                        {p.note && <span style={{ fontSize: 9, color: '#64748b' }}>{p.note}</span>}
                       </div>
                       <span onClick={() => removePayment(c.id, i)} style={{
                         color: '#f87171', fontSize: 11, cursor: 'pointer', padding: '2px 6px',
@@ -211,20 +223,29 @@ export function ClientCard({ client, gd, gdn, upd, doPif, undoPif, addPayment, r
             </div>
 
             {/* Add expected row */}
-            <div className="fx g6 ac" style={{ marginBottom: 6 }}>
+            <div className="fx g6 ac fw" style={{ marginBottom: 6 }}>
               <input type="text" inputMode="numeric" pattern="[0-9]*" className="inp"
-                style={{ color: '#fbbf24', fontWeight: 700, fontSize: 14, borderColor: 'rgba(251,191,36,.15)', flex: 1 }}
+                style={{ color: '#fbbf24', fontWeight: 700, fontSize: 14, borderColor: 'rgba(251,191,36,.15)', flex: 1, minWidth: 80 }}
                 value={newExpAmt} placeholder="Amount"
                 onChange={e => setNewExpAmt(e.target.value)} />
               <input type="date" className="inp"
                 style={{ fontSize: 12, borderColor: 'rgba(251,191,36,.15)', width: 130 }}
                 value={newExpDate}
                 onChange={e => setNewExpDate(e.target.value)} />
+              <div className="fx g3 ac">
+                {['ACH', 'CC', 'Other'].map(t => (
+                  <span key={t} onClick={() => setNewExpType(newExpType === t ? '' : t)} style={{
+                    padding: '6px 8px', borderRadius: 5, fontSize: 10, fontWeight: 700, cursor: 'pointer',
+                    background: newExpType === t ? 'rgba(251,191,36,.2)' : 'rgba(15,26,42,.5)',
+                    border: '1px solid ' + (newExpType === t ? 'rgba(251,191,36,.5)' : 'rgba(30,58,95,.2)'),
+                    color: newExpType === t ? '#fbbf24' : '#475569',
+                  }}>{t}</span>
+                ))}
+              </div>
               <span onClick={() => {
                 if (newExpAmt && parseFloat(newExpAmt) > 0) {
-                  addExpected(c.id, newExpAmt, newExpDate, '');
-                  setNewExpAmt('');
-                  setNewExpDate('');
+                  addExpected(c.id, newExpAmt, newExpDate, newExpType);
+                  setNewExpAmt(''); setNewExpDate(''); setNewExpType('');
                 }
               }} style={{
                 background: 'rgba(251,191,36,.1)', border: '1px solid rgba(251,191,36,.25)',
@@ -246,8 +267,8 @@ export function ClientCard({ client, gd, gdn, upd, doPif, undoPif, addPayment, r
                   }}>
                     <div className="fx ac g6">
                       <span style={{ fontSize: 13, fontWeight: 700, color: '#fbbf24' }}>{fd(e.amt)}</span>
+                      {e.note && <span style={{ fontSize: 8, fontWeight: 700, color: '#fbbf24', background: 'rgba(251,191,36,.12)', padding: '1px 5px', borderRadius: 3 }}>{e.note}</span>}
                       {e.date && <span style={{ fontSize: 9, color: '#475569' }}>{e.date}</span>}
-                      {e.note && <span style={{ fontSize: 9, color: '#64748b' }}>{e.note}</span>}
                     </div>
                     <div className="fx g4 ac">
                       {/* Mark as collected button */}

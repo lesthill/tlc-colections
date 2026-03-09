@@ -285,17 +285,17 @@ function render(){
   h+='</div>';
 
   // Selected closer mini frame OR spiff tracker — fixed height so pills don't shift
-  var spiffBg=selCl?'background:rgba(30,58,95,.1)':'background:linear-gradient(135deg,rgba(10,22,40,.95),rgba(20,35,60,.9));border:1px solid rgba(74,222,128,.2)';
-  h+='<div style="'+spiffBg+';border-radius:8px;padding:6px 10px;margin-bottom:8px;height:104px;overflow:hidden">';
+  var spiffBg=selCl?'background:rgba(30,58,95,.1)':'background:linear-gradient(135deg,rgba(8,18,35,.97),rgba(15,30,55,.95));border:1px solid rgba(74,222,128,.25);box-shadow:0 0 20px rgba(74,222,128,.06)';
+  h+='<div style="'+spiffBg+';border-radius:10px;padding:8px 12px;margin-bottom:8px;height:140px;overflow:hidden">';
   if(selCl){
     var sc=cls[f],swp=sc.sale>0?sc.ws/sc.sale:0,ssp=sc.sale>0?sc.si/sc.sale:0,sep=sc.sale>0?sc.ex/sc.sale:0,spd=sc.sale>0?(sc.ws+sc.si)/sc.sale:0;
     h+='<div class="fx ac g8" style="height:100%">';
     if(spd>=.999){h+='<div style="width:50px;height:28px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(74,222,128,.1);border-radius:6px"><span style="font-size:13px">&#9989;</span></div>'}
     else{h+='<div style="width:50px;height:28px;flex-shrink:0">'+svg(50,28,swp,ssp,sep,fp(spd))+'</div>'}
-    h+='<div style="flex:1"><div style="font-size:13px;font-weight:700;color:#7dd3fc">'+CN[f]+'</div>';
-    h+='<div style="font-size:10px;color:#475569">'+sc.cnt+' accts | '+sc.con+' contacted | <span style="color:#fb923c;font-weight:700">'+fd(sc.bal)+'</span></div></div></div>'
+    h+='<div style="flex:1"><div style="font-size:15px;font-weight:700;color:#7dd3fc">'+CN[f]+'</div>';
+    h+='<div style="font-size:11px;color:#475569;margin-top:2px">'+sc.cnt+' accts | '+sc.con+' contacted | <span style="color:#fb923c;font-weight:700">'+fd(sc.bal)+'</span></div></div></div>'
   } else {
-    // DC SPIFF tracker
+    // DC SPIFF tracker — BIG and BOLD
     var dcHeads=46;
     var dcClients=D.filter(function(c){return c.ev==='Wash DC'});
     var dcColTotal=0;var dcSinceTotal=0;
@@ -307,39 +307,34 @@ function render(){
     var nextTier=null;
     for(var ti=0;ti<spiffTiers.length;ti++){if(dcSPH<spiffTiers[ti].sph){nextTier=spiffTiers[ti];break}}
     var nextNeed=nextTier?Math.max(0,nextTier.sph*dcHeads-dcCollected):0;
-    // Top: DC SPIFF gradient title + big SPH number
-    h+='<div class="fx jb ac" style="margin-bottom:5px">';
-    h+='<div class="fx ac g6"><div style="font-size:12px;font-weight:900;letter-spacing:2px;background:linear-gradient(90deg,#4ade80,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent">DC SPIFF</div>';
-    h+='<div style="font-size:9px;color:#475569">'+fd(dcCollected)+' &middot; '+dcHeads+' hds</div></div>';
-    h+='<div style="font-size:22px;font-weight:900;color:'+(dcSPH>=4500?'#4ade80':'#e2e8f0')+';letter-spacing:-1px">$'+dcSPH.toLocaleString()+' <span style="font-size:9px;font-weight:600;color:#64748b;letter-spacing:0">SPH</span></div>';
+    // Row 1: DC SPIFF title + SPH big
+    h+='<div class="fx jb ac" style="margin-bottom:6px">';
+    h+='<div><div style="font-size:14px;font-weight:900;letter-spacing:3px;background:linear-gradient(90deg,#4ade80,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1">DC SPIFF</div>';
+    h+='<div style="font-size:9px;color:#64748b;margin-top:1px">'+fd(dcCollected)+' collected &middot; '+dcHeads+' heads</div></div>';
+    h+='<div style="text-align:right"><div style="font-size:28px;font-weight:900;color:'+(dcSPH>=4500?'#4ade80':'#e2e8f0')+';letter-spacing:-1px;line-height:1">$'+dcSPH.toLocaleString()+'</div>';
+    h+='<div style="font-size:9px;font-weight:600;color:#64748b">per head</div></div>';
     h+='</div>';
-    // Thermometer bar
-    h+='<div style="position:relative;height:10px;background:rgba(15,23,42,.9);border-radius:5px;overflow:hidden;border:1px solid rgba(51,65,85,.5);margin-bottom:5px">';
+    // Thermometer
+    h+='<div style="position:relative;height:14px;background:rgba(15,23,42,.9);border-radius:7px;overflow:hidden;border:1px solid rgba(51,65,85,.5);margin-bottom:8px">';
     var fillColor=dcSPH>=10000?'linear-gradient(90deg,#4ade80,#38bdf8,#a78bfa,#fb923c)':dcSPH>=9000?'linear-gradient(90deg,#4ade80,#38bdf8,#a78bfa)':dcSPH>=8500?'linear-gradient(90deg,#4ade80,#38bdf8)':dcSPH>=4500?'linear-gradient(90deg,#4ade80,#22c55e)':'linear-gradient(90deg,#334155,#475569)';
-    h+='<div style="position:absolute;top:0;left:0;height:100%;width:'+Math.round(pctFill*100)+'%;background:'+fillColor+';border-radius:5px"></div>';
+    h+='<div style="position:absolute;top:0;left:0;height:100%;width:'+Math.round(pctFill*100)+'%;background:'+fillColor+';border-radius:7px"></div>';
     spiffTiers.forEach(function(t){var pos=Math.round((t.sph/maxSPH)*100);h+='<div style="position:absolute;top:0;left:'+pos+'%;width:1px;height:100%;background:'+(dcSPH>=t.sph?'rgba(255,255,255,.4)':'rgba(71,85,105,.5)')+'"></div>'});
     h+='</div>';
-    // Tier roadmap cards
-    if(nextTier){
-      h+='<div class="fx g4" style="align-items:stretch">';
-      // Next tier — big prominent card
-      h+='<div style="flex:2;background:rgba(0,0,0,.25);border:1px solid '+nextTier.color+'55;border-radius:6px;padding:3px 7px">';
-      h+='<div style="font-size:8px;font-weight:800;color:'+nextTier.color+'">'+nextTier.label+' &#8594; '+nextTier.bonus+' ea</div>';
-      h+='<div style="font-size:12px;font-weight:900;color:#fff">'+fd(nextNeed)+' <span style="font-size:8px;font-weight:600;color:#94a3b8">to go</span></div>';
+    // Tier roadmap — 4 equal cards
+    h+='<div class="fx g4" style="align-items:stretch">';
+    spiffTiers.forEach(function(t){
+      var hit=dcSPH>=t.sph;var need=Math.max(0,t.sph*dcHeads-dcCollected);
+      var isNext=nextTier&&t.sph===nextTier.sph;
+      var bg=hit?'rgba(74,222,128,.08)':isNext?'rgba(0,0,0,.3)':'rgba(0,0,0,.15)';
+      var bdr=hit?t.color+'44':isNext?t.color+'66':t.color+'22';
+      h+='<div style="flex:1;background:'+bg+';border:1px solid '+bdr+';border-radius:6px;padding:4px 5px;text-align:center">';
+      h+='<div style="font-size:8px;font-weight:800;color:'+t.color+'">'+t.label+(hit?' &#10003;':'')+'</div>';
+      if(hit){h+='<div style="font-size:10px;font-weight:800;color:#e2e8f0">'+t.bonus+'</div>'}
+      else{h+='<div style="font-size:10px;font-weight:900;color:'+(isNext?'#fff':'#94a3b8')+'">'+fd(need)+'</div>';
+      h+='<div style="font-size:7px;color:#64748b">'+t.bonus+' ea</div>'}
       h+='</div>';
-      // Other tiers
-      for(var tj=spiffTiers.indexOf(nextTier)+1;tj<spiffTiers.length;tj++){
-        var ft=spiffTiers[tj];var fn=Math.max(0,ft.sph*dcHeads-dcCollected);
-        h+='<div style="flex:1;background:rgba(0,0,0,.15);border:1px solid '+ft.color+'22;border-radius:6px;padding:3px 5px;text-align:center">';
-        h+='<div style="font-size:7px;font-weight:700;color:'+ft.color+'">'+ft.label+'</div>';
-        h+='<div style="font-size:9px;font-weight:800;color:#94a3b8">'+fd(fn)+'</div>';
-        h+='<div style="font-size:7px;color:#64748b">'+ft.bonus+'</div>';
-        h+='</div>';
-      }
-      h+='</div>';
-    } else {
-      h+='<div style="text-align:center;font-size:14px;color:#4ade80;font-weight:800">&#127881; ALL TIERS HIT! &#127881;</div>';
-    }
+    });
+    h+='</div>';
   }
   h+='</div>';
 
@@ -487,7 +482,7 @@ function render(){
     h+='</div>';
     // Contact
     if(c.ph||c.em){h+='<div style="padding:0 12px 6px" class="fx g6 fw con">';
-      if(c.ph)h+='<a href="tel:'+c.ph+'">&#128222; '+c.ph+'</a>';
+      if(c.ph)h+='<a href="goto:'+c.ph+'">&#128222; '+c.ph+'</a>';
       if(c.em)h+='<a href="mailto:'+c.em+'" style="overflow:hidden;text-overflow:ellipsis;max-width:200px;white-space:nowrap">&#9993; '+c.em+'</a>';
     h+='</div>'}
 

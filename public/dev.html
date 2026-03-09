@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TLC v2 DEV</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #1a1a2e;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .phone-frame {
+    width: 393px;
+    height: 852px;
+    border-radius: 47px;
+    border: 6px solid #2a2a3e;
+    background: #000;
+    position: relative;
+    overflow: hidden;
+    box-shadow:
+      0 0 0 2px #111,
+      0 20px 60px rgba(0,0,0,0.5),
+      inset 0 0 0 2px #333;
+  }
+  /* Dynamic Island */
+  .notch {
+    position: absolute;
+    top: 11px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 126px;
+    height: 37px;
+    background: #000;
+    border-radius: 20px;
+    z-index: 10;
+  }
+  /* Side buttons */
+  .phone-frame::before {
+    content: '';
+    position: absolute;
+    right: -8px;
+    top: 172px;
+    width: 4px;
+    height: 72px;
+    background: #2a2a3e;
+    border-radius: 0 3px 3px 0;
+  }
+  .phone-frame::after {
+    content: '';
+    position: absolute;
+    left: -8px;
+    top: 148px;
+    width: 4px;
+    height: 44px;
+    background: #2a2a3e;
+    border-radius: 3px 0 0 3px;
+    box-shadow: 0 56px 0 #2a2a3e, 0 100px 0 #2a2a3e;
+  }
+  iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    border-radius: 41px;
+  }
+  .label {
+    color: #555;
+    font-size: 12px;
+    text-align: center;
+    margin-top: 16px;
+    letter-spacing: 2px;
+  }
+  .reload-btn {
+    display: block;
+    margin: 12px auto 0;
+    background: #2a2a3e;
+    border: none;
+    color: #7dd3fc;
+    padding: 8px 20px;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .reload-btn:hover { background: #3a3a4e; }
+</style>
+</head>
+<body>
+  <div>
+    <div class="phone-frame">
+      <div class="notch"></div>
+      <iframe id="app" src="/"></iframe>
+    </div>
+    <div class="label">iPHONE 15 PRO — 393 × 852</div>
+    <button class="reload-btn" onclick="document.getElementById('app').src='/?t='+Date.now()">↻ Reload</button>
+  </div>
+</body>
+</html>

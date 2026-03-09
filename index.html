@@ -58,7 +58,7 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
 @keyframes spiffGlow{0%,100%{box-shadow:0 0 2px rgba(74,222,128,.15)}50%{box-shadow:0 0 6px rgba(74,222,128,.25),0 0 10px rgba(56,189,248,.1)}}
 @keyframes spiffShimmer{0%{left:-100%}100%{left:200%}}
 @keyframes tierPulse{0%,100%{opacity:.85;transform:scale(1)}50%{opacity:1;transform:scale(1.02)}}
-@keyframes amtGlow{0%,100%{text-shadow:0 0 4px rgba(255,255,255,.2)}50%{text-shadow:0 0 12px rgba(255,255,255,.6),0 0 20px rgba(74,222,128,.4)}}
+@keyframes amtGlow{0%,100%{text-shadow:0 0 8px rgba(255,255,255,.4),0 0 16px rgba(74,222,128,.2)}50%{text-shadow:0 0 24px rgba(255,255,255,.9),0 0 40px rgba(74,222,128,.7),0 0 56px rgba(74,222,128,.3)}}
 @keyframes pifGlow{0%{box-shadow:0 0 0 0 rgba(74,222,128,.4)}70%{box-shadow:0 0 0 12px rgba(74,222,128,0)}100%{box-shadow:0 0 0 0 rgba(74,222,128,0)}}
 .pif-anim{animation:pifPop .5s ease,pifGlow .7s ease}
 .done{display:flex;align-items:center;justify-content:center;width:96px;height:56px;flex-shrink:0;background:rgba(74,222,128,.1);border:2px solid rgba(74,222,128,.3);border-radius:12px}
@@ -248,6 +248,7 @@ function svg(w,h,ws,si,ex,txt){
   return s+'</svg>'}
 
 function doRefresh(){if(window.caches){caches.keys().then(function(n){n.forEach(function(k){caches.delete(k)})});setTimeout(function(){window.location.href=window.location.pathname+'?v=53&t='+Date.now()},300)}else{window.location.href=window.location.pathname+'?v=53&t='+Date.now()}}
+function dialGoTo(ph){var raw=ph.replace(/[^0-9]/g,'');navigator.clipboard.writeText(raw).catch(function(){});window.location.href='com.logmein.gotoconnect://dial?number='+raw}
 function render(){
   var f=S.f;
   // Show events until 4th Friday after event date
@@ -489,7 +490,7 @@ function render(){
     h+='</div>';
     // Contact
     if(c.ph||c.em){h+='<div style="padding:0 12px 6px" class="fx g6 fw con">';
-      if(c.ph)h+='<a href="tel:'+c.ph+'">&#128222; '+c.ph+'</a>';
+      if(c.ph)h+='<a href="#" onclick="dialGoTo(\''+c.ph+'\');return false;">&#128222; '+c.ph+'</a>';
       if(c.em)h+='<a href="mailto:'+c.em+'" style="overflow:hidden;text-overflow:ellipsis;max-width:200px;white-space:nowrap">&#9993; '+c.em+'</a>';
     h+='</div>'}
 

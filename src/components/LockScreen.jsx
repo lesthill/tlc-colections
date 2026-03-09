@@ -1,19 +1,26 @@
 import { useState, useEffect, useCallback } from 'react';
 
 const CRED_KEY = 'tlc-webauthn-cred';
+const SESSION_KEY = 'tlc-unlocked';
 
 function canWebAuthn() {
   return window.PublicKeyCredential && navigator.credentials;
 }
 
-// Generate a random buffer
+function isSessionUnlocked() {
+  return !!sessionStorage.getItem(SESSION_KEY);
+}
+
+function markSessionUnlocked() {
+  sessionStorage.setItem(SESSION_KEY, '1');
+}
+
 function randomBuf(len) {
   const buf = new Uint8Array(len);
   crypto.getRandomValues(buf);
   return buf;
 }
 
-// Enroll: create a new credential (triggers Face ID / Touch ID)
 async function enroll() {
   const challenge = randomBuf(32);
   const userId = randomBuf(16);
@@ -30,13 +37,11 @@ async function enroll() {
       timeout: 60000,
     },
   });
-  // Store credential ID for future assertions
   const idArr = Array.from(new Uint8Array(cred.rawId));
   localStorage.setItem(CRED_KEY, JSON.stringify(idArr));
   return true;
 }
 
-// Verify: request assertion with stored credential (triggers Face ID / Touch ID)
 async function verify() {
   const stored = localStorage.getItem(CRED_KEY);
   if (!stored) return false;
@@ -55,20 +60,22 @@ async function verify() {
 }
 
 export function LockScreen() {
-  const [visible, setVisible] = useState(true);
+  // Skip entirely if already unlocked this session
+  const [visible, setVisible] = useState(!isSessionUnlocked());
   const [fading, setFading] = useState(false);
-  const [status, setStatus] = useState(''); // '', 'checking', 'enroll', 'failed'
+  const [status, setStatus] = useState('');
   const hasWebAuthn = canWebAuthn();
   const hasCredential = !!localStorage.getItem(CRED_KEY);
 
   const dismiss = useCallback(() => {
+    markSessionUnlocked();
     setFading(true);
     setTimeout(() => setVisible(false), 350);
   }, []);
 
-  // Auto-trigger Face ID on mount if enrolled
+  // Auto-trigger Face ID on mount if enrolled and not already unlocked
   useEffect(() => {
-    if (!hasWebAuthn || !hasCredential) return;
+    if (!visible || !hasWebAuthn || !hasCredential) return;
     let cancelled = false;
     setStatus('checking');
     verify()
@@ -159,13 +166,11 @@ export function LockScreen() {
           </svg>
         </div>
       ) : (
-        /* Waiting for auto-verify on mount */
         <div style={{ fontSize: 13, color: 'var(--text-dim)', marginBottom: 40 }}>
           Authenticating...
         </div>
       )}
 
-      {/* Face ID icon when checking */}
       {showFaceId && !status.startsWith('fail') && (
         <div style={{ marginTop: 24, opacity: 0.4 }}>
           <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--green)" strokeWidth="1.2">

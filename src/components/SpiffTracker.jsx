@@ -111,7 +111,7 @@ export function SpiffTracker({ gdn }) {
                 {t.label}{hit ? ' \u2713' : ''}
               </div>
               <div style={{
-                fontSize: 14, fontWeight: 900, letterSpacing: -0.5,
+                fontSize: 18, fontWeight: 900, letterSpacing: -0.5, lineHeight: 1,
                 color: hit ? t.color : isNext ? '#fff' : 'var(--text-secondary)',
                 textShadow: hit ? `0 0 12px ${t.color}80` : isNext ? '0 0 16px rgba(255,255,255,.6)' : 'none',
                 animation: isNext ? 'amtGlow 2s ease-in-out infinite' : 'none',

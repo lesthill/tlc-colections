@@ -354,12 +354,7 @@ export default function App() {
                 <span key={k}
                   className={'pill' + (filter === k ? ' on' : '') + (!hasCl ? ' gry' : '')}
                   onClick={() => hasCl && setFilter(filter === k ? 'ALL' : k)}
-                >
-                  {k}
-                  {hasCl && <span style={{ fontSize: 10, opacity: 0.7 }}>
-                    {cls[k].bal >= 1000 ? Math.round(cls[k].bal / 1000) + 'K' : fd(cls[k].bal)}
-                  </span>}
-                </span>
+                >{k}</span>
               );
             })}
           </div>

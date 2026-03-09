@@ -12,7 +12,7 @@ export function CloserPanel({ closerKey, closerStats, closerNames }) {
   return (
     <div style={{
       background: 'rgba(30,58,95,.15)', border: '1px solid rgba(125,211,252,.2)',
-      borderRadius: 10, padding: '10px 14px', marginBottom: 8, minHeight: 80,
+      borderRadius: 10, padding: '10px 14px', marginBottom: 8, height: 140, overflow: 'hidden',
     }}>
       <div className="fx ac g10">
         {spd >= 0.999 ? (

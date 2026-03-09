@@ -247,7 +247,7 @@ function svg(w,h,ws,si,ex,txt){
   if(txt)s+='<text x="'+cx+'" y="'+(cy-4)+'" text-anchor="middle" fill="#e2e8f0" font-size="'+(w*.22)+'" font-weight="700" font-family="system-ui">'+txt+'</text>';
   return s+'</svg>'}
 
-function doRefresh(){if(window.caches){caches.keys().then(function(n){n.forEach(function(k){caches.delete(k)})});setTimeout(function(){window.location.href=window.location.pathname+'?v=55&t='+Date.now()},300)}else{window.location.href=window.location.pathname+'?v=55&t='+Date.now()}}
+function doRefresh(){if(window.caches){caches.keys().then(function(n){n.forEach(function(k){caches.delete(k)})});setTimeout(function(){window.location.href=window.location.pathname+'?v=56&t='+Date.now()},300)}else{window.location.href=window.location.pathname+'?v=56&t='+Date.now()}}
 function dialGoTo(ph){var raw=ph.replace(/[^0-9]/g,'');navigator.clipboard.writeText(raw).catch(function(){});window.location.href='com.logmein.gotoconnect://dial?number='+raw}
 function render(){
   var f=S.f;
@@ -270,7 +270,7 @@ function render(){
   // ===== STICKY TOP =====
   var h='<div class="ftop">';
   h+='<div class="hdr">';
-  h+='<div class="fx jb ac" style="margin-bottom:8px"><div><div class="tag">TLC COLLECTIONS</div><div style="font-size:9px;color:#334155;letter-spacing:1px" onclick="doRefresh()">v54</div></div>';
+  h+='<div class="fx jb ac" style="margin-bottom:8px"><div><div class="tag">TLC COLLECTIONS</div><div style="font-size:9px;color:#334155;letter-spacing:1px" onclick="doRefresh()">v56</div></div>';
   h+='<div class="fx g6">';
   h+='<button style="background:transparent;border:1px solid rgba(30,58,95,.3);color:#7dd3fc;padding:6px 10px;font-size:16px;border-radius:6px" onclick="S.settings=!S.settings;render()">&#9881;</button>';
   h+='<button style="background:transparent;border:1px solid rgba(74,222,128,.25);color:#4ade80;padding:6px 10px;font-size:13px;border-radius:6px" onclick="doRefresh()">&#x21bb;</button>';
@@ -528,7 +528,11 @@ function render(){
       if(edt)h+='<span class="gry">by '+edt+'</span>';if(cn)h+='<span class="gry">"'+cn+'"</span>';h+='</div>'}
     h+='</div>'
   });
-  // ACH choice modal
+  // ACH modal moved outside scroll body
+
+  h+='<div class="fx jb ac" style="padding:14px 16px;font-size:8px;color:#1e293b"><span>LH // '+new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'})+'</span><span style="color:#7dd3fc;font-weight:700">TLC COLLECTIONS</span></div>';
+  h+='</div>';
+  // ACH choice modal — rendered outside scroll body so iOS stacking context doesn't clip it
   if(achPending){
     h+='<div style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:9000;display:flex;align-items:center;justify-content:center" onclick="achPending=null;render()">';
     h+='<div style="background:#0c1117;border:1px solid rgba(30,58,95,.3);border-radius:16px;padding:24px;margin:20px;max-width:320px;width:100%" onclick="event.stopPropagation()">';
@@ -539,9 +543,7 @@ function render(){
     h+='<button onclick="achPending=null;render()" style="width:100%;padding:12px;background:transparent;border:1px solid rgba(30,58,95,.3);color:#475569;font-size:13px;border-radius:10px">Cancel</button>';
     h+='</div></div>';
   }
-
-  h+='<div class="fx jb ac" style="padding:14px 16px;font-size:8px;color:#1e293b"><span>LH // '+new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'})+'</span><span style="color:#7dd3fc;font-weight:700">TLC COLLECTIONS</span></div>';
-  h+='</div>';document.getElementById('app').innerHTML=h;setTimeout(function(){var f=document.querySelector('.ftop');var s=document.getElementById('sb');if(f&&s){s.style.marginTop=f.offsetHeight+'px';s.style.height='calc(100vh - '+f.offsetHeight+'px)'}},20)
+  document.getElementById('app').innerHTML=h;setTimeout(function(){var f=document.querySelector('.ftop');var s=document.getElementById('sb');if(f&&s){s.style.marginTop=f.offsetHeight+'px';s.style.height='calc(100vh - '+f.offsetHeight+'px)'}},20)
 }
 try{var v=localStorage.getItem(SK);if(v)TD=JSON.parse(v)}catch(e){}
 try{var nv=localStorage.getItem(NK);if(nv)NC=JSON.parse(nv)}catch(e){}

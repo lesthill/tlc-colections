@@ -158,7 +158,6 @@ function gd(id,f){return(TD[id]||{})[f]||''}
 function gdn(id,f){return parseFloat((TD[id]||{})[f])||0}
 function upd(id,f,v){if(!TD[id])TD[id]={};TD[id][f]=v;if(f==='cs'&&v==='collected'){TD[id]['ct']=Date.now()}if(f==='cs'&&v!=='collected'){delete TD[id]['ct']}try{localStorage.setItem(SK,JSON.stringify(TD))}catch(e){}render()}
 function dueDate(sd){var d=new Date(sd+'T12:00:00');var c=0;while(c<3){d.setDate(d.getDate()+1);if(d.getDay()===5)c++}return d}
-function pullDate(sd){var d=new Date(sd+'T12:00:00');var c=0;while(c<4){d.setDate(d.getDate()+1);if(d.getDay()===5)c++}return d}
 function daysLeft(sd){return Math.ceil((dueDate(sd)-new Date())/(864e5))}
 function weeksAgo(ed){return Math.round((new Date()-new Date(ed+'T12:00:00'))/(7*864e5))}
 function doPif(id,bal){upd(id,'_prev',JSON.stringify({since:gd(id,'since'),cs:gd(id,'cs'),exp:gd(id,'exp'),ct:gd(id,'ct')}));if(!TD[id])TD[id]={};TD[id]['_pif']='1';TD[id]['since']=String(bal);TD[id]['cs']='collected';TD[id]['exp']='0';TD[id]['ct']=Date.now();try{localStorage.setItem(SK,JSON.stringify(TD))}catch(e){}render()}
@@ -247,7 +246,7 @@ function svg(w,h,ws,si,ex,txt){
 function doRefresh(){if(window.caches){caches.keys().then(function(n){n.forEach(function(k){caches.delete(k)})});setTimeout(function(){window.location.href=window.location.pathname+'?v=53&t='+Date.now()},300)}else{window.location.href=window.location.pathname+'?v=53&t='+Date.now()}}
 function render(){
   var f=S.f;
-  // Show all cards with outstanding balance; pullDate only controls Foundation badge
+  // Show all cards with outstanding balance
   var now=Date.now();var DAY=24*60*60*1000;var today=new Date();
   var allOpen=D.filter(function(c){if(c.bal<=0)return false;var cs=gd(c.id,'cs');var ct=gdn(c.id,'ct');if(cs==='collected'&&ct>0&&(now-ct)>DAY)return false;return true});
   var evSet={};var evBal={};allOpen.forEach(function(c){evSet[c.ev]=true;if(!evBal[c.ev])evBal[c.ev]=0;evBal[c.ev]+=c.bal-gdn(c.id,'since')});var evList=Object.keys(evSet);
@@ -472,7 +471,6 @@ function render(){
     var cs=gd(c.id,'cs')||'not_contacted';var isPif=gd(c.id,'_pif')==='1';
     var isX=S.exp===c.id;var isJ=S.jump===c.id;
     var dl=daysLeft(c.ed),dueD=dueDate(c.ed),dueFmt=(dueD.getMonth()+1)+'/'+dueD.getDate();
-    var pastPull=today>pullDate(c.ed);
     var dlTxt=dl>0?dl+'d to Fdn':dl===0?'FDN TODAY':'PAST FDN';var dlCol=dl<=0?'#f87171':dl<=7?'#fbbf24':'#4ade80';
     var urgBg=dl<=0?'rgba(248,113,113,.1)':dl<=7?'rgba(251,191,36,.1)':'rgba(74,222,128,.1)';
     var wp=c.sale>0?c.col/c.sale:0,sp=c.sale>0?since/c.sale:0,ep=c.sale>0?exp/c.sale:0;
@@ -485,7 +483,7 @@ function render(){
     if(fullPaid){h+='<div class="done'+(isPif?' pif-anim':'')+'"><div style="text-align:center"><div style="font-size:24px">&#9989;</div><div style="font-size:10px;font-weight:700;color:#4ade80;letter-spacing:2px">PAID</div></div></div>'}
     else{h+='<div style="width:96px;height:56px;flex-shrink:0">'+svg(96,56,wp,sp,ep,fp(totalPaid/(c.sale||1)))+'</div>'}
     h+='<div style="flex:1;min-width:0"><div class="fx ac g4 fw" style="margin-bottom:4px">';
-    if(!pastPull){h+='<span class="badge" style="color:'+dlCol+';background:'+urgBg+'">'+dlTxt+' ('+dueFmt+')</span>';}
+    h+='<span class="badge" style="color:'+dlCol+';background:'+urgBg+'">'+dlTxt+' ('+dueFmt+')</span>';
     h+='<span class="badge" style="color:'+(TC[c.t]||'#94a3b8')+';background:'+(TC[c.t]||'#94a3b8')+'15">'+(TS[c.t]||'')+'</span>';
     h+='<span style="color:#7dd3fc;font-size:11px;font-weight:700">'+c.cl+'</span></div>';
     h+='<div class="nm">'+c.nm+'</div><div class="ev">'+c.ev+'</div></div>';

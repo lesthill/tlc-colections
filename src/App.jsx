@@ -392,7 +392,7 @@ export default function App() {
           </div>
         )}
         <div style={{ padding: '0 10px 8px' }}>
-          <span onClick={() => addPocketDeal({ name: '', amount: 0, event: '', phone: '', email: '', notes: '' })} style={{
+          <span onClick={() => addPocketDeal({ name: '', amount: 0, event: '', closer: '', phone: '', email: '', notes: '' })} style={{
             display: 'block', textAlign: 'center', padding: '10px 0', borderRadius: 8,
             background: 'rgba(167,139,250,.06)', border: '1px dashed rgba(167,139,250,.25)',
             color: '#a78bfa', fontSize: 12, fontWeight: 700, cursor: 'pointer',

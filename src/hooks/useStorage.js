@@ -133,7 +133,21 @@ export function useStorage() {
   }, []);
 
   const [pocketDeals, setPocketDeals] = useState([]);
-  useEffect(() => { setPocketDeals(getPocketDeals()); }, [getPocketDeals]);
+  useEffect(() => {
+    let deals = getPocketDeals();
+    // Seed default pocket deals on first load
+    if (deals.length === 0) {
+      const now = Date.now();
+      deals = [
+        { id: 'pk-s1', name: 'Gary Williams', event: 'Wash DC', closer: 'CL', phone: '', email: '', notes: '', amount: 0, created: now },
+        { id: 'pk-s2', name: 'Ronnie Screen', event: 'Wash DC', closer: 'TK', phone: '', email: '', notes: '', amount: 0, created: now },
+        { id: 'pk-s3', name: 'Linda Godfrey', event: 'Wash DC', closer: 'LT', phone: '', email: '', notes: '', amount: 0, created: now },
+        { id: 'pk-s4', name: 'Yalonda Adams', event: 'Wash DC', closer: 'LT', phone: '', email: '', notes: '', amount: 0, created: now },
+      ];
+      try { localStorage.setItem('tlc-pockets', JSON.stringify(deals)); } catch (e) {}
+    }
+    setPocketDeals(deals);
+  }, [getPocketDeals]);
 
   const savePockets = useCallback((deals) => {
     setPocketDeals(deals);

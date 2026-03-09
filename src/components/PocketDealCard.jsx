@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { CLOSER_NAMES } from '../data.js';
 import { fd } from '../utils.js';
 
 // Next Saturday from a given timestamp
@@ -41,7 +42,10 @@ export function PocketDealCard({ deal, onUpdate, onRemove }) {
               background: urgCol + '15', padding: '2px 6px', borderRadius: 4,
             }}>{countdown}</span>
           </div>
-          <div className="nm">{deal.name || 'Unnamed'}</div>
+          <div className="fx ac g6">
+            <span className="nm" style={{ flex: 'none' }}>{deal.name || 'Unnamed'}</span>
+            {deal.closer && <span style={{ color: '#7dd3fc', fontSize: 11, fontWeight: 700 }}>{deal.closer}</span>}
+          </div>
           {deal.event && <div className="ev">{deal.event}</div>}
         </div>
         <div style={{ textAlign: 'right', flexShrink: 0 }}>
@@ -88,6 +92,19 @@ export function PocketDealCard({ deal, onUpdate, onRemove }) {
               <label style={{ fontSize: 9, fontWeight: 700, color: '#64748b', letterSpacing: 1, display: 'block', marginBottom: 3 }}>EVENT</label>
               <input className="inp" value={deal.event || ''} placeholder="City"
                 onChange={e => onUpdate(deal.id, 'event', e.target.value)} />
+            </div>
+          </div>
+          <div style={{ marginBottom: 10 }}>
+            <label style={{ fontSize: 9, fontWeight: 700, color: '#64748b', letterSpacing: 1, display: 'block', marginBottom: 3 }}>CLOSER</label>
+            <div className="fx g4 fw">
+              {Object.keys(CLOSER_NAMES).map(k => (
+                <span key={k} onClick={() => onUpdate(deal.id, 'closer', deal.closer === k ? '' : k)} style={{
+                  padding: '5px 10px', borderRadius: 5, fontSize: 10, fontWeight: 700, cursor: 'pointer',
+                  background: deal.closer === k ? 'rgba(125,211,252,.15)' : 'rgba(15,26,42,.5)',
+                  border: '1px solid ' + (deal.closer === k ? 'rgba(125,211,252,.4)' : 'rgba(30,58,95,.2)'),
+                  color: deal.closer === k ? '#7dd3fc' : '#475569',
+                }}>{k}</span>
+              ))}
             </div>
           </div>
           <div className="fx g6" style={{ marginBottom: 10 }}>

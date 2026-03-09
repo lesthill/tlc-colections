@@ -247,7 +247,7 @@ function svg(w,h,ws,si,ex,txt){
   if(txt)s+='<text x="'+cx+'" y="'+(cy-4)+'" text-anchor="middle" fill="#e2e8f0" font-size="'+(w*.22)+'" font-weight="700" font-family="system-ui">'+txt+'</text>';
   return s+'</svg>'}
 
-function doRefresh(){if(window.caches){caches.keys().then(function(n){n.forEach(function(k){caches.delete(k)})});setTimeout(function(){window.location.href=window.location.pathname+'?v=53&t='+Date.now()},300)}else{window.location.href=window.location.pathname+'?v=53&t='+Date.now()}}
+function doRefresh(){if(window.caches){caches.keys().then(function(n){n.forEach(function(k){caches.delete(k)})});setTimeout(function(){window.location.href=window.location.pathname+'?v=55&t='+Date.now()},300)}else{window.location.href=window.location.pathname+'?v=55&t='+Date.now()}}
 function dialGoTo(ph){var raw=ph.replace(/[^0-9]/g,'');navigator.clipboard.writeText(raw).catch(function(){});window.location.href='com.logmein.gotoconnect://dial?number='+raw}
 function render(){
   var f=S.f;
@@ -290,15 +290,23 @@ function render(){
   h+='</div>';
 
   // Selected closer mini frame OR spiff tracker — fixed height so pills don't shift
-  var spiffBg=selCl?'background:rgba(30,58,95,.1)':'background:linear-gradient(135deg,rgba(8,18,35,.97),rgba(15,30,55,.95));border:1px solid rgba(74,222,128,.25);box-shadow:0 0 20px rgba(74,222,128,.06)';
-  h+='<div style="'+spiffBg+';border-radius:10px;padding:8px 12px;margin-bottom:8px;height:140px;overflow:hidden">';
+  var spiffBg=selCl?'background:rgba(30,58,95,.15);border:1px solid rgba(125,211,252,.2)':'background:linear-gradient(135deg,rgba(8,18,35,.97),rgba(15,30,55,.95));border:1px solid rgba(74,222,128,.25);box-shadow:0 0 20px rgba(74,222,128,.06)';
+  var spiffH=selCl?'min-height:80px':'height:140px;overflow:hidden';
+  h+='<div style="'+spiffBg+';border-radius:10px;padding:10px 14px;margin-bottom:8px;'+spiffH+'">';
   if(selCl){
     var sc=cls[f],swp=sc.sale>0?sc.ws/sc.sale:0,ssp=sc.sale>0?sc.si/sc.sale:0,sep=sc.sale>0?sc.ex/sc.sale:0,spd=sc.sale>0?(sc.ws+sc.si)/sc.sale:0;
-    h+='<div class="fx ac g8" style="height:100%">';
-    if(spd>=.999){h+='<div style="width:50px;height:28px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(74,222,128,.1);border-radius:6px"><span style="font-size:13px">&#9989;</span></div>'}
-    else{h+='<div style="width:50px;height:28px;flex-shrink:0">'+svg(50,28,swp,ssp,sep,fp(spd))+'</div>'}
-    h+='<div style="flex:1"><div style="font-size:15px;font-weight:700;color:#7dd3fc">'+CN[f]+'</div>';
-    h+='<div style="font-size:11px;color:#475569;margin-top:2px">'+sc.cnt+' accts | '+sc.con+' contacted | <span style="color:#fb923c;font-weight:700">'+fd(sc.bal)+'</span></div></div></div>'
+    var scRem=sc.bal-sc.si;
+    h+='<div class="fx ac g10">';
+    if(spd>=.999){h+='<div style="width:64px;height:36px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(74,222,128,.12);border-radius:8px"><span style="font-size:18px">&#9989;</span></div>'}
+    else{h+='<div style="width:64px;height:36px;flex-shrink:0">'+svg(64,36,swp,ssp,sep,fp(spd))+'</div>'}
+    h+='<div style="flex:1"><div style="font-size:20px;font-weight:800;color:#7dd3fc;letter-spacing:.5px">'+CN[f]+'</div>';
+    h+='<div style="font-size:13px;color:#94a3b8;margin-top:4px"><span style="font-weight:700">'+sc.cnt+'</span> accts &middot; <span style="font-weight:700">'+sc.con+'</span> contacted</div>';
+    h+='<div style="font-size:13px;margin-top:2px"><span style="color:#4ade80;font-weight:700">'+fd(sc.ws)+'</span> ws + <span style="color:#38bdf8;font-weight:700">'+fd(sc.si)+'</span> since</div>';
+    h+='</div>';
+    h+='<div style="text-align:right"><div style="font-size:24px;font-weight:900;color:#fb923c">'+fd(scRem>0?scRem:0)+'</div>';
+    h+='<div style="font-size:10px;color:#64748b;font-weight:600">outstanding</div>';
+    h+='<div style="font-size:12px;color:#475569;margin-top:2px">of '+fd(sc.sale)+'</div></div>';
+    h+='</div>'
   } else {
     // DC SPIFF tracker — BIG and BOLD
     var dcHeads=46;
@@ -351,7 +359,7 @@ function render(){
   // Closer pills (in sticky)
   h+='<div class="closer-bar"><div class="pills">';
   h+='<div class="pill all'+(f==='ALL'?' on':'')+'" onclick="S.f=\'ALL\';render()">ALL</div>';
-  var allClKeys=Object.keys(CN);allClKeys.sort(function(a,b){var ab=cls[a]?cls[a].bal-cls[a].si:0;var bb=cls[b]?cls[b].bal-cls[b].si:0;return bb-ab});
+  var allClKeys=Object.keys(CN);
   allClKeys.forEach(function(k){var hasData=!!cls[k];var cb=hasData?cls[k].bal-cls[k].si:0;var cbs=cb>=1000?(Math.round(cb/1000)+'K'):(hasData?fd(cb):'$0');h+='<div class="pill'+(f===k?' on':'')+(hasData?'':' gry')+'" onclick="S.f=S.f===\''+k+'\'?\'ALL\':\''+k+'\';render()">'+k+' <span style="font-size:10px;opacity:.7">'+cbs+'</span></div>'});
   h+='</div></div>';
   h+='</div>';// end ftop
@@ -461,7 +469,7 @@ function render(){
     var cs=gd(c.id,'cs')||'not_contacted';var isPif=gd(c.id,'_pif')==='1';
     var isX=S.exp===c.id;var isJ=S.jump===c.id;
     var dl=daysLeft(c.ed),dueD=dueDate(c.ed),dueFmt=(dueD.getMonth()+1)+'/'+dueD.getDate();
-    var dlTxt=dl>0?dl+'d to Fdn':dl===0?'FDN TODAY':'PAST FDN';var dlCol=dl<=0?'#f87171':dl<=7?'#fbbf24':'#4ade80';
+    var dlTxt=dl>0?dl+'d to Foundation':dl===0?'FOUNDATION TODAY':'PAST FOUNDATION';var dlCol=dl<=0?'#f87171':dl<=7?'#fbbf24':'#4ade80';
     var urgBg=dl<=0?'rgba(248,113,113,.1)':dl<=7?'rgba(251,191,36,.1)':'rgba(74,222,128,.1)';
     var wp=c.sale>0?c.col/c.sale:0,sp=c.sale>0?since/c.sale:0,ep=c.sale>0?exp/c.sale:0;
     var totalPaid=c.col+since;var fullPaid=totalPaid>=c.sale&&c.sale>0;var remaining=c.bal-since;var pifAmt=Math.max(0,c.sale-c.col-since);
@@ -522,7 +530,7 @@ function render(){
   });
   // ACH choice modal
   if(achPending){
-    h+='<div style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:100;display:flex;align-items:center;justify-content:center" onclick="achPending=null;render()">';
+    h+='<div style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:9000;display:flex;align-items:center;justify-content:center" onclick="achPending=null;render()">';
     h+='<div style="background:#0c1117;border:1px solid rgba(30,58,95,.3);border-radius:16px;padding:24px;margin:20px;max-width:320px;width:100%" onclick="event.stopPropagation()">';
     h+='<div style="font-size:16px;font-weight:700;color:#e2e8f0;margin-bottom:4px">Send ACH Form</div>';
     h+='<div style="font-size:12px;color:#475569;margin-bottom:20px">'+achPending.name+'</div>';

@@ -285,7 +285,7 @@ function render(){
   h+='</div>';
 
   // Selected closer mini frame OR spiff tracker — fixed height so pills don't shift
-  h+='<div style="background:rgba(30,58,95,.1);border-radius:8px;padding:6px 10px;margin-bottom:8px;height:88px;overflow:hidden">';
+  h+='<div style="background:rgba(30,58,95,.1);border-radius:8px;padding:6px 10px;margin-bottom:8px;height:104px;overflow:hidden">';
   if(selCl){
     var sc=cls[f],swp=sc.sale>0?sc.ws/sc.sale:0,ssp=sc.sale>0?sc.si/sc.sale:0,sep=sc.sale>0?sc.ex/sc.sale:0,spd=sc.sale>0?(sc.ws+sc.si)/sc.sale:0;
     h+='<div class="fx ac g8" style="height:100%">';
@@ -307,20 +307,20 @@ function render(){
     var nextTier=null;
     for(var ti=0;ti<spiffTiers.length;ti++){if(dcSPH<spiffTiers[ti].sph){nextTier=spiffTiers[ti];break}}
     var nextNeed=nextTier?Math.max(0,nextTier.sph*dcHeads-dcCollected):0;
-    // Row 1: SPH + collected + thermometer
-    h+='<div class="fx ac g6" style="margin-bottom:3px">';
-    h+='<div style="font-size:8px;font-weight:700;color:#64748b;letter-spacing:1px;writing-mode:vertical-lr;transform:rotate(180deg);line-height:1">DC<br>SPIFF</div>';
-    h+='<div style="font-size:20px;font-weight:800;color:'+(dcSPH>=4500?'#4ade80':'#e2e8f0')+';letter-spacing:-0.5px">$'+dcSPH.toLocaleString()+'</div>';
-    h+='<div style="font-size:10px;color:#64748b;line-height:1.2">per head<br><span style="font-size:9px">'+fd(dcCollected)+' / '+dcHeads+' hds</span></div>';
-    h+='<div style="flex:1;position:relative;height:14px;background:rgba(15,23,42,.8);border-radius:7px;overflow:hidden;border:1px solid rgba(51,65,85,.5)">';
+    // Row 1: DC SPIFF badge + SPH + collected + thermometer
+    h+='<div class="fx ac g6" style="margin-bottom:4px">';
+    h+='<div style="background:linear-gradient(135deg,rgba(74,222,128,.15),rgba(56,189,248,.15));border:1px solid rgba(74,222,128,.3);border-radius:6px;padding:2px 6px;flex-shrink:0"><div style="font-size:7px;font-weight:800;color:#4ade80;letter-spacing:1.5px;line-height:1">DC</div><div style="font-size:7px;font-weight:800;color:#38bdf8;letter-spacing:1px;line-height:1">SPIFF</div></div>';
+    h+='<div style="font-size:18px;font-weight:800;color:'+(dcSPH>=4500?'#4ade80':'#e2e8f0')+';letter-spacing:-0.5px">$'+dcSPH.toLocaleString()+'</div>';
+    h+='<div style="font-size:8px;color:#64748b;line-height:1.2">per head<br><span style="font-size:8px">'+fd(dcCollected)+' / '+dcHeads+' hds</span></div>';
+    h+='<div style="flex:1;position:relative;height:12px;background:rgba(15,23,42,.8);border-radius:6px;overflow:hidden;border:1px solid rgba(51,65,85,.5)">';
     var fillColor=dcSPH>=10000?'linear-gradient(90deg,#4ade80,#38bdf8,#a78bfa,#fb923c)':dcSPH>=9000?'linear-gradient(90deg,#4ade80,#38bdf8,#a78bfa)':dcSPH>=8500?'linear-gradient(90deg,#4ade80,#38bdf8)':dcSPH>=4500?'linear-gradient(90deg,#4ade80,#22c55e)':'linear-gradient(90deg,#334155,#475569)';
     h+='<div style="position:absolute;top:0;left:0;height:100%;width:'+Math.round(pctFill*100)+'%;background:'+fillColor+';border-radius:7px"></div>';
     spiffTiers.forEach(function(t){var pos=Math.round((t.sph/maxSPH)*100);h+='<div style="position:absolute;top:0;left:'+pos+'%;width:1px;height:100%;background:'+(dcSPH>=t.sph?'rgba(255,255,255,.4)':'rgba(71,85,105,.5)')+'"></div>'});
     h+='</div></div>';
-    // Row 2: next tier callout
+    // Row 2: all tier callouts - next tier emphasized, rest listed
     if(nextTier){
-      h+='<div style="font-size:11px;color:#94a3b8;line-height:1.4">';
-      h+='Collect <span style="color:#fff;font-weight:800;font-size:12px">'+fd(nextNeed)+'</span> more &#8594; <span style="color:'+nextTier.color+';font-weight:800">'+nextTier.label+'</span> <span style="color:'+nextTier.color+'">'+nextTier.bonus+' ea</span>';
+      h+='<div style="font-size:10px;color:#94a3b8;line-height:1.35">';
+      h+='Collect <span style="color:#fff;font-weight:800">'+fd(nextNeed)+'</span> more &#8594; <span style="color:'+nextTier.color+';font-weight:800">'+nextTier.label+'</span> <span style="color:'+nextTier.color+'">'+nextTier.bonus+' ea</span>';
       for(var tj=spiffTiers.indexOf(nextTier)+1;tj<spiffTiers.length;tj++){
         var ft=spiffTiers[tj];var fn=Math.max(0,ft.sph*dcHeads-dcCollected);
         h+='<br><span style="color:#64748b">'+fd(fn)+'</span> &#8594; <span style="color:'+ft.color+';font-weight:700">'+ft.label+'</span> <span style="color:'+ft.color+'">'+ft.bonus+'</span>';

@@ -55,6 +55,9 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
 .closer-card.on{background:#0f1a2a;border:2px solid rgba(125,211,252,.25)}
 
 @keyframes pifPop{0%{transform:scale(1)}50%{transform:scale(1.06)}100%{transform:scale(1)}}
+@keyframes spiffGlow{0%,100%{box-shadow:0 0 4px rgba(74,222,128,.3)}50%{box-shadow:0 0 12px rgba(74,222,128,.6),0 0 20px rgba(56,189,248,.3)}}
+@keyframes spiffShimmer{0%{left:-100%}100%{left:200%}}
+@keyframes tierPulse{0%,100%{opacity:.85;transform:scale(1)}50%{opacity:1;transform:scale(1.02)}}
 @keyframes pifGlow{0%{box-shadow:0 0 0 0 rgba(74,222,128,.4)}70%{box-shadow:0 0 0 12px rgba(74,222,128,0)}100%{box-shadow:0 0 0 0 rgba(74,222,128,0)}}
 .pif-anim{animation:pifPop .5s ease,pifGlow .7s ease}
 .done{display:flex;align-items:center;justify-content:center;width:96px;height:56px;flex-shrink:0;background:rgba(74,222,128,.1);border:2px solid rgba(74,222,128,.3);border-radius:12px}
@@ -310,14 +313,16 @@ function render(){
     // Row 1: DC SPIFF title + SPH big
     h+='<div class="fx jb ac" style="margin-bottom:6px">';
     h+='<div><div style="font-size:14px;font-weight:900;letter-spacing:3px;background:linear-gradient(90deg,#4ade80,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1">DC SPIFF</div>';
-    h+='<div style="font-size:9px;color:#64748b;margin-top:1px">'+fd(dcCollected)+' collected &middot; '+dcHeads+' heads</div></div>';
+    h+='<div style="font-size:9px;color:#64748b;margin-top:1px">'+fd(dcCollected)+' collected &middot; '+dcHeads+' BU</div></div>';
     h+='<div style="text-align:right"><div style="font-size:28px;font-weight:900;color:'+(dcSPH>=4500?'#4ade80':'#e2e8f0')+';letter-spacing:-1px;line-height:1">$'+dcSPH.toLocaleString()+'</div>';
-    h+='<div style="font-size:9px;font-weight:600;color:#64748b">per head</div></div>';
+    h+='<div style="font-size:9px;font-weight:600;color:#64748b">per BU</div></div>';
     h+='</div>';
-    // Thermometer
-    h+='<div style="position:relative;height:14px;background:rgba(15,23,42,.9);border-radius:7px;overflow:hidden;border:1px solid rgba(51,65,85,.5);margin-bottom:8px">';
+    // Thermometer with glow
+    h+='<div style="position:relative;height:14px;background:rgba(15,23,42,.9);border-radius:7px;overflow:hidden;border:1px solid rgba(51,65,85,.5);margin-bottom:8px;animation:spiffGlow 2s ease-in-out infinite">';
     var fillColor=dcSPH>=10000?'linear-gradient(90deg,#4ade80,#38bdf8,#a78bfa,#fb923c)':dcSPH>=9000?'linear-gradient(90deg,#4ade80,#38bdf8,#a78bfa)':dcSPH>=8500?'linear-gradient(90deg,#4ade80,#38bdf8)':dcSPH>=4500?'linear-gradient(90deg,#4ade80,#22c55e)':'linear-gradient(90deg,#334155,#475569)';
-    h+='<div style="position:absolute;top:0;left:0;height:100%;width:'+Math.round(pctFill*100)+'%;background:'+fillColor+';border-radius:7px"></div>';
+    h+='<div style="position:absolute;top:0;left:0;height:100%;width:'+Math.round(pctFill*100)+'%;background:'+fillColor+';border-radius:7px;transition:width .8s ease"></div>';
+    // Shimmer effect on fill
+    h+='<div style="position:absolute;top:0;left:0;height:100%;width:'+Math.round(pctFill*100)+'%;overflow:hidden;border-radius:7px"><div style="position:absolute;top:0;width:50%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);animation:spiffShimmer 2.5s ease-in-out infinite"></div></div>';
     spiffTiers.forEach(function(t){var pos=Math.round((t.sph/maxSPH)*100);h+='<div style="position:absolute;top:0;left:'+pos+'%;width:1px;height:100%;background:'+(dcSPH>=t.sph?'rgba(255,255,255,.4)':'rgba(71,85,105,.5)')+'"></div>'});
     h+='</div>';
     // Tier roadmap — 4 equal cards
@@ -327,7 +332,8 @@ function render(){
       var isNext=nextTier&&t.sph===nextTier.sph;
       var bg=hit?'rgba(74,222,128,.08)':isNext?'rgba(0,0,0,.3)':'rgba(0,0,0,.15)';
       var bdr=hit?t.color+'44':isNext?t.color+'66':t.color+'22';
-      h+='<div style="flex:1;background:'+bg+';border:1px solid '+bdr+';border-radius:6px;padding:4px 5px;text-align:center">';
+      var anim=isNext?';animation:tierPulse 2s ease-in-out infinite':'';
+      h+='<div style="flex:1;background:'+bg+';border:1px solid '+bdr+';border-radius:6px;padding:4px 5px;text-align:center'+anim+'">';
       h+='<div style="font-size:8px;font-weight:800;color:'+t.color+'">'+t.label+(hit?' &#10003;':'')+'</div>';
       if(hit){h+='<div style="font-size:10px;font-weight:800;color:#e2e8f0">'+t.bonus+'</div>'}
       else{h+='<div style="font-size:10px;font-weight:900;color:'+(isNext?'#fff':'#94a3b8')+'">'+fd(need)+'</div>';

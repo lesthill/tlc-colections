@@ -489,7 +489,7 @@ function render(){
     h+='</div>';
     // Contact
     if(c.ph||c.em){h+='<div style="padding:0 12px 6px" class="fx g6 fw con">';
-      if(c.ph)h+='<a href="tel:'+c.ph+'" onclick="var w=window.open(\'https://app.goto.com/calls?dialNumber='+c.ph.replace(/-/g,'')+'\',\'_blank\');if(w)return false;">&#128222; '+c.ph+'</a>';
+      if(c.ph)h+='<a href="com.logmein.gotoconnect://dial?number='+c.ph.replace(/-/g,'')+'">&#128222; '+c.ph+'</a>';
       if(c.em)h+='<a href="mailto:'+c.em+'" style="overflow:hidden;text-overflow:ellipsis;max-width:200px;white-space:nowrap">&#9993; '+c.em+'</a>';
     h+='</div>'}
 
@@ -530,6 +530,17 @@ function render(){
     h+='<button onclick="achPending=null;render()" style="width:100%;padding:12px;background:transparent;border:1px solid rgba(30,58,95,.3);color:#475569;font-size:13px;border-radius:10px">Cancel</button>';
     h+='</div></div>';
   }
+
+  h+='<div class="frame" style="margin-top:12px"><div class="frame-title">GOTO DIAL TEST — 28014041643</div>';
+  h+='<div class="fx fc g6" style="font-size:11px">';
+  h+='<a href="com.logmein.gotoconnect://dial?number=28014041643" style="color:#38bdf8;text-decoration:none;padding:6px 0">1. gotoconnect://dial</a>';
+  h+='<a href="gotoconnect://dial?number=28014041643" style="color:#38bdf8;text-decoration:none;padding:6px 0">2. gotoconnect://dial (short)</a>';
+  h+='<a href="com.goto.connect://call/28014041643" style="color:#38bdf8;text-decoration:none;padding:6px 0">3. com.goto.connect://call</a>';
+  h+='<a href="goto://call?number=28014041643" style="color:#38bdf8;text-decoration:none;padding:6px 0">4. goto://call</a>';
+  h+='<a href="gotomobile://call?number=28014041643" style="color:#38bdf8;text-decoration:none;padding:6px 0">5. gotomobile://call</a>';
+  h+='<a href="jive://call?number=28014041643" style="color:#38bdf8;text-decoration:none;padding:6px 0">6. jive://call</a>';
+  h+='<a href="tel:28014041643" style="color:#38bdf8;text-decoration:none;padding:6px 0">7. tel: (fallback)</a>';
+  h+='</div></div>';
 
   h+='<div class="fx jb ac" style="padding:14px 16px;font-size:8px;color:#1e293b"><span>LH // '+new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'})+'</span><span style="color:#7dd3fc;font-weight:700">TLC COLLECTIONS</span></div>';
   h+='</div>';document.getElementById('app').innerHTML=h;setTimeout(function(){var f=document.querySelector('.ftop');var s=document.getElementById('sb');if(f&&s){s.style.marginTop=f.offsetHeight+'px';s.style.height='calc(100vh - '+f.offsetHeight+'px)'}},20)

@@ -246,10 +246,9 @@ function svg(w,h,ws,si,ex,txt){
 function doRefresh(){if(window.caches){caches.keys().then(function(n){n.forEach(function(k){caches.delete(k)})});setTimeout(function(){window.location.href=window.location.pathname+'?v=53&t='+Date.now()},300)}else{window.location.href=window.location.pathname+'?v=53&t='+Date.now()}}
 function render(){
   var f=S.f;
-  // Only show workshops within last 4 weeks
+  // Show all cards from last 4 weeks (28 days + grace to end of week)
   var now=Date.now();var DAY=24*60*60*1000;var today=new Date();
-  var cutoff=new Date();cutoff.setDate(cutoff.getDate()-28);var cutStr=cutoff.toISOString().split('T')[0];
-  var allOpen=D.filter(function(c){if(c.bal<=0||c.ed<cutStr)return false;var cs=gd(c.id,'cs');var ct=gdn(c.id,'ct');if(cs==='collected'&&ct>0&&(now-ct)>DAY)return false;return true});
+  var allOpen=D.filter(function(c){if(c.bal<=0)return false;var days=Math.floor((today-new Date(c.ed+'T12:00:00'))/DAY);if(days>34)return false;var cs=gd(c.id,'cs');var ct=gdn(c.id,'ct');if(cs==='collected'&&ct>0&&(now-ct)>DAY)return false;return true});
   var evSet={};var evBal={};allOpen.forEach(function(c){evSet[c.ev]=true;if(!evBal[c.ev])evBal[c.ev]=0;evBal[c.ev]+=c.bal-gdn(c.id,'since')});var evList=Object.keys(evSet);
   var activeEvs=Object.keys(S.evs).filter(function(k){return S.evs[k]});var showAllEvs=activeEvs.length===0;
   var evFiltered=showAllEvs?allOpen:allOpen.filter(function(c){return S.evs[c.ev]});

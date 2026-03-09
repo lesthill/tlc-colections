@@ -246,12 +246,10 @@ function svg(w,h,ws,si,ex,txt){
 function doRefresh(){if(window.caches){caches.keys().then(function(n){n.forEach(function(k){caches.delete(k)})});setTimeout(function(){window.location.href=window.location.pathname+'?v=53&t='+Date.now()},300)}else{window.location.href=window.location.pathname+'?v=53&t='+Date.now()}}
 function render(){
   var f=S.f;
-  // Show last 4 events
+  // Show events until 4th Friday after event date
   var now=Date.now();var DAY=24*60*60*1000;var today=new Date();
-  var evDates={};D.forEach(function(c){if(!evDates[c.ev]||c.ed>evDates[c.ev])evDates[c.ev]=c.ed});
-  var sortedEvs=Object.keys(evDates).sort(function(a,b){return evDates[b]>evDates[a]?1:-1}).slice(0,4);
-  var last4={};sortedEvs.forEach(function(e){last4[e]=true});
-  var allOpen=D.filter(function(c){if(c.bal<=0||!last4[c.ev])return false;var cs=gd(c.id,'cs');var ct=gdn(c.id,'ct');if(cs==='collected'&&ct>0&&(now-ct)>DAY)return false;return true});
+  function fourFri(sd){var d=new Date(sd+'T12:00:00');var c=0;while(c<4){d.setDate(d.getDate()+1);if(d.getDay()===5)c++}return d}
+  var allOpen=D.filter(function(c){if(c.bal<=0)return false;if(today>fourFri(c.ed))return false;var cs=gd(c.id,'cs');var ct=gdn(c.id,'ct');if(cs==='collected'&&ct>0&&(now-ct)>DAY)return false;return true});
   var evSet={};var evBal={};allOpen.forEach(function(c){evSet[c.ev]=true;if(!evBal[c.ev])evBal[c.ev]=0;evBal[c.ev]+=c.bal-gdn(c.id,'since')});var evList=Object.keys(evSet);
   var activeEvs=Object.keys(S.evs).filter(function(k){return S.evs[k]});var showAllEvs=activeEvs.length===0;
   var evFiltered=showAllEvs?allOpen:allOpen.filter(function(c){return S.evs[c.ev]});

@@ -30,7 +30,7 @@ export const STATUS_COLORS = {
 };
 
 // NMI payment link
-export const NMI_URL = 'https://secure.nmi.com/merchants/login.php?cookie_check=1&referrer=L21lcmNoYW50cy92aXJ0dWFsX3Rlcm1pbmFsLnBocD9pZD0xMzUyNjE5NDg0';
+export const NMI_URL = 'https://secure.nmi.com/merchants/login.php?cookie_check=1&referrer=L21lcmNoYW50cy92aXJ0dWFsdGVybWluYWwucGhwP3RpZD1lODY3NTc1Y2RhODdmM2Y1YzVhMjc4YjAwNTZiMzhhOQ&qed=983885f206e87e86abb4ac5df39f9ca7a7b242fe380841cb9fc93ac31df7bcad';
 
 // localStorage keys
 export const STORAGE_KEY = 'tlc-v10';

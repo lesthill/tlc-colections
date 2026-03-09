@@ -31,13 +31,20 @@ export function useStorage() {
     if (f === 'cs' && v === 'collected') {
       next[id].ct = Date.now();
     }
+    if (f === 'cs' && v !== 'collected') {
+      delete next[id]['ct'];
+    }
     save(next);
   }, [trackedData, save]);
 
   // PIF: mark as paid in full, save previous state for undo
   const doPif = useCallback((id, bal) => {
     const prev = { since: gd(id, 'since'), cs: gd(id, 'cs'), exp: gd(id, 'exp') };
-    const next = { ...trackedData, [id]: { ...(trackedData[id] || {}), _prev: JSON.stringify(prev), since: String(bal), cs: 'collected', _pif: '1', ct: Date.now() } };
+    const rec = trackedData[id] || {};
+    const payments = JSON.parse(rec._payments || '[]');
+    payments.push({ amt: bal, ts: Date.now(), note: 'PIF' });
+    const total = payments.reduce((s, p) => s + p.amt, 0);
+    const next = { ...trackedData, [id]: { ...rec, _prev: JSON.stringify(prev), _payments: JSON.stringify(payments), since: String(total), cs: 'collected', _pif: '1', ct: Date.now() } };
     save(next);
   }, [trackedData, save, gd]);
 
@@ -61,11 +68,38 @@ export function useStorage() {
     save(next);
   }, [trackedData, save, gd]);
 
+  // Add a payment entry
+  const addPayment = useCallback((id, amount, note) => {
+    const amt = parseFloat(amount);
+    if (!amt || amt <= 0) return;
+    const rec = trackedData[id] || {};
+    const payments = JSON.parse(rec._payments || '[]');
+    payments.push({ amt, ts: Date.now(), note: note || '' });
+    const total = payments.reduce((s, p) => s + p.amt, 0);
+    const next = { ...trackedData, [id]: { ...rec, _payments: JSON.stringify(payments), since: String(total) } };
+    save(next);
+  }, [trackedData, save]);
+
+  // Remove a payment entry by index
+  const removePayment = useCallback((id, index) => {
+    const rec = trackedData[id] || {};
+    const payments = JSON.parse(rec._payments || '[]');
+    payments.splice(index, 1);
+    const total = payments.reduce((s, p) => s + p.amt, 0);
+    const next = { ...trackedData, [id]: { ...rec, _payments: JSON.stringify(payments), since: String(total) } };
+    save(next);
+  }, [trackedData, save]);
+
+  // Get payments array for a client
+  const getPayments = useCallback((id) => {
+    try { return JSON.parse((trackedData[id] || {})._payments || '[]'); } catch (e) { return []; }
+  }, [trackedData]);
+
   // Reset all
   const doReset = useCallback(() => {
     setTrackedData({});
     try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
   }, []);
 
-  return { trackedData, loading, gd, gdn, upd, doPif, undoPif, doPifExp, undoPifExp, doReset };
+  return { trackedData, loading, gd, gdn, upd, doPif, undoPif, doPifExp, undoPifExp, addPayment, removePayment, getPayments, doReset };
 }

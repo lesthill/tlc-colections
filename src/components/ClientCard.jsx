@@ -1,21 +1,26 @@
+import { useState } from 'react';
 import { TIER_LABELS, TIER_COLORS, STATUS_NAMES, STATUS_COLORS, NMI_URL } from '../data.js';
-import { fd, fp, dueDate, daysLeft } from '../utils.js';
+import { fd, fp, dueDate, daysLeft, weeksAgo } from '../utils.js';
 import { Gauge, DoneBadge } from './Gauge.jsx';
 
-export function ClientCard({ client, gd, gdn, upd, doPif, undoPif, doPifExp, undoPifExp, expanded, onToggleExpand, jump, onAskACH, onDialGoTo }) {
+export function ClientCard({ client, gd, gdn, upd, doPif, undoPif, doPifExp, undoPifExp, addPayment, removePayment, getPayments, expanded, onToggleExpand, jump, onAskACH, onDialGoTo }) {
   const c = client;
+  const [newPayAmt, setNewPayAmt] = useState('');
+  const payments = getPayments(c.id);
   const since = gdn(c.id, 'since');
   const exp = gdn(c.id, 'exp');
   const edt = gd(c.id, 'edt');
   const cn = gd(c.id, 'cn');
   const cs = gd(c.id, 'cs') || 'not_contacted';
   const isPif = gd(c.id, '_pif') === '1';
+
   const dl = daysLeft(c.ed);
   const dueD = dueDate(c.ed);
   const dueFmt = (dueD.getMonth() + 1) + '/' + dueD.getDate();
   const dlTxt = dl > 0 ? dl + 'd to Foundation' : dl === 0 ? 'FOUNDATION TODAY' : 'PAST FOUNDATION';
   const dlCol = dl <= 0 ? '#f87171' : dl <= 7 ? '#fbbf24' : '#4ade80';
   const urgBg = dl <= 0 ? 'rgba(248,113,113,.1)' : dl <= 7 ? 'rgba(251,191,36,.1)' : 'rgba(74,222,128,.1)';
+
   const wp = c.sale > 0 ? c.col / c.sale : 0;
   const sp = c.sale > 0 ? since / c.sale : 0;
   const ep = c.sale > 0 ? exp / c.sale : 0;
@@ -25,274 +30,185 @@ export function ClientCard({ client, gd, gdn, upd, doPif, undoPif, doPifExp, und
   const pifAmt = Math.max(0, c.sale - c.col - since);
   const isExpPif = exp >= pifAmt && pifAmt > 0 && gd(c.id, '_prevExp');
 
-  const tierLabel = TIER_LABELS[c.t] || '';
-  const tierColor = TIER_COLORS[c.t] || '#94a3b8';
-  const rrColor = c.rr === 'DECLINED' ? '#f87171' : c.rr === 'RANGE' ? '#38bdf8' : c.rr === 'NEED_INFO' ? '#fbbf24' : c.rr === 'APPROVED' ? '#4ade80' : '#64748b';
-
-  const handleCC = () => {
+  // CC button handler: copy info to clipboard, open NMI
+  function handleCC(e) {
+    e.preventDefault();
     const info = c.nm + '\n' + (c.em || '') + '\n' + (remaining > 0 ? fd(remaining) : fd(c.bal));
     navigator.clipboard.writeText(info).catch(() => {});
-    window.open(NMI_URL, '_blank', 'noopener,noreferrer');
-  };
-
-  const handleACH = () => {
-    onAskACH(c.id, c.nm, remaining > 0 ? remaining : c.bal);
-  };
-
-  const hasData = since > 0 || exp > 0 || edt || cn;
+    const a = document.createElement('a');
+    a.href = NMI_URL;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
 
   return (
-    <div className="card" id={`c-${c.id}`} style={jump ? { boxShadow: 'inset 0 0 0 2px var(--blue)' } : undefined}>
+    <div className="card" id={'c-' + c.id} style={jump ? { boxShadow: 'inset 0 0 0 2px #7dd3fc' } : undefined}>
 
-      {/* Top row */}
-      <div style={{ padding: 12, display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+      {/* Top row: gauge + info + balance */}
+      <div style={{ padding: 12 }} className="fx g10">
 
-        {/* Left: Gauge or DoneBadge */}
-        <div style={{ flexShrink: 0, width: 96, height: 56, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          {fullPaid
-            ? <DoneBadge isPif={isPif} />
-            : <Gauge w={96} h={56} ws={wp} si={sp} ex={ep} label={fp(wp + sp)} />
-          }
-        </div>
+        {/* Left: gauge or done badge */}
+        {fullPaid ? (
+          <DoneBadge isPif={isPif} />
+        ) : (
+          <div style={{ width: 96, height: 56, flexShrink: 0 }}>
+            <Gauge w={96} h={56} ws={wp} si={sp} ex={ep} label={fp(totalPaid / (c.sale || 1))} />
+          </div>
+        )}
 
-        {/* Middle: badges, name, event */}
+        {/* Middle: badges + name + event */}
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', alignItems: 'center', marginBottom: 2 }}>
-            <span style={{
-              fontSize: 9, fontWeight: 700, padding: '1px 5px', borderRadius: 3,
-              background: urgBg, color: dlCol, whiteSpace: 'nowrap',
-            }}>
-              {dueFmt} &middot; {dlTxt}
+          <div className="fx ac g4 fw" style={{ marginBottom: 4 }}>
+            <span className="badge" style={{ color: dlCol, background: urgBg }}>{dlTxt} ({dueFmt})</span>
+            <span className="badge" style={{ color: TIER_COLORS[c.t] || '#94a3b8', background: (TIER_COLORS[c.t] || '#94a3b8') + '15' }}>
+              {TIER_LABELS[c.t] || ''}
             </span>
-            {tierLabel && (
-              <span style={{
-                fontSize: 9, fontWeight: 700, padding: '1px 5px', borderRadius: 3,
-                background: 'rgba(255,255,255,.06)', color: tierColor,
-              }}>
-                {tierLabel}
-              </span>
-            )}
-            {c.cl && (
-              <span style={{
-                fontSize: 9, fontWeight: 600, padding: '1px 5px', borderRadius: 3,
-                background: 'rgba(255,255,255,.06)', color: '#94a3b8',
-              }}>
-                {c.cl}
-              </span>
-            )}
+            <span style={{ color: '#7dd3fc', fontSize: 11, fontWeight: 700 }}>{c.cl}</span>
           </div>
-          <div className="nm" style={{ fontWeight: 700, fontSize: 14, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            {c.nm}
-          </div>
-          <div className="ev" style={{ fontSize: 11, color: 'var(--text-dim)' }}>
-            {c.ev}
-          </div>
+          <div className="nm">{c.nm}</div>
+          <div className="ev">{c.ev}</div>
         </div>
 
-        {/* Right: Balance + payment buttons */}
-        <div style={{ flexShrink: 0, textAlign: 'right' }}>
-          <div style={{ fontSize: 16, fontWeight: 700, color: remaining <= 0 ? 'var(--green)' : 'var(--text-primary)' }}>
-            {fd(remaining > 0 ? remaining : c.bal)}
-          </div>
-          <div style={{ fontSize: 10, color: 'var(--text-dim)' }}>
-            of {fd(c.sale)}
-          </div>
-          {since > 0 && (
-            <div style={{ fontSize: 10, color: 'var(--blue)', fontWeight: 600 }}>
-              +{fd(since)}
-            </div>
-          )}
+        {/* Right: balance + CC/ACH links */}
+        <div style={{ textAlign: 'right', flexShrink: 0 }}>
+          <div className="bal">{fd(remaining > 0 ? remaining : c.bal)}</div>
+          <div className="bsub">of {fd(c.sale)}</div>
+          {since > 0 && <div style={{ color: '#38bdf8', fontSize: 10, fontWeight: 600 }}>+{fd(since)}</div>}
           {remaining > 0 && (
-            <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end', marginTop: 4 }}>
-              <button onClick={handleCC} style={{
-                background: 'none', border: '1px solid var(--border)', borderRadius: 4,
-                padding: '2px 6px', fontSize: 12, cursor: 'pointer', color: 'var(--text-primary)',
-              }}>
-                CC&#x1F4B3;
-              </button>
-              <button onClick={handleACH} style={{
-                background: 'none', border: '1px solid var(--border)', borderRadius: 4,
-                padding: '2px 6px', fontSize: 12, cursor: 'pointer', color: 'var(--text-primary)',
-              }}>
-                ACH&#x1F3E6;
-              </button>
+            <div style={{ marginTop: 4, display: 'flex', gap: 14, justifyContent: 'flex-end' }}>
+              <a href="#" onClick={handleCC} style={{ color: '#38bdf8', textDecoration: 'none', fontSize: 22 }}>&#128179;</a>
+              <a href="#" onClick={e => { e.preventDefault(); onAskACH(c.id, c.nm, fd(remaining)); }} style={{ color: '#4ade80', textDecoration: 'none', fontSize: 22 }}>&#127974;</a>
             </div>
           )}
         </div>
       </div>
 
       {/* Stats row */}
-      <div style={{ padding: '0 12px 6px', display: 'flex', gap: 8, flexWrap: 'wrap', fontSize: 11 }}>
-        <span style={{ color: '#4ade80' }}>WS {fd(c.col)}</span>
-        {c.rr && (
-          <span style={{ color: rrColor }}>
-            {c.rr}{c.rn ? ' · ' + c.rn : ''}
-          </span>
-        )}
-        {c.nt && (
-          <span style={{ color: '#94a3b8' }}>{c.nt}</span>
-        )}
+      <div style={{ padding: '0 12px 6px' }} className="fx g8 fw">
+        <span className="grn" style={{ fontSize: 11 }}>WS:{fd(c.col)}</span>
+        {c.rr && <span className={c.rr === 'DECLINED' ? 'red' : c.rr === 'RANGE' ? 'blu' : 'ylw'} style={{ fontSize: 11 }}>RR:{c.rn}</span>}
+        {c.nt && <span className="gry" style={{ fontSize: 11 }}>{c.nt}</span>}
       </div>
 
       {/* Contact row */}
       {(c.ph || c.em) && (
-        <div style={{ padding: '0 12px 6px', display: 'flex', gap: 10, fontSize: 11 }}>
-          {c.ph && (
-            <a href="#" onClick={e => { e.preventDefault(); onDialGoTo(c.ph); }}
-              style={{ color: 'var(--blue)', textDecoration: 'none' }}>
-              &#x1F4DE; {c.ph}
-            </a>
-          )}
-          {c.em && (
-            <a href={`mailto:${c.em}`} style={{ color: 'var(--blue)', textDecoration: 'none', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              &#x2709; {c.em}
-            </a>
-          )}
+        <div style={{ padding: '0 12px 6px' }} className="fx g6 fw con">
+          {c.ph && <a href="#" onClick={e => { e.preventDefault(); onDialGoTo(c.ph); }}>&#128222; {c.ph}</a>}
+          {c.em && <a href={'mailto:' + c.em} style={{ overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 200, whiteSpace: 'nowrap' }}>&#9993; {c.em}</a>}
         </div>
       )}
 
-      {/* Status bar */}
-      <div style={{
-        borderTop: '1px solid var(--border)', padding: '6px 12px',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      }}>
-        <select
-          value={cs}
-          onChange={e => upd(c.id, 'cs', e.target.value)}
-          style={{
-            background: 'none', border: '1px solid var(--border)', borderRadius: 4,
-            color: STATUS_COLORS[cs] || '#64748b', fontSize: 11, padding: '2px 6px',
-            cursor: 'pointer', outline: 'none',
-          }}
-        >
-          {Object.entries(STATUS_NAMES).map(([k, v]) => (
-            <option key={k} value={k}>{v}</option>
+      {/* Status + expand */}
+      <div className="fx g8" style={{ padding: '6px 12px 8px', borderTop: '1px solid rgba(30,58,95,.1)' }}>
+        <select className="sel" style={{ color: STATUS_COLORS[cs] }} value={cs}
+          onChange={e => upd(c.id, 'cs', e.target.value)}>
+          {Object.keys(STATUS_NAMES).map(k => (
+            <option key={k} value={k}>{STATUS_NAMES[k]}</option>
           ))}
         </select>
-        <button onClick={onToggleExpand} style={{
-          background: 'none', border: 'none', color: 'var(--text-dim)',
-          cursor: 'pointer', fontSize: 14, padding: '2px 6px',
-        }}>
-          {expanded ? '\u25B2' : '\u25BC'}
-        </button>
+        <button className="btn" onClick={onToggleExpand}>{expanded ? '\u25B2' : '\u25BC'}</button>
       </div>
 
       {/* Expanded section */}
       {expanded && (
-        <div style={{ background: '#080d13', padding: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div style={{ padding: 12, background: '#080d13', borderTop: '1px solid rgba(30,58,95,.15)' }}>
+          <div style={{ marginBottom: 12 }}>
+            <label className="lbl blu">COLLECTED SINCE WORKSHOP &middot; {fd(since)}</label>
 
-          {/* Collected since workshop */}
-          <div>
-            <label style={{ fontSize: 9, fontWeight: 700, color: 'var(--blue)', letterSpacing: 1, marginBottom: 4, display: 'block' }}>
-              COLLECTED SINCE WORKSHOP
-            </label>
-            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-              <input
-                type="number"
-                inputMode="numeric"
-                value={since || ''}
-                onChange={e => upd(c.id, 'since', e.target.value)}
-                placeholder="0"
-                style={{
-                  flex: 1, background: 'var(--bg-secondary)', border: '1px solid var(--blue)',
-                  borderRadius: 4, color: 'var(--blue)', padding: '6px 8px', fontSize: 14,
-                  fontWeight: 700, outline: 'none',
-                }}
-              />
-              {!isPif ? (
-                <button onClick={() => doPif(c.id)} style={{
-                  background: 'var(--green)', color: '#000', border: 'none', borderRadius: 4,
-                  padding: '6px 10px', fontSize: 11, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap',
-                }}>
-                  PIF
-                </button>
+            {/* Add payment row */}
+            <div className="fx g8 ac" style={{ marginBottom: 8 }}>
+              <input type="text" inputMode="numeric" pattern="[0-9]*" className="inp"
+                style={{ color: '#38bdf8', fontWeight: 700, fontSize: 16, borderColor: 'rgba(56,189,248,.2)', flex: 1 }}
+                value={newPayAmt} placeholder="Amount"
+                onChange={e => setNewPayAmt(e.target.value)} />
+              <button className="btn-pif" style={{ fontSize: 11, padding: '10px 12px' }}
+                onClick={() => {
+                  if (newPayAmt && parseFloat(newPayAmt) > 0) {
+                    addPayment(c.id, newPayAmt, '');
+                    setNewPayAmt('');
+                  }
+                }}>+ ADD</button>
+              {isPif ? (
+                <button className="btn-undo" onClick={() => undoPif(c.id)}>UNDO PIF</button>
               ) : (
-                <button onClick={() => undoPif(c.id)} style={{
-                  background: 'rgba(248,113,113,.15)', color: '#f87171', border: '1px solid #f87171',
-                  borderRadius: 4, padding: '6px 10px', fontSize: 11, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap',
-                }}>
-                  UNDO PIF
-                </button>
+                <button className="btn-pif" onClick={() => doPif(c.id)}>PIF</button>
               )}
+            </div>
+
+            {/* Payment ledger */}
+            {payments.length > 0 && (
+              <div style={{
+                background: 'rgba(56,189,248,.04)', border: '1px solid rgba(56,189,248,.1)',
+                borderRadius: 6, overflow: 'hidden',
+              }}>
+                {payments.map((p, i) => {
+                  const d = new Date(p.ts);
+                  const dateFmt = (d.getMonth() + 1) + '/' + d.getDate() + ' ' +
+                    d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+                  return (
+                    <div key={p.ts + '-' + i} className="fx jb ac" style={{
+                      padding: '8px 10px',
+                      borderBottom: i < payments.length - 1 ? '1px solid rgba(30,58,95,.1)' : 'none',
+                    }}>
+                      <div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: '#38bdf8' }}>{fd(p.amt)}</div>
+                        <div style={{ fontSize: 9, color: '#475569' }}>
+                          {dateFmt}{p.note ? ' \u00b7 ' + p.note : ''}
+                        </div>
+                      </div>
+                      <button onClick={() => removePayment(c.id, i)} style={{
+                        background: 'rgba(248,113,113,.1)', border: '1px solid rgba(248,113,113,.2)',
+                        color: '#f87171', fontSize: 10, fontWeight: 700, padding: '4px 8px',
+                        borderRadius: 4, cursor: 'pointer',
+                      }}>{'\u2715'}</button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          <div style={{ marginBottom: 12 }}>
+            <label className="lbl ylw">EXPECTED NEXT PAYMENT</label>
+            <div className="fx g8 ac">
+              <input type="text" inputMode="numeric" pattern="[0-9]*" className="inp"
+                style={{ color: '#fbbf24', fontWeight: 700, fontSize: 16, borderColor: 'rgba(251,191,36,.2)', width: 140 }}
+                value={exp || ''} placeholder="0"
+                onChange={e => upd(c.id, 'exp', e.target.value)} />
+              {isExpPif ? (
+                <button className="btn-undo" onClick={() => undoPifExp(c.id)}>UNDO</button>
+              ) : pifAmt > 0 ? (
+                <button style={{
+                  background: 'rgba(251,191,36,.1)', border: '1px solid rgba(251,191,36,.25)',
+                  color: '#fbbf24', padding: '12px 8px', fontSize: 11, borderRadius: 6,
+                  fontWeight: 700, whiteSpace: 'nowrap', cursor: 'pointer',
+                }} onClick={() => doPifExp(c.id)}>PIF {fd(pifAmt)}</button>
+              ) : null}
+            </div>
+            <div style={{ marginTop: 8 }}>
+              <input type="date" className="inp" value={edt || ''}
+                onChange={e => upd(c.id, 'edt', e.target.value)} />
             </div>
           </div>
 
-          {/* Expected next payment */}
           <div>
-            <label style={{ fontSize: 9, fontWeight: 700, color: '#fbbf24', letterSpacing: 1, marginBottom: 4, display: 'block' }}>
-              EXPECTED NEXT PAYMENT
-            </label>
-            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-              <input
-                type="number"
-                inputMode="numeric"
-                value={exp || ''}
-                onChange={e => upd(c.id, 'exp', e.target.value)}
-                placeholder="0"
-                style={{
-                  flex: 1, background: 'var(--bg-secondary)', border: '1px solid #fbbf24',
-                  borderRadius: 4, color: '#fbbf24', padding: '6px 8px', fontSize: 14,
-                  fontWeight: 700, outline: 'none',
-                }}
-              />
-              {!isExpPif ? (
-                <button onClick={() => doPifExp(c.id)} style={{
-                  background: '#fbbf24', color: '#000', border: 'none', borderRadius: 4,
-                  padding: '6px 10px', fontSize: 11, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap',
-                }}>
-                  PIF EXP
-                </button>
-              ) : (
-                <button onClick={() => undoPifExp(c.id)} style={{
-                  background: 'rgba(248,113,113,.15)', color: '#f87171', border: '1px solid #f87171',
-                  borderRadius: 4, padding: '6px 10px', fontSize: 11, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap',
-                }}>
-                  UNDO
-                </button>
-              )}
-              <input
-                type="date"
-                value={edt || ''}
-                onChange={e => upd(c.id, 'edt', e.target.value)}
-                style={{
-                  background: 'var(--bg-secondary)', border: '1px solid var(--border)',
-                  borderRadius: 4, color: 'var(--text-primary)', padding: '6px 8px', fontSize: 12,
-                  outline: 'none',
-                }}
-              />
-            </div>
-          </div>
-
-          {/* Notes */}
-          <div>
-            <label style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-dim)', letterSpacing: 1, marginBottom: 4, display: 'block' }}>
-              NOTES
-            </label>
-            <input
-              type="text"
-              value={cn || ''}
-              onChange={e => upd(c.id, 'cn', e.target.value)}
-              placeholder="Add notes..."
-              style={{
-                width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border)',
-                borderRadius: 4, color: 'var(--text-primary)', padding: '6px 8px', fontSize: 13,
-                outline: 'none', boxSizing: 'border-box',
-              }}
-            />
+            <label className="lbl gry">NOTES</label>
+            <input className="inp" value={cn || ''} placeholder="Follow-up notes..."
+              onChange={e => upd(c.id, 'cn', e.target.value)} />
           </div>
         </div>
       )}
 
       {/* Collapsed preview */}
-      {!expanded && hasData && (
-        <div style={{
-          padding: '4px 12px 8px', fontSize: 11, color: 'var(--text-dim)',
-          display: 'flex', gap: 8, flexWrap: 'wrap',
-        }}>
-          {since > 0 && <span style={{ color: 'var(--blue)' }}>+{fd(since)}</span>}
-          {exp > 0 && <span style={{ color: '#fbbf24' }}>exp {fd(exp)}</span>}
-          {edt && <span>{edt}</span>}
-          {cn && <span style={{ color: '#94a3b8' }}>{cn}</span>}
+      {!expanded && (cn || since > 0 || exp > 0) && (
+        <div style={{ padding: '4px 12px 8px', fontSize: 11 }} className="fx g8 fw">
+          {since > 0 && <span className="blu">+{fd(since)}</span>}
+          {exp > 0 && <span className="ylw">Potential:{fd(exp)}</span>}
+          {edt && <span className="gry">by {edt}</span>}
+          {cn && <span className="gry">"{cn}"</span>}
         </div>
       )}
     </div>

@@ -15,7 +15,7 @@ import './styles.css';
 const CLOSER_KEYS = Object.keys(CLOSER_NAMES);
 
 export default function App() {
-  const { trackedData, loading, gd, gdn, upd, doPif, undoPif, doPifExp, undoPifExp, doReset } = useStorage();
+  const { trackedData, loading, gd, gdn, upd, doPif, undoPif, doPifExp, undoPifExp, doReset, addPayment, removePayment, getPayments } = useStorage();
 
   // UI state
   const [filter, setFilter] = useState('ALL');
@@ -78,6 +78,7 @@ export default function App() {
 
   // Filter visible clients: not past 4th Friday cutoff, and if collected hide after 1 day
   const visible = CLIENTS.filter(c => {
+    if (c.bal <= 0) return false;
     const ff = fourthFriday(c.ed);
     if (now > ff) return false;
     const cs = gd(c.id, 'cs');
@@ -98,14 +99,13 @@ export default function App() {
     ? evFiltered
     : evFiltered.filter(c => c.cl === filter);
 
+  // Open count
+  const openCount = filtered.length;
+
   // Sort
   const sorted = [...filtered].sort((a, b) => {
-    const aS = gdn(a.id, 'since');
-    const bS = gdn(b.id, 'since');
-    const aBal = a.bal - aS;
-    const bBal = b.bal - bS;
     let cmp = 0;
-    if (sortBy === 'bal') cmp = aBal - bBal;
+    if (sortBy === 'bal') cmp = a.bal - b.bal;
     else if (sortBy === 'nm') cmp = a.nm.localeCompare(b.nm);
     else if (sortBy === 'ev') cmp = a.ev.localeCompare(b.ev) || a.ed.localeCompare(b.ed);
     else if (sortBy === 'cl') cmp = a.cl.localeCompare(b.cl);
@@ -115,18 +115,17 @@ export default function App() {
 
   // Compute totals
   let tS = 0, tW = 0, tSi = 0, tE = 0;
-  visible.forEach(c => {
+  evFiltered.forEach(c => {
     tS += c.sale;
     tW += c.col;
     tSi += gdn(c.id, 'since');
     tE += gdn(c.id, 'exp');
   });
-  const openCount = visible.filter(c => gd(c.id, 'cs') !== 'collected').length;
 
   // Compute closer stats
   const cls = {};
   CLOSER_KEYS.forEach(k => { cls[k] = { bal: 0, cnt: 0, sale: 0, ws: 0, si: 0, ex: 0, con: 0 }; });
-  visible.forEach(c => {
+  evFiltered.forEach(c => {
     const k = c.cl;
     if (!cls[k]) return;
     const si = gdn(c.id, 'since');
@@ -138,7 +137,7 @@ export default function App() {
     cls[k].si += si;
     cls[k].ex += ex;
     cls[k].bal += c.bal - si;
-    if (cs === 'contacted' || cs === 'committed' || cs === 'collected') cls[k].con++;
+    if (cs && cs !== 'not_contacted') cls[k].con++;
   });
 
   // Unique visible events + event outstanding balances
@@ -174,7 +173,7 @@ export default function App() {
     window.location.reload();
   }
 
-  function askACH(id, name, amount) { setAchPending({ id, name, amount }); }
+  function askACH(id, name, amount) { setAchPending({ id, name, amount: typeof amount === 'number' ? fd(amount) : amount }); }
 
   async function sendACH(id, name, amount, withAmount) {
     const firstName = name.split(' ')[0];
@@ -329,7 +328,9 @@ export default function App() {
                   onClick={() => hasCl && setFilter(filter === k ? 'ALL' : k)}
                 >
                   {k}
-                  {hasCl && <span style={{ fontSize: 9, marginLeft: 4, opacity: 0.7 }}>{fd(cls[k].bal)}</span>}
+                  {hasCl && <span style={{ fontSize: 10, opacity: 0.7 }}>
+                    {cls[k].bal >= 1000 ? Math.round(cls[k].bal / 1000) + 'K' : fd(cls[k].bal)}
+                  </span>}
                 </span>
               );
             })}
@@ -346,7 +347,7 @@ export default function App() {
             {visEvs.map(ev => (
               <span key={ev} className={'evpill' + (activeEvs[ev] ? ' on' : '')} onClick={() => togEv(ev)}>
                 {iata(ev)}
-                <span style={{ fontSize: 9, marginLeft: 4, opacity: 0.6 }}>{fd(evBals[ev] || 0)}</span>
+                <span style={{ fontSize: 10, color: '#fb923c', fontWeight: 700 }}>{evBals[ev] >= 1000 ? Math.round(evBals[ev] / 1000) + 'K' : fd(evBals[ev] || 0)}</span>
               </span>
             ))}
           </div>
@@ -396,6 +397,9 @@ export default function App() {
             jump={jump === c.id}
             onAskACH={askACH}
             onDialGoTo={dialGoTo}
+            addPayment={addPayment}
+            removePayment={removePayment}
+            getPayments={getPayments}
           />
         ))}
 

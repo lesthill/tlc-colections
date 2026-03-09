@@ -284,7 +284,7 @@ function render(){
   h+='<div style="text-align:right"><div style="font-size:24px;font-weight:700;color:#fff">'+items.length+'</div><div style="font-size:8px;font-weight:700;color:#475569;letter-spacing:1px">OPEN</div></div>';
   h+='</div>';
 
-  // Selected closer mini frame (always visible)
+  // Selected closer mini frame OR spiff tracker
   h+='<div style="background:rgba(30,58,95,.1);border-radius:8px;padding:8px 10px;margin-bottom:8px;min-height:30px">';
   if(selCl){
     var sc=cls[f],swp=sc.sale>0?sc.ws/sc.sale:0,ssp=sc.sale>0?sc.si/sc.sale:0,sep=sc.sale>0?sc.ex/sc.sale:0,spd=sc.sale>0?(sc.ws+sc.si)/sc.sale:0;
@@ -294,7 +294,37 @@ function render(){
     h+='<div style="flex:1"><div style="font-size:13px;font-weight:700;color:#7dd3fc">'+CN[f]+'</div>';
     h+='<div style="font-size:10px;color:#475569">'+sc.cnt+' accts | '+sc.con+' contacted | <span style="color:#fb923c;font-weight:700">'+fd(sc.bal)+'</span></div></div></div>'
   } else {
-    h+='<div class="fx ac" style="height:28px"><span style="color:#334155;font-size:10px;font-style:italic">Select a closer to view details</span></div>'
+    // Compact spiff tracker in header
+    var dcHeads=46;
+    var dcClients=D.filter(function(c){return c.ev==='Wash DC'});
+    var dcColTotal=0;var dcSinceTotal=0;
+    dcClients.forEach(function(c){dcColTotal+=c.col;dcSinceTotal+=gdn(c.id,'since')});
+    var dcCollected=dcColTotal+dcSinceTotal;
+    var dcSPH=dcHeads>0?Math.round(dcCollected/dcHeads):0;
+    var spiffTiers=[{sph:4500,label:'I',bonus:'$500',color:'#4ade80'},{sph:8500,label:'II',bonus:'$500',color:'#38bdf8'},{sph:9000,label:'II+',bonus:'$750',color:'#a78bfa'},{sph:10000,label:'II++',bonus:'$1,000',color:'#fb923c'}];
+    var maxSPH=11000;var pctFill=Math.min(dcSPH/maxSPH,1);
+    // Row 1: label + SPH + collected
+    h+='<div class="fx jb ac" style="margin-bottom:6px"><div style="font-size:9px;font-weight:700;color:#64748b;letter-spacing:1px">DC SPIFF</div>';
+    h+='<div style="font-size:18px;font-weight:800;color:'+(dcSPH>=4500?'#4ade80':'#e2e8f0')+'">$'+dcSPH.toLocaleString()+' <span style="font-size:9px;font-weight:600;color:#64748b">SPH</span></div>';
+    h+='<div style="font-size:9px;color:#475569">'+fd(dcCollected)+' / '+dcHeads+' hds</div></div>';
+    // Row 2: thermometer
+    h+='<div style="position:relative;height:18px;background:rgba(15,23,42,.8);border-radius:9px;overflow:hidden;border:1px solid rgba(51,65,85,.5);margin-bottom:5px">';
+    var fillColor=dcSPH>=10000?'linear-gradient(90deg,#4ade80,#38bdf8,#a78bfa,#fb923c)':dcSPH>=9000?'linear-gradient(90deg,#4ade80,#38bdf8,#a78bfa)':dcSPH>=8500?'linear-gradient(90deg,#4ade80,#38bdf8)':dcSPH>=4500?'linear-gradient(90deg,#4ade80,#22c55e)':'linear-gradient(90deg,#334155,#475569)';
+    h+='<div style="position:absolute;top:0;left:0;height:100%;width:'+Math.round(pctFill*100)+'%;background:'+fillColor+';border-radius:9px"></div>';
+    spiffTiers.forEach(function(t){var pos=Math.round((t.sph/maxSPH)*100);h+='<div style="position:absolute;top:0;left:'+pos+'%;width:1px;height:100%;background:'+(dcSPH>=t.sph?'rgba(255,255,255,.3)':'rgba(71,85,105,.5)')+'"></div>'});
+    h+='<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.5)">$'+dcSPH.toLocaleString()+' SPH</div>';
+    h+='</div>';
+    // Row 3: tier pills
+    h+='<div class="fx g4">';
+    spiffTiers.forEach(function(t){
+      var hit=dcSPH>=t.sph;var need=Math.max(0,t.sph*dcHeads-dcCollected);
+      h+='<div style="flex:1;padding:4px 6px;border-radius:6px;background:'+(hit?'rgba(74,222,128,.08)':'rgba(30,41,59,.5)')+';border:1px solid '+(hit?t.color+'33':'rgba(51,65,85,.3)')+';text-align:center">';
+      h+='<div style="font-size:8px;font-weight:700;color:'+(hit?t.color:'#64748b')+'">'+t.label+(hit?' &#10003;':'')+'</div>';
+      h+='<div style="font-size:9px;font-weight:700;color:'+(hit?'#e2e8f0':'#94a3b8')+'">'+t.bonus+'</div>';
+      if(!hit)h+='<div style="font-size:8px;color:#475569">'+fd(need)+'</div>';
+      h+='</div>'
+    });
+    h+='</div>';
   }
   h+='</div>';
 
@@ -398,66 +428,7 @@ function render(){
     });
     h+='</div>';
 
-    // === DC WEEK 10 SPIFF TRACKER ===
-    var dcHeads=46;
-    var dcClients=D.filter(function(c){return c.ev==='Wash DC'});
-    var dcColTotal=0;var dcSinceTotal=0;
-    dcClients.forEach(function(c){dcColTotal+=c.col;dcSinceTotal+=gdn(c.id,'since')});
-    var dcCollected=dcColTotal+dcSinceTotal;
-    var dcSPH=dcHeads>0?Math.round(dcCollected/dcHeads):0;
-    var tiers=[{sph:4500,label:'TIER I',bonus:'$500',color:'#4ade80'},{sph:8500,label:'TIER II',bonus:'$500',color:'#38bdf8'},{sph:9000,label:'II+',bonus:'$750',color:'#a78bfa'},{sph:10000,label:'II++',bonus:'$1,000',color:'#fb923c'}];
-    var maxSPH=11000;
-    var pctFill=Math.min(dcSPH/maxSPH,1);
-
-    h+='<div style="margin:8px 10px 4px;padding:14px;background:linear-gradient(135deg,rgba(15,23,42,.95),rgba(30,41,59,.9));border:1px solid rgba(74,222,128,.15);border-radius:12px">';
-    h+='<div class="fx jb ac" style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:#64748b;letter-spacing:1.5px">DC WEEK 10 SPIFF</div>';
-    h+='<div style="font-size:10px;color:#475569">'+dcHeads+' BUs</div></div>';
-
-    // SPH display
-    h+='<div style="text-align:center;margin-bottom:12px">';
-    h+='<div style="font-size:32px;font-weight:800;color:'+(dcSPH>=4500?'#4ade80':'#e2e8f0')+';letter-spacing:-1px">$'+dcSPH.toLocaleString()+'</div>';
-    h+='<div style="font-size:10px;color:#64748b;letter-spacing:1px">SALES PER HEAD</div>';
-    h+='<div style="font-size:11px;color:#475569;margin-top:2px">'+fd(dcCollected)+' collected / '+dcHeads+' heads</div>';
-    h+='</div>';
-
-    // Thermometer bar
-    h+='<div style="position:relative;height:28px;background:rgba(15,23,42,.8);border-radius:14px;overflow:hidden;border:1px solid rgba(51,65,85,.5);margin-bottom:8px">';
-    // Fill
-    var fillColor=dcSPH>=10000?'linear-gradient(90deg,#4ade80,#38bdf8,#a78bfa,#fb923c)':dcSPH>=9000?'linear-gradient(90deg,#4ade80,#38bdf8,#a78bfa)':dcSPH>=8500?'linear-gradient(90deg,#4ade80,#38bdf8)':dcSPH>=4500?'linear-gradient(90deg,#4ade80,#22c55e)':'linear-gradient(90deg,#334155,#475569)';
-    h+='<div style="position:absolute;top:0;left:0;height:100%;width:'+Math.round(pctFill*100)+'%;background:'+fillColor+';border-radius:14px;transition:width .5s ease"></div>';
-    // Tier markers
-    tiers.forEach(function(t){
-      var pos=Math.round((t.sph/maxSPH)*100);
-      h+='<div style="position:absolute;top:0;left:'+pos+'%;width:2px;height:100%;background:'+(dcSPH>=t.sph?'rgba(255,255,255,.3)':'rgba(71,85,105,.5)')+'"></div>'
-    });
-    // SPH label on bar
-    h+='<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.5)">$'+dcSPH.toLocaleString()+' SPH</div>';
-    h+='</div>';
-
-    // Tier labels below bar
-    h+='<div style="position:relative;height:16px;margin-bottom:10px">';
-    tiers.forEach(function(t){
-      var pos=Math.round((t.sph/maxSPH)*100);
-      h+='<div style="position:absolute;left:'+pos+'%;transform:translateX(-50%);font-size:8px;font-weight:700;color:'+(dcSPH>=t.sph?t.color:'#475569')+'">'+t.sph/1000+'K</div>'
-    });
-    h+='</div>';
-
-    // Tier cards
-    h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">';
-    tiers.forEach(function(t){
-      var hit=dcSPH>=t.sph;
-      var need=Math.max(0,t.sph*dcHeads-dcCollected);
-      h+='<div style="padding:8px;border-radius:8px;background:'+(hit?'rgba(74,222,128,.08)':'rgba(30,41,59,.5)')+';border:1px solid '+(hit?t.color+'33':'rgba(51,65,85,.3)')+'">';
-      h+='<div class="fx jb ac"><span style="font-size:10px;font-weight:700;color:'+(hit?t.color:'#64748b')+'">'+t.label+'</span>';
-      if(hit)h+='<span style="font-size:9px;color:#4ade80">&#10003;</span>';
-      h+='</div>';
-      h+='<div style="font-size:12px;font-weight:700;color:'+(hit?'#e2e8f0':'#94a3b8')+'">'+t.bonus+' ea</div>';
-      if(!hit)h+='<div style="font-size:9px;color:#475569;margin-top:2px">Need '+fd(need)+' more</div>';
-      h+='</div>'
-    });
-    h+='</div>';
-    h+='</div>';
-    // === END SPIFF TRACKER ===
+    // === END CLOSER CARDS ===
   }
 
   // Sort

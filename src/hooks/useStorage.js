@@ -127,11 +127,41 @@ export function useStorage() {
     try { return JSON.parse((trackedData[id] || {})._payments || '[]'); } catch (e) { return []; }
   }, [trackedData]);
 
+  // --- Pocket Deals ---
+  const getPocketDeals = useCallback(() => {
+    try { return JSON.parse(localStorage.getItem('tlc-pockets') || '[]'); } catch (e) { return []; }
+  }, []);
+
+  const [pocketDeals, setPocketDeals] = useState([]);
+  useEffect(() => { setPocketDeals(getPocketDeals()); }, [getPocketDeals]);
+
+  const savePockets = useCallback((deals) => {
+    setPocketDeals(deals);
+    try { localStorage.setItem('tlc-pockets', JSON.stringify(deals)); } catch (e) {}
+  }, []);
+
+  const addPocketDeal = useCallback((deal) => {
+    const deals = getPocketDeals();
+    deals.push({ ...deal, id: 'pk-' + Date.now(), created: Date.now() });
+    savePockets(deals);
+  }, [getPocketDeals, savePockets]);
+
+  const updatePocketDeal = useCallback((id, field, value) => {
+    const deals = getPocketDeals();
+    const d = deals.find(p => p.id === id);
+    if (d) { d[field] = value; savePockets(deals); }
+  }, [getPocketDeals, savePockets]);
+
+  const removePocketDeal = useCallback((id) => {
+    const deals = getPocketDeals().filter(p => p.id !== id);
+    savePockets(deals);
+  }, [getPocketDeals, savePockets]);
+
   // Reset all
   const doReset = useCallback(() => {
     setTrackedData({});
     try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
   }, []);
 
-  return { trackedData, loading, gd, gdn, upd, doPif, undoPif, addExpected, removeExpected, getExpected, collectExpected, addPayment, removePayment, getPayments, doReset };
+  return { trackedData, loading, gd, gdn, upd, doPif, undoPif, addExpected, removeExpected, getExpected, collectExpected, addPayment, removePayment, getPayments, pocketDeals, addPocketDeal, updatePocketDeal, removePocketDeal, doReset };
 }

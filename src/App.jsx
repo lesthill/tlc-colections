@@ -10,12 +10,13 @@ import { AchModal } from './components/AchModal.jsx';
 import { Settings } from './components/Settings.jsx';
 import { SpiffTracker } from './components/SpiffTracker.jsx';
 import { LockScreen } from './components/LockScreen.jsx';
+import { PocketDealCard } from './components/PocketDealCard.jsx';
 import './styles.css';
 
 const CLOSER_KEYS = Object.keys(CLOSER_NAMES);
 
 export default function App() {
-  const { trackedData, loading, gd, gdn, upd, doPif, undoPif, addPayment, removePayment, getPayments, addExpected, removeExpected, getExpected, collectExpected, doReset } = useStorage();
+  const { trackedData, loading, gd, gdn, upd, doPif, undoPif, addPayment, removePayment, getPayments, addExpected, removeExpected, getExpected, collectExpected, pocketDeals, addPocketDeal, updatePocketDeal, removePocketDeal, doReset } = useStorage();
 
   // UI state
   const [filter, setFilter] = useState('ALL');
@@ -380,6 +381,22 @@ export default function App() {
               {s.label} {sortBy === s.key ? (sortDir === 'desc' ? '\u2193' : '\u2191') : ''}
             </span>
           ))}
+        </div>
+
+        {/* Pocket Deals */}
+        {pocketDeals.length > 0 && (
+          <div style={{ padding: '0 10px 4px' }}>
+            {pocketDeals.map(d => (
+              <PocketDealCard key={d.id} deal={d} onUpdate={updatePocketDeal} onRemove={removePocketDeal} />
+            ))}
+          </div>
+        )}
+        <div style={{ padding: '0 10px 8px' }}>
+          <span onClick={() => addPocketDeal({ name: '', amount: 0, event: '', phone: '', email: '', notes: '' })} style={{
+            display: 'block', textAlign: 'center', padding: '10px 0', borderRadius: 8,
+            background: 'rgba(167,139,250,.06)', border: '1px dashed rgba(167,139,250,.25)',
+            color: '#a78bfa', fontSize: 12, fontWeight: 700, cursor: 'pointer',
+          }}>+ New Pocket Deal</span>
         </div>
 
         {/* Client cards */}

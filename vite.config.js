@@ -5,4 +5,5 @@ export default defineConfig({
   plugins: [react()],
   base: process.env.BUILD_BASE || '/',
   build: { outDir: 'docs' },
+  server: { host: '0.0.0.0', port: 8888 },
 });

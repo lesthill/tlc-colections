@@ -104,22 +104,19 @@ export function SpiffTracker({ gdn }) {
           return (
             <div key={t.sph} style={{
               flex: 1, background: bg, border: `1px solid ${bdr}`,
-              borderRadius: 6, padding: '4px 2px', textAlign: 'center',
+              borderRadius: 6, padding: '5px 2px', textAlign: 'center',
               animation: isNext ? 'tierPulse 2s ease-in-out infinite' : 'none',
             }}>
-              <div style={{ fontSize: 8, fontWeight: 800, color: t.color }}>
+              <div style={{ fontSize: 8, fontWeight: 800, color: t.color, marginBottom: 1 }}>
                 {t.label}{hit ? ' \u2713' : ''}
               </div>
-              {hit ? (
-                <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--text-primary)' }}>{t.bonus}</div>
-              ) : (
-                <div style={{
-                  fontSize: 10, fontWeight: 900,
-                  color: isNext ? '#fff' : 'var(--text-secondary)',
-                  animation: isNext ? 'amtGlow 2s ease-in-out infinite' : 'none',
-                }}>{fd(need)}</div>
-              )}
-              <div style={{ fontSize: 7, color: 'var(--text-muted)' }}>{t.bonus} ea</div>
+              <div style={{
+                fontSize: 14, fontWeight: 900, letterSpacing: -0.5,
+                color: hit ? t.color : isNext ? '#fff' : 'var(--text-secondary)',
+                textShadow: hit ? `0 0 12px ${t.color}80` : isNext ? '0 0 16px rgba(255,255,255,.6)' : 'none',
+                animation: isNext ? 'amtGlow 2s ease-in-out infinite' : 'none',
+              }}>{hit ? t.bonus : fd(need)}</div>
+              {!hit && <div style={{ fontSize: 7, color: t.color, fontWeight: 700, opacity: 0.8 }}>{t.bonus} ea</div>}
             </div>
           );
         })}

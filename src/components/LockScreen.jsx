@@ -1,18 +1,22 @@
 import { useState, useEffect, useCallback } from 'react';
 
 const CRED_KEY = 'tlc-webauthn-cred';
-const SESSION_KEY = 'tlc-unlocked';
+const UNLOCK_KEY = 'tlc-unlock-ts';
+const UNLOCK_TTL = 24 * 60 * 60 * 1000; // 24 hours
 
 function canWebAuthn() {
   return window.PublicKeyCredential && navigator.credentials;
 }
 
-function isSessionUnlocked() {
-  return !!sessionStorage.getItem(SESSION_KEY);
+function isRecentlyUnlocked() {
+  try {
+    const ts = parseInt(localStorage.getItem(UNLOCK_KEY), 10);
+    return ts && (Date.now() - ts) < UNLOCK_TTL;
+  } catch (e) { return false; }
 }
 
-function markSessionUnlocked() {
-  sessionStorage.setItem(SESSION_KEY, '1');
+function markUnlocked() {
+  localStorage.setItem(UNLOCK_KEY, String(Date.now()));
 }
 
 function randomBuf(len) {
@@ -60,15 +64,14 @@ async function verify() {
 }
 
 export function LockScreen() {
-  // Skip entirely if already unlocked this session
-  const [visible, setVisible] = useState(!isSessionUnlocked());
+  const [visible, setVisible] = useState(!isRecentlyUnlocked());
   const [fading, setFading] = useState(false);
   const [status, setStatus] = useState('');
   const hasWebAuthn = canWebAuthn();
   const hasCredential = !!localStorage.getItem(CRED_KEY);
 
   const dismiss = useCallback(() => {
-    markSessionUnlocked();
+    markUnlocked();
     setFading(true);
     setTimeout(() => setVisible(false), 350);
   }, []);

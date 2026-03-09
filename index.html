@@ -247,9 +247,9 @@ function svg(w,h,ws,si,ex,txt){
 function doRefresh(){if(window.caches){caches.keys().then(function(n){n.forEach(function(k){caches.delete(k)})});setTimeout(function(){window.location.href=window.location.pathname+'?v=53&t='+Date.now()},300)}else{window.location.href=window.location.pathname+'?v=53&t='+Date.now()}}
 function render(){
   var f=S.f;
-  // Hide cards after 4th Friday past event date (1 week after Foundation)
+  // Show all cards with outstanding balance; pullDate only controls Foundation badge
   var now=Date.now();var DAY=24*60*60*1000;var today=new Date();
-  var allOpen=D.filter(function(c){if(c.bal<=0)return false;if(today>pullDate(c.ed))return false;var cs=gd(c.id,'cs');var ct=gdn(c.id,'ct');if(cs==='collected'&&ct>0&&(now-ct)>DAY)return false;return true});
+  var allOpen=D.filter(function(c){if(c.bal<=0)return false;var cs=gd(c.id,'cs');var ct=gdn(c.id,'ct');if(cs==='collected'&&ct>0&&(now-ct)>DAY)return false;return true});
   var evSet={};var evBal={};allOpen.forEach(function(c){evSet[c.ev]=true;if(!evBal[c.ev])evBal[c.ev]=0;evBal[c.ev]+=c.bal-gdn(c.id,'since')});var evList=Object.keys(evSet);
   var activeEvs=Object.keys(S.evs).filter(function(k){return S.evs[k]});var showAllEvs=activeEvs.length===0;
   var evFiltered=showAllEvs?allOpen:allOpen.filter(function(c){return S.evs[c.ev]});
@@ -472,6 +472,7 @@ function render(){
     var cs=gd(c.id,'cs')||'not_contacted';var isPif=gd(c.id,'_pif')==='1';
     var isX=S.exp===c.id;var isJ=S.jump===c.id;
     var dl=daysLeft(c.ed),dueD=dueDate(c.ed),dueFmt=(dueD.getMonth()+1)+'/'+dueD.getDate();
+    var pastPull=today>pullDate(c.ed);
     var dlTxt=dl>0?dl+'d to Fdn':dl===0?'FDN TODAY':'PAST FDN';var dlCol=dl<=0?'#f87171':dl<=7?'#fbbf24':'#4ade80';
     var urgBg=dl<=0?'rgba(248,113,113,.1)':dl<=7?'rgba(251,191,36,.1)':'rgba(74,222,128,.1)';
     var wp=c.sale>0?c.col/c.sale:0,sp=c.sale>0?since/c.sale:0,ep=c.sale>0?exp/c.sale:0;
@@ -484,7 +485,7 @@ function render(){
     if(fullPaid){h+='<div class="done'+(isPif?' pif-anim':'')+'"><div style="text-align:center"><div style="font-size:24px">&#9989;</div><div style="font-size:10px;font-weight:700;color:#4ade80;letter-spacing:2px">PAID</div></div></div>'}
     else{h+='<div style="width:96px;height:56px;flex-shrink:0">'+svg(96,56,wp,sp,ep,fp(totalPaid/(c.sale||1)))+'</div>'}
     h+='<div style="flex:1;min-width:0"><div class="fx ac g4 fw" style="margin-bottom:4px">';
-    h+='<span class="badge" style="color:'+dlCol+';background:'+urgBg+'">'+dlTxt+' ('+dueFmt+')</span>';
+    if(!pastPull){h+='<span class="badge" style="color:'+dlCol+';background:'+urgBg+'">'+dlTxt+' ('+dueFmt+')</span>';}
     h+='<span class="badge" style="color:'+(TC[c.t]||'#94a3b8')+';background:'+(TC[c.t]||'#94a3b8')+'15">'+(TS[c.t]||'')+'</span>';
     h+='<span style="color:#7dd3fc;font-size:11px;font-weight:700">'+c.cl+'</span></div>';
     h+='<div class="nm">'+c.nm+'</div><div class="ev">'+c.ev+'</div></div>';

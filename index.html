@@ -191,7 +191,7 @@ async function sendACH(id,name,amount,withAmount){
     var h=pg.getHeight();
     
     // Amount to be processed only
-    if(withAmount)pg.drawText(amount,{x:290,y:h-455,size:12,font:font,color:PL.rgb(0,0,0)});
+    if(withAmount)pg.drawText(amount,{x:282,y:h-468,size:11,font:font,color:PL.rgb(0,0,0)});
     
     var filledBytes=await pdfDoc.save();
     var blob=new Blob([filledBytes],{type:'application/pdf'});
@@ -309,6 +309,7 @@ function render(){
     var nextNeed=nextTier?Math.max(0,nextTier.sph*dcHeads-dcCollected):0;
     // Row 1: SPH + collected + thermometer
     h+='<div class="fx ac g6" style="margin-bottom:3px">';
+    h+='<div style="font-size:8px;font-weight:700;color:#64748b;letter-spacing:1px;writing-mode:vertical-lr;transform:rotate(180deg);line-height:1">DC<br>SPIFF</div>';
     h+='<div style="font-size:20px;font-weight:800;color:'+(dcSPH>=4500?'#4ade80':'#e2e8f0')+';letter-spacing:-0.5px">$'+dcSPH.toLocaleString()+'</div>';
     h+='<div style="font-size:10px;color:#64748b;line-height:1.2">per head<br><span style="font-size:9px">'+fd(dcCollected)+' / '+dcHeads+' hds</span></div>';
     h+='<div style="flex:1;position:relative;height:14px;background:rgba(15,23,42,.8);border-radius:7px;overflow:hidden;border:1px solid rgba(51,65,85,.5)">';

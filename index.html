@@ -47,6 +47,27 @@ const SK = "coll-v5";
 const TODAY = "2026-03-07";
 const DEF_FROM = "2026-02-07";
 
+// API sync config — set these after deploying the Cloudflare Worker
+const API_URL = "https://tlc-collections-api.lesthill.workers.dev";
+const API_KEY = "tlc-collect-2026";
+
+const apiFetch = async (path, opts = {}) => {
+  if (!API_URL) return null;
+  try {
+    const res = await fetch(API_URL + path, {
+      ...opts,
+      headers: { "Content-Type": "application/json", "X-API-Key": API_KEY, ...(opts.headers || {}) },
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (e) { return null; }
+};
+
+const syncToApi = async (data) => {
+  if (!API_URL) return;
+  try { await apiFetch("/api/tracking", { method: "PUT", body: JSON.stringify(data) }); } catch (e) {}
+};
+
 const D = [
   {id:"b1",nm:"William DuQuette",ev:"Boston",ed:"2025-11-24",cl:"BL",sale:46997,col:2500,bal:44497,t:46997,nt:"Founder's Club",rr:"DECLINED",rn:"691 $18K",ph:"603-234-4546",em:"billduke32@gmail.com"},
   {id:"b2",nm:"Willy Santana",ev:"Boston",ed:"2025-11-24",cl:"BL",sale:9995,col:3500,bal:6495,t:9995,nt:"",rr:"DECLINED",rn:"<600 $0",ph:"617-686-5290",em:"santana.willy@icloud.com"},
@@ -125,10 +146,22 @@ function App() {
   const [showReset,setShowReset]=useState(false);
   const [showDates,setShowDates]=useState(false);
 
-  useEffect(()=>{try{const v=window.localStorage?.getItem(SK);if(v)setTd(JSON.parse(v))}catch(e){}setLoading(false)},[]);
-  const save=useCallback(d=>{setTd(d);try{window.localStorage?.setItem(SK,JSON.stringify(d))}catch(e){}},[]);
+  useEffect(()=>{
+    (async()=>{
+      // Try API first, fall back to localStorage
+      const remote = await apiFetch("/api/tracking");
+      if (remote && Object.keys(remote).length > 0) {
+        setTd(remote);
+        try{window.localStorage?.setItem(SK,JSON.stringify(remote))}catch(e){}
+      } else {
+        try{const v=window.localStorage?.getItem(SK);if(v)setTd(JSON.parse(v))}catch(e){}
+      }
+      setLoading(false);
+    })();
+  },[]);
+  const save=useCallback(d=>{setTd(d);try{window.localStorage?.setItem(SK,JSON.stringify(d))}catch(e){}syncToApi(d)},[]);
   const upd=useCallback((id,f,v)=>{save({...td,[id]:{...(td[id]||{}),[f]:v}})},[td,save]);
-  const doReset=useCallback(()=>{setTd({});try{window.localStorage?.removeItem(SK)}catch(e){}setShowReset(false)},[]);
+  const doReset=useCallback(()=>{setTd({});try{window.localStorage?.removeItem(SK)}catch(e){}syncToApi({});setShowReset(false)},[]);
   const doSort=col=>{if(sortBy===col)setSortDir(d=>d==="asc"?"desc":"asc");else{setSortBy(col);setSortDir("desc")}};
   const setPre=w=>{const d=new Date(TODAY);d.setDate(d.getDate()-w*7);setDf(d.toISOString().split("T")[0]);setDt(TODAY)};
 

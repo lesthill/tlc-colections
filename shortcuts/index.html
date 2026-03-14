@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TLC Collections — Siri Setup</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #080d13; color: #e2e8f0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro', sans-serif; min-height: 100vh; padding: 20px; }
+  .header { text-align: center; padding: 30px 0 20px; }
+  .header h1 { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .header p { color: #64748b; font-size: 14px; }
+  .badge { display: inline-block; background: #4ade8020; color: #4ade80; font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 20px; letter-spacing: 2px; margin-bottom: 12px; }
+  .card { background: #0c1117; border: 1px solid #1e3a5f20; border-radius: 16px; padding: 20px; margin-bottom: 16px; }
+  .card h2 { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+  .card .desc { color: #94a3b8; font-size: 13px; margin-bottom: 12px; line-height: 1.5; }
+  .card .siri { color: #64748b; font-size: 12px; margin-bottom: 14px; }
+  .card .siri em { color: #7dd3fc; font-style: normal; }
+  .install-btn { display: block; width: 100%; background: linear-gradient(135deg, #7dd3fc, #38bdf8); color: #080d13; font-size: 16px; font-weight: 700; padding: 14px; border: none; border-radius: 12px; text-align: center; text-decoration: none; cursor: pointer; }
+  .install-btn:active { opacity: 0.8; }
+  .step { background: #0f1a2a; border: 1px solid #1e3a5f30; border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+  .step-num { display: inline-block; background: #4ade8030; color: #4ade80; width: 24px; height: 24px; border-radius: 50%; text-align: center; line-height: 24px; font-size: 13px; font-weight: 700; margin-right: 8px; }
+  .step p { display: inline; color: #cbd5e1; font-size: 14px; }
+  .note { background: #fbbf2410; border: 1px solid #fbbf2430; border-radius: 12px; padding: 14px; margin-top: 20px; }
+  .note p { color: #fbbf24; font-size: 13px; line-height: 1.5; }
+  .divider { border: none; border-top: 1px solid #1e3a5f20; margin: 24px 0; }
+  .icon { font-size: 28px; margin-bottom: 8px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="badge">TLC COLLECTIONS</div>
+  <h1>Siri Voice Setup</h1>
+  <p>Tap each button to install the Siri Shortcuts</p>
+</div>
+
+<div class="card">
+  <div class="icon">📊</div>
+  <h2>Collections Summary</h2>
+  <div class="desc">Get a spoken overview of all accounts — total balance, amount collected, contacts made.</div>
+  <div class="siri">Say: <em>"Hey Siri, Collections Summary"</em></div>
+  <a class="install-btn" href="shortcuts://import-shortcut?url=https://lesthill.github.io/tlc-colections/shortcuts/collections-summary.shortcut&name=Collections%20Summary">Install Shortcut</a>
+</div>
+
+<div class="card">
+  <div class="icon">💰</div>
+  <h2>Collections Update</h2>
+  <div class="desc">Record a payment — Siri asks which client and how much was collected.</div>
+  <div class="siri">Say: <em>"Hey Siri, Collections Update"</em></div>
+  <a class="install-btn" href="shortcuts://import-shortcut?url=https://lesthill.github.io/tlc-colections/shortcuts/collections-update.shortcut&name=Collections%20Update">Install Shortcut</a>
+</div>
+
+<div class="card">
+  <div class="icon">📋</div>
+  <h2>Collections Status</h2>
+  <div class="desc">Update a client's contact status — Contacted, Committed, Collected, or Unreachable.</div>
+  <div class="siri">Say: <em>"Hey Siri, Collections Status"</em></div>
+  <a class="install-btn" href="shortcuts://import-shortcut?url=https://lesthill.github.io/tlc-colections/shortcuts/collections-status.shortcut&name=Collections%20Status">Install Shortcut</a>
+</div>
+
+<div class="card">
+  <div class="icon">🔍</div>
+  <h2>Check Client</h2>
+  <div class="desc">Look up a client by name — Siri reads back their balance, collections, and status.</div>
+  <div class="siri">Say: <em>"Hey Siri, Check Client"</em></div>
+  <a class="install-btn" href="shortcuts://import-shortcut?url=https://lesthill.github.io/tlc-colections/shortcuts/check-client.shortcut&name=Check%20Client">Install Shortcut</a>
+</div>
+
+<hr class="divider">
+
+<div class="step">
+  <span class="step-num">1</span>
+  <p>Tap each <strong>Install Shortcut</strong> button above</p>
+</div>
+<div class="step">
+  <span class="step-num">2</span>
+  <p>When Shortcuts opens, tap <strong>Add Shortcut</strong></p>
+</div>
+<div class="step">
+  <span class="step-num">3</span>
+  <p>Say <strong>"Hey Siri, Collections Summary"</strong> to test</p>
+</div>
+
+<div class="note">
+  <p>⚠️ If prompted about "untrusted shortcuts", go to <strong>Settings → Shortcuts</strong> and enable <strong>Allow Untrusted Shortcuts</strong>.</p>
+</div>
+
+</body>
+</html>

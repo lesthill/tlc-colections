@@ -28,86 +28,81 @@
 <body>
 <div id="root" class="app-wrap"></div>
 
+
 <script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js"></script>
-<script src="https://unpkg.com/@babel/standalone@7.24.0/babel.min.js"></script>
 
-<script type="text/babel" data-type="module">
+<script>
 const { useState, useEffect, useMemo, useCallback } = React;
 const { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } = Recharts;
-
-
-const CN = { LH:"Les Hill", SH:"Scott Hoffmann", CL:"Chad Lawson", BL:"Bernard Lawson", TK:"Tiffany Knight", BH:"Boyd Hoffmann", LT:"Lisa Toland", KF:"K. Fontaine" };
-const fmt = n => "$" + Math.abs(n).toLocaleString(undefined,{maximumFractionDigits:0});
-const pct = n => (n*100).toFixed(0)+"%";
-const TS = {9995:"$10K",25997:"$26K",39997:"$40K",46997:"$47K"};
-const TC = {9995:"#94a3b8",25997:"#38bdf8",39997:"#4ade80",46997:"#fbbf24"};
+const CN = { LH: "Les Hill", SH: "Scott Hoffmann", CL: "Chad Lawson", BL: "Bernard Lawson", TK: "Tiffany Knight", BH: "Boyd Hoffmann", LT: "Lisa Toland", KF: "K. Fontaine" };
+const fmt = (n) => "$" + Math.abs(n).toLocaleString(void 0, { maximumFractionDigits: 0 });
+const pct = (n) => (n * 100).toFixed(0) + "%";
+const TS = { 9995: "$10K", 25997: "$26K", 39997: "$40K", 46997: "$47K" };
+const TC = { 9995: "#94a3b8", 25997: "#38bdf8", 39997: "#4ade80", 46997: "#fbbf24" };
 const SK = "coll-v5";
 const TODAY = "2026-03-07";
 const DEF_FROM = "2026-02-07";
-
-// API sync config — set these after deploying the Cloudflare Worker
 const API_URL = "https://tlc-collections-api.lesthill.workers.dev";
 const API_KEY = "tlc-collect-2026";
-
 const apiFetch = async (path, opts = {}) => {
   if (!API_URL) return null;
   try {
     const res = await fetch(API_URL + path, {
       ...opts,
-      headers: { "Content-Type": "application/json", "X-API-Key": API_KEY, ...(opts.headers || {}) },
+      headers: { "Content-Type": "application/json", "X-API-Key": API_KEY, ...opts.headers || {} }
     });
     if (!res.ok) return null;
     return await res.json();
-  } catch (e) { return null; }
+  } catch (e) {
+    return null;
+  }
 };
-
 const syncToApi = async (data) => {
   if (!API_URL) return;
-  try { await apiFetch("/api/tracking", { method: "PUT", body: JSON.stringify(data) }); } catch (e) {}
+  try {
+    await apiFetch("/api/tracking", { method: "PUT", body: JSON.stringify(data) });
+  } catch (e) {
+  }
 };
-
 const D = [
-  {id:"b1",nm:"William DuQuette",ev:"Boston",ed:"2025-11-24",cl:"BL",sale:46997,col:2500,bal:44497,t:46997,nt:"Founder's Club",rr:"DECLINED",rn:"691 $18K",ph:"603-234-4546",em:"billduke32@gmail.com"},
-  {id:"b2",nm:"Willy Santana",ev:"Boston",ed:"2025-11-24",cl:"BL",sale:9995,col:3500,bal:6495,t:9995,nt:"",rr:"DECLINED",rn:"<600 $0",ph:"617-686-5290",em:"santana.willy@icloud.com"},
-  {id:"b3",nm:"Russell Thompson",ev:"Boston",ed:"2025-11-24",cl:"KF",sale:25997,col:10000,bal:15997,t:25997,nt:"",rr:"DECLINED",rn:"716 charge off",ph:"",em:""},
-  {id:"f1",nm:"Luce Pierre-Russon",ev:"Ft Lauderdale",ed:"2025-12-08",cl:"LT",sale:39997,col:1000,bal:38997,t:39997,nt:"Lawsuit postponed",rr:"DECLINED",rn:"656 $3K",ph:"816-410-3290",em:"taisharusson@yahoo.com"},
-  {id:"f2",nm:"Shannon Burrows",ev:"Ft Lauderdale",ed:"2025-12-08",cl:"TK",sale:39997,col:12000,bal:27997,t:39997,nt:"UGA",rr:"RANGE",rn:"5-25k",ph:"561-254-1229",em:"shannonburrowsrealtor@gmail.com"},
-  {id:"h1",nm:"Camille Brown",ev:"Houston",ed:"2025-12-29",cl:"BH",sale:39997,col:10000,bal:29997,t:39997,nt:"UGA",rr:"RANGE",rn:"0-25k",ph:"713-498-6110",em:"admin@reiningmoney.com"},
-  {id:"h2",nm:"Kinshasa Carter",ev:"Houston",ed:"2025-12-29",cl:"CL",sale:25997,col:9995,bal:16002,t:25997,nt:"10k pkg",rr:"DECLINED",rn:"635",ph:"832-483-9893",em:"shasacarter@gmail.com"},
-  {id:"h3",nm:"Raymond DarDar Jr",ev:"Houston",ed:"2025-12-29",cl:"KF",sale:39997,col:1000,bal:38997,t:39997,nt:"",rr:"DECLINED",rn:"702 $0",ph:"337-296-4461",em:"raymonddardar@yahoo.com"},
-  {id:"h4",nm:"Christine Toledo",ev:"Houston",ed:"2025-12-29",cl:"SH",sale:39997,col:5000,bal:34997,t:39997,nt:"HELOC iffy",rr:"DECLINED",rn:"718 re-UW",ph:"832-293-7026",em:"nikebrisnger@gmail.com"},
-  {id:"h5",nm:"Jason Bishop",ev:"Houston",ed:"2025-12-29",cl:"SH",sale:39997,col:9995,bal:30002,t:39997,nt:"",rr:"NEED_INFO",rn:"Verify",ph:"713-882-5552",em:"scoreboarddude@yahoo.com"},
-  {id:"s1",nm:"Cirilo Mendoza",ev:"San Diego",ed:"2026-01-12",cl:"BH",sale:25997,col:2000,bal:23997,t:25997,nt:"",rr:"NEED_INFO",rn:"Need SSN",ph:"619-843-2857",em:"mendozacirilo700@gmail.com"},
-  {id:"s2",nm:"Anne Mohney",ev:"San Diego",ed:"2026-01-12",cl:"TK",sale:46997,col:0,bal:46997,t:46997,nt:"Founder's Club",rr:"RANGE",rn:"20-40k",ph:"619-341-9406",em:"annemohney@gmail.com"},
-  {id:"s3",nm:"Paula Handel",ev:"San Diego",ed:"2026-01-12",cl:"TK",sale:39997,col:0,bal:39997,t:39997,nt:"Divorce?",rr:"APPROVED",rn:"Approved",ph:"619-746-4180",em:"paulashandel@gmail.com"},
-  {id:"s4",nm:"Chenoa Hernandez",ev:"San Diego",ed:"2026-01-12",cl:"TK",sale:25997,col:1000,bal:24997,t:25997,nt:"Retirement acct",rr:"DECLINED",rn:"Settlements",ph:"209-770-0981",em:"chengirl209@gmail.com"},
-  {id:"d1",nm:"Kayla Schultz",ev:"Denver",ed:"2026-01-19",cl:"LT",sale:25997,col:1000,bal:24997,t:25997,nt:"Banker said no",ph:"970-556-4992",em:"kessagirl1@gmail.com"},
-  {id:"d2",nm:"Suzanne Barrett",ev:"Denver",ed:"2026-01-19",cl:"LT",sale:25997,col:2500,bal:23497,t:25997,nt:"$1.5K 2wk + $1K 5wk",ph:"772-882-1245",em:"suzanne@topdocumentation.com"},
-  {id:"d3",nm:"Nancy Frazier",ev:"Denver",ed:"2026-01-19",cl:"SH",sale:25997,col:250,bal:25747,t:25997,nt:"Hail mary",ph:"719-641-6148",em:"nancy@arrowsconstruction.com"},
-  {id:"d4",nm:"Katherine Suazo",ev:"Denver",ed:"2026-01-19",cl:"TK",sale:39997,col:10000,bal:29997,t:39997,nt:"$5K 2wk + $5K 5wk",ph:"720-355-4382",em:"ksuazo2090@gmail.com"},
-  {id:"d5",nm:"Teresa Ries",ev:"Denver",ed:"2026-01-19",cl:"TK",sale:9995,col:4760,bal:5235,t:9995,nt:"",ph:"304-282-8501",em:"cassa26525@gmail.com"},
-  {id:"w1",nm:"Jabbar Thomas",ev:"Fort Worth",ed:"2026-01-26",cl:"BL",sale:39997,col:0,bal:39997,t:39997,nt:"ACH never funded",rr:"DECLINED",rn:"620 re-UW",ph:"469-781-7232",em:"jabgconstruction@engineer.com"},
-  {id:"w2",nm:"Ashley Lillie",ev:"Fort Worth",ed:"2026-01-26",cl:"CL",sale:39997,col:10000,bal:29997,t:39997,nt:"",ph:"",em:""},
-  {id:"k1",nm:"Steven Hooks Sr",ev:"Kansas City",ed:"2026-02-02",cl:"BL",sale:39997,col:3000,bal:36997,t:39997,nt:"RR in 2 weeks",rr:"RANGE",rn:"RR pending",ph:"816-269-5698",em:"shooksld@gmail.com"},
-  {id:"k2",nm:"Shanda Walsh",ev:"Kansas City",ed:"2026-02-02",cl:"LT",sale:39997,col:2500,bal:37497,t:39997,nt:"Bal via RR",rr:"RANGE",rn:"30-50k",ph:"913-406-3700",em:"walshs2006@gmail.com"},
-  {id:"k3",nm:"Sherry Samples",ev:"Kansas City",ed:"2026-02-02",cl:"LT",sale:39997,col:20000,bal:19997,t:39997,nt:"Bal via CC",ph:"913-634-8747",em:"machka_sherry@yahoo.com"},
-  {id:"a1",nm:"Matt Steward",ev:"Albuquerque",ed:"2026-02-09",cl:"CL",sale:39997,col:10000,bal:29997,t:39997,nt:"Bal RR",rr:"RANGE",rn:"5-25k",ph:"979-595-8632",em:"train@mattstewardcoaching.com"},
-  {id:"a2",nm:"Gene Romero",ev:"Albuquerque",ed:"2026-02-09",cl:"CL",sale:25997,col:1000,bal:24997,t:25997,nt:"Bal ACH",ph:"505-720-7001",em:"geno4012@gmail.com"},
-  {id:"a3",nm:"Eduardo Solis",ev:"Albuquerque",ed:"2026-02-09",cl:"LH",sale:25997,col:0,bal:0,t:25997,nt:"CANCELLED — refunded 3/6",rr:"DECLINED",rn:"687 $5K",ph:"915-539-1465",em:"eddiesolis72@gmail.com"},
-  {id:"a4",nm:"Anthony Lucero",ev:"Albuquerque",ed:"2026-02-09",cl:"LH",sale:39997,col:10000,bal:29997,t:39997,nt:"Bal ACH",rr:"RANGE",rn:"30-40k",ph:"505-269-8788",em:"trluc57@aol.com"},
-  {id:"a5",nm:"Becky Gonzalez",ev:"Albuquerque",ed:"2026-02-09",cl:"TK",sale:39997,col:26997,bal:13000,t:39997,nt:"Bal 3 wks",rr:"DECLINED",rn:"649 thin",ph:"505-688-1064",em:"beckygonzalez30@yahoo.com"},
-  {id:"a6",nm:"Selena Fox-Anderson",ev:"Albuquerque",ed:"2026-02-09",cl:"TK",sale:46997,col:0,bal:46997,t:46997,nt:"FC — TSP",rr:"DECLINED",rn:"680 $9.9K",ph:"505-366-4514",em:"selenapfox@gmail.com"},
-  {id:"a7",nm:"Douglas Conrad",ev:"Albuquerque",ed:"2026-02-09",cl:"TK",sale:25997,col:1000,bal:24997,t:25997,nt:"Bal 3 wks",rr:"NEED_INFO",rn:"Verify",ph:"505-702-2902",em:"fr3sh4200@gmail.com"},
-  {id:"a8",nm:"Armando Maestas",ev:"Albuquerque",ed:"2026-02-09",cl:"TK",sale:46997,col:2000,bal:44997,t:46997,nt:"Save @10",rr:"DECLINED",rn:"723 $0",ph:"",em:""},
+  { id: "b1", nm: "William DuQuette", ev: "Boston", ed: "2025-11-24", cl: "BL", sale: 46997, col: 2500, bal: 44497, t: 46997, nt: "Founder's Club", rr: "DECLINED", rn: "691 $18K", ph: "603-234-4546", em: "billduke32@gmail.com" },
+  { id: "b2", nm: "Willy Santana", ev: "Boston", ed: "2025-11-24", cl: "BL", sale: 9995, col: 3500, bal: 6495, t: 9995, nt: "", rr: "DECLINED", rn: "<600 $0", ph: "617-686-5290", em: "santana.willy@icloud.com" },
+  { id: "b3", nm: "Russell Thompson", ev: "Boston", ed: "2025-11-24", cl: "KF", sale: 25997, col: 1e4, bal: 15997, t: 25997, nt: "", rr: "DECLINED", rn: "716 charge off", ph: "", em: "" },
+  { id: "f1", nm: "Luce Pierre-Russon", ev: "Ft Lauderdale", ed: "2025-12-08", cl: "LT", sale: 39997, col: 1e3, bal: 38997, t: 39997, nt: "Lawsuit postponed", rr: "DECLINED", rn: "656 $3K", ph: "816-410-3290", em: "taisharusson@yahoo.com" },
+  { id: "f2", nm: "Shannon Burrows", ev: "Ft Lauderdale", ed: "2025-12-08", cl: "TK", sale: 39997, col: 12e3, bal: 27997, t: 39997, nt: "UGA", rr: "RANGE", rn: "5-25k", ph: "561-254-1229", em: "shannonburrowsrealtor@gmail.com" },
+  { id: "h1", nm: "Camille Brown", ev: "Houston", ed: "2025-12-29", cl: "BH", sale: 39997, col: 1e4, bal: 29997, t: 39997, nt: "UGA", rr: "RANGE", rn: "0-25k", ph: "713-498-6110", em: "admin@reiningmoney.com" },
+  { id: "h2", nm: "Kinshasa Carter", ev: "Houston", ed: "2025-12-29", cl: "CL", sale: 25997, col: 9995, bal: 16002, t: 25997, nt: "10k pkg", rr: "DECLINED", rn: "635", ph: "832-483-9893", em: "shasacarter@gmail.com" },
+  { id: "h3", nm: "Raymond DarDar Jr", ev: "Houston", ed: "2025-12-29", cl: "KF", sale: 39997, col: 1e3, bal: 38997, t: 39997, nt: "", rr: "DECLINED", rn: "702 $0", ph: "337-296-4461", em: "raymonddardar@yahoo.com" },
+  { id: "h4", nm: "Christine Toledo", ev: "Houston", ed: "2025-12-29", cl: "SH", sale: 39997, col: 5e3, bal: 34997, t: 39997, nt: "HELOC iffy", rr: "DECLINED", rn: "718 re-UW", ph: "832-293-7026", em: "nikebrisnger@gmail.com" },
+  { id: "h5", nm: "Jason Bishop", ev: "Houston", ed: "2025-12-29", cl: "SH", sale: 39997, col: 9995, bal: 30002, t: 39997, nt: "", rr: "NEED_INFO", rn: "Verify", ph: "713-882-5552", em: "scoreboarddude@yahoo.com" },
+  { id: "s1", nm: "Cirilo Mendoza", ev: "San Diego", ed: "2026-01-12", cl: "BH", sale: 25997, col: 2e3, bal: 23997, t: 25997, nt: "", rr: "NEED_INFO", rn: "Need SSN", ph: "619-843-2857", em: "mendozacirilo700@gmail.com" },
+  { id: "s2", nm: "Anne Mohney", ev: "San Diego", ed: "2026-01-12", cl: "TK", sale: 46997, col: 0, bal: 46997, t: 46997, nt: "Founder's Club", rr: "RANGE", rn: "20-40k", ph: "619-341-9406", em: "annemohney@gmail.com" },
+  { id: "s3", nm: "Paula Handel", ev: "San Diego", ed: "2026-01-12", cl: "TK", sale: 39997, col: 0, bal: 39997, t: 39997, nt: "Divorce?", rr: "APPROVED", rn: "Approved", ph: "619-746-4180", em: "paulashandel@gmail.com" },
+  { id: "s4", nm: "Chenoa Hernandez", ev: "San Diego", ed: "2026-01-12", cl: "TK", sale: 25997, col: 1e3, bal: 24997, t: 25997, nt: "Retirement acct", rr: "DECLINED", rn: "Settlements", ph: "209-770-0981", em: "chengirl209@gmail.com" },
+  { id: "d1", nm: "Kayla Schultz", ev: "Denver", ed: "2026-01-19", cl: "LT", sale: 25997, col: 1e3, bal: 24997, t: 25997, nt: "Banker said no", ph: "970-556-4992", em: "kessagirl1@gmail.com" },
+  { id: "d2", nm: "Suzanne Barrett", ev: "Denver", ed: "2026-01-19", cl: "LT", sale: 25997, col: 2500, bal: 23497, t: 25997, nt: "$1.5K 2wk + $1K 5wk", ph: "772-882-1245", em: "suzanne@topdocumentation.com" },
+  { id: "d3", nm: "Nancy Frazier", ev: "Denver", ed: "2026-01-19", cl: "SH", sale: 25997, col: 250, bal: 25747, t: 25997, nt: "Hail mary", ph: "719-641-6148", em: "nancy@arrowsconstruction.com" },
+  { id: "d4", nm: "Katherine Suazo", ev: "Denver", ed: "2026-01-19", cl: "TK", sale: 39997, col: 1e4, bal: 29997, t: 39997, nt: "$5K 2wk + $5K 5wk", ph: "720-355-4382", em: "ksuazo2090@gmail.com" },
+  { id: "d5", nm: "Teresa Ries", ev: "Denver", ed: "2026-01-19", cl: "TK", sale: 9995, col: 4760, bal: 5235, t: 9995, nt: "", ph: "304-282-8501", em: "cassa26525@gmail.com" },
+  { id: "w1", nm: "Jabbar Thomas", ev: "Fort Worth", ed: "2026-01-26", cl: "BL", sale: 39997, col: 0, bal: 39997, t: 39997, nt: "ACH never funded", rr: "DECLINED", rn: "620 re-UW", ph: "469-781-7232", em: "jabgconstruction@engineer.com" },
+  { id: "w2", nm: "Ashley Lillie", ev: "Fort Worth", ed: "2026-01-26", cl: "CL", sale: 39997, col: 1e4, bal: 29997, t: 39997, nt: "", ph: "", em: "" },
+  { id: "k1", nm: "Steven Hooks Sr", ev: "Kansas City", ed: "2026-02-02", cl: "BL", sale: 39997, col: 3e3, bal: 36997, t: 39997, nt: "RR in 2 weeks", rr: "RANGE", rn: "RR pending", ph: "816-269-5698", em: "shooksld@gmail.com" },
+  { id: "k2", nm: "Shanda Walsh", ev: "Kansas City", ed: "2026-02-02", cl: "LT", sale: 39997, col: 2500, bal: 37497, t: 39997, nt: "Bal via RR", rr: "RANGE", rn: "30-50k", ph: "913-406-3700", em: "walshs2006@gmail.com" },
+  { id: "k3", nm: "Sherry Samples", ev: "Kansas City", ed: "2026-02-02", cl: "LT", sale: 39997, col: 2e4, bal: 19997, t: 39997, nt: "Bal via CC", ph: "913-634-8747", em: "machka_sherry@yahoo.com" },
+  { id: "a1", nm: "Matt Steward", ev: "Albuquerque", ed: "2026-02-09", cl: "CL", sale: 39997, col: 1e4, bal: 29997, t: 39997, nt: "Bal RR", rr: "RANGE", rn: "5-25k", ph: "979-595-8632", em: "train@mattstewardcoaching.com" },
+  { id: "a2", nm: "Gene Romero", ev: "Albuquerque", ed: "2026-02-09", cl: "CL", sale: 25997, col: 1e3, bal: 24997, t: 25997, nt: "Bal ACH", ph: "505-720-7001", em: "geno4012@gmail.com" },
+  { id: "a3", nm: "Eduardo Solis", ev: "Albuquerque", ed: "2026-02-09", cl: "LH", sale: 25997, col: 0, bal: 0, t: 25997, nt: "CANCELLED \u2014 refunded 3/6", rr: "DECLINED", rn: "687 $5K", ph: "915-539-1465", em: "eddiesolis72@gmail.com" },
+  { id: "a4", nm: "Anthony Lucero", ev: "Albuquerque", ed: "2026-02-09", cl: "LH", sale: 39997, col: 1e4, bal: 29997, t: 39997, nt: "Bal ACH", rr: "RANGE", rn: "30-40k", ph: "505-269-8788", em: "trluc57@aol.com" },
+  { id: "a5", nm: "Becky Gonzalez", ev: "Albuquerque", ed: "2026-02-09", cl: "TK", sale: 39997, col: 26997, bal: 13e3, t: 39997, nt: "Bal 3 wks", rr: "DECLINED", rn: "649 thin", ph: "505-688-1064", em: "beckygonzalez30@yahoo.com" },
+  { id: "a6", nm: "Selena Fox-Anderson", ev: "Albuquerque", ed: "2026-02-09", cl: "TK", sale: 46997, col: 0, bal: 46997, t: 46997, nt: "FC \u2014 TSP", rr: "DECLINED", rn: "680 $9.9K", ph: "505-366-4514", em: "selenapfox@gmail.com" },
+  { id: "a7", nm: "Douglas Conrad", ev: "Albuquerque", ed: "2026-02-09", cl: "TK", sale: 25997, col: 1e3, bal: 24997, t: 25997, nt: "Bal 3 wks", rr: "NEED_INFO", rn: "Verify", ph: "505-702-2902", em: "fr3sh4200@gmail.com" },
+  { id: "a8", nm: "Armando Maestas", ev: "Albuquerque", ed: "2026-02-09", cl: "TK", sale: 46997, col: 2e3, bal: 44997, t: 46997, nt: "Save @10", rr: "DECLINED", rn: "723 $0", ph: "", em: "" }
 ];
-
-const sC={not_contacted:"#64748b",contacted:"#fbbf24",committed:"#4ade80",unreachable:"#f87171",collected:"#38bdf8"};
-const sL={not_contacted:"Not Contacted",contacted:"Contacted",committed:"Committed",unreachable:"Unreachable",collected:"Collected"};
-
-// 3-segment gauge component
-const Gauge = ({sale, workshopCol, sinceCol, expected}) => {
+const sC = { not_contacted: "#64748b", contacted: "#fbbf24", committed: "#4ade80", unreachable: "#f87171", collected: "#38bdf8" };
+const sL = { not_contacted: "Not Contacted", contacted: "Contacted", committed: "Committed", unreachable: "Unreachable", collected: "Collected" };
+const Gauge = ({ sale, workshopCol, sinceCol, expected }) => {
   const total = sale;
   if (total === 0) return null;
   const w1 = Math.min(workshopCol / total, 1);
@@ -120,307 +115,139 @@ const Gauge = ({sale, workshopCol, sinceCol, expected}) => {
   const a1 = w1 * circ;
   const a2 = w2 * circ;
   const a3 = w3 * circ;
-  return (
-    <div style={{position:"relative",width:"96px",height:"56px",flexShrink:0}}>
-      <svg width="96" height="56" viewBox="0 0 100 56">
-        <path d="M 6 52 A 44 44 0 0 1 94 52" fill="none" stroke="#1e293b" strokeWidth="8" strokeLinecap="round"/>
-        {a1 > 0 && <path d="M 6 52 A 44 44 0 0 1 94 52" fill="none" stroke="#4ade80" strokeWidth="8" strokeLinecap="round" strokeDasharray={`${a1} ${circ}`}/>}
-        {a2 > 0 && <path d="M 6 52 A 44 44 0 0 1 94 52" fill="none" stroke="#38bdf8" strokeWidth="8" strokeLinecap="round" strokeDasharray={`0 ${a1} ${a2} ${circ}`}/>}
-        {a3 > 0 && <path d="M 6 52 A 44 44 0 0 1 94 52" fill="none" stroke="#fbbf2450" strokeWidth="8" strokeLinecap="round" strokeDasharray={`0 ${a1+a2} ${a3} ${circ}`}/>}
-        <text x="50" y="42" textAnchor="middle" fill="#e2e8f0" fontSize="16" fontWeight="700" fontFamily="'Instrument Serif',serif">{pct(totalPct)}</text>
-        <text x="50" y="53" textAnchor="middle" fill="#475569" fontSize="7" fontFamily="monospace">PAID</text>
-      </svg>
-    </div>
-  );
+  return /* @__PURE__ */ React.createElement("div", { style: { position: "relative", width: "96px", height: "56px", flexShrink: 0 } }, /* @__PURE__ */ React.createElement("svg", { width: "96", height: "56", viewBox: "0 0 100 56" }, /* @__PURE__ */ React.createElement("path", { d: "M 6 52 A 44 44 0 0 1 94 52", fill: "none", stroke: "#1e293b", strokeWidth: "8", strokeLinecap: "round" }), a1 > 0 && /* @__PURE__ */ React.createElement("path", { d: "M 6 52 A 44 44 0 0 1 94 52", fill: "none", stroke: "#4ade80", strokeWidth: "8", strokeLinecap: "round", strokeDasharray: `${a1} ${circ}` }), a2 > 0 && /* @__PURE__ */ React.createElement("path", { d: "M 6 52 A 44 44 0 0 1 94 52", fill: "none", stroke: "#38bdf8", strokeWidth: "8", strokeLinecap: "round", strokeDasharray: `0 ${a1} ${a2} ${circ}` }), a3 > 0 && /* @__PURE__ */ React.createElement("path", { d: "M 6 52 A 44 44 0 0 1 94 52", fill: "none", stroke: "#fbbf2450", strokeWidth: "8", strokeLinecap: "round", strokeDasharray: `0 ${a1 + a2} ${a3} ${circ}` }), /* @__PURE__ */ React.createElement("text", { x: "50", y: "42", textAnchor: "middle", fill: "#e2e8f0", fontSize: "16", fontWeight: "700", fontFamily: "'Instrument Serif',serif" }, pct(totalPct)), /* @__PURE__ */ React.createElement("text", { x: "50", y: "53", textAnchor: "middle", fill: "#475569", fontSize: "7", fontFamily: "monospace" }, "PAID")));
 };
-
 function App() {
-  const [cf,setCf]=useState("ALL");
-  const [df,setDf]=useState(DEF_FROM);
-  const [dt,setDt]=useState(TODAY);
-  const [td,setTd]=useState({});
-  const [loading,setLoading]=useState(true);
-  const [expId,setExpId]=useState(null);
-  const [sortBy,setSortBy]=useState("bal");
-  const [sortDir,setSortDir]=useState("desc");
-  const [showReset,setShowReset]=useState(false);
-  const [showDates,setShowDates]=useState(false);
-
-  useEffect(()=>{
-    (async()=>{
-      // Try API first, fall back to localStorage
+  const [cf, setCf] = useState("ALL");
+  const [df, setDf] = useState(DEF_FROM);
+  const [dt, setDt] = useState(TODAY);
+  const [td, setTd] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [expId, setExpId] = useState(null);
+  const [sortBy, setSortBy] = useState("bal");
+  const [sortDir, setSortDir] = useState("desc");
+  const [showReset, setShowReset] = useState(false);
+  const [showDates, setShowDates] = useState(false);
+  useEffect(() => {
+    (async () => {
       const remote = await apiFetch("/api/tracking");
       if (remote && Object.keys(remote).length > 0) {
         setTd(remote);
-        try{window.localStorage?.setItem(SK,JSON.stringify(remote))}catch(e){}
+        try {
+          window.localStorage?.setItem(SK, JSON.stringify(remote));
+        } catch (e) {
+        }
       } else {
-        try{const v=window.localStorage?.getItem(SK);if(v)setTd(JSON.parse(v))}catch(e){}
+        try {
+          const v = window.localStorage?.getItem(SK);
+          if (v) setTd(JSON.parse(v));
+        } catch (e) {
+        }
       }
       setLoading(false);
     })();
-  },[]);
-  const save=useCallback(d=>{setTd(d);try{window.localStorage?.setItem(SK,JSON.stringify(d))}catch(e){}syncToApi(d)},[]);
-  const upd=useCallback((id,f,v)=>{save({...td,[id]:{...(td[id]||{}),[f]:v}})},[td,save]);
-  const doReset=useCallback(()=>{setTd({});try{window.localStorage?.removeItem(SK)}catch(e){}syncToApi({});setShowReset(false)},[]);
-  const doSort=col=>{if(sortBy===col)setSortDir(d=>d==="asc"?"desc":"asc");else{setSortBy(col);setSortDir("desc")}};
-  const setPre=w=>{const d=new Date(TODAY);d.setDate(d.getDate()-w*7);setDf(d.toISOString().split("T")[0]);setDt(TODAY)};
-
-  // Filter out cancelled (bal===0) from active collections
-  const allW=useMemo(()=>D.filter(c=>c.ed>=df&&c.ed<=dt&&c.bal>0),[df,dt]);
-  const clients=useMemo(()=>allW.filter(c=>cf==="ALL"||c.cl===cf).map(c=>{
-    const since=parseFloat(td[c.id]?.since)||0;
-    const exp=parseFloat(td[c.id]?.exp)||0;
-    return{...c,since,exp,edt:td[c.id]?.edt||"",cn:td[c.id]?.cn||"",cs:td[c.id]?.cs||"not_contacted"};
-  }).sort((a,b)=>{
-    let av=a[sortBy],bv=b[sortBy];
-    if(typeof av==="string")return sortDir==="asc"?av.localeCompare(bv):bv.localeCompare(av);
-    return sortDir==="asc"?av-bv:bv-av;
-  }),[cf,allW,td,sortBy,sortDir]);
-
-  const tBal=allW.reduce((s,c)=>s+c.bal,0);
-  const tCol=allW.reduce((s,c)=>s+c.col,0);
-  const tSold=allW.reduce((s,c)=>s+c.sale,0);
-  const fBal=clients.reduce((s,c)=>s+c.bal,0);
-  const fSince=clients.reduce((s,c)=>s+c.since,0);
-  const fExp=clients.reduce((s,c)=>s+c.exp,0);
-  const contd=clients.filter(c=>c.cs!=="not_contacted").length;
-  const gp=tSold>0?(tCol+fSince)/tSold:0;
-  const evsW=useMemo(()=>[...new Set(allW.map(c=>c.ev))],[allW]);
-
-  const clSum=useMemo(()=>Object.keys(CN).map(k=>{
-    const cc=allW.filter(c=>c.cl===k);if(!cc.length)return null;
-    const totalSale=cc.reduce((s,c)=>s+c.sale,0);
-    const wsCol=cc.reduce((s,c)=>s+c.col,0);
-    const sinceCol=cc.reduce((s,c)=>s+(parseFloat(td[c.id]?.since)||0),0);
-    const expCol=cc.reduce((s,c)=>s+(parseFloat(td[c.id]?.exp)||0),0);
-    return{cl:k,n:CN[k],cnt:cc.length,bal:cc.reduce((s,c)=>s+c.bal,0),totalSale,wsCol,sinceCol,expCol,
-      con:cc.filter(c=>(td[c.id]?.cs||"not_contacted")!=="not_contacted").length};
-  }).filter(Boolean).sort((a,b)=>b.bal-a.bal),[allW,td]);
-
-  const evChart=useMemo(()=>evsW.map(ev=>{
-    const cc=allW.filter(c=>c.ev===ev);
-    return{event:ev.length>9?ev.substring(0,8)+"…":ev,balance:cc.reduce((s,c)=>s+c.bal,0)};
-  }).sort((a,b)=>b.balance-a.balance),[allW,evsW]);
-
-  if(loading) return (<div style={{minHeight:"100vh",background:"#080d13",display:"flex",alignItems:"center",justifyContent:"center",color:"#7dd3fc",fontFamily:"monospace",fontSize:"14px"}}>Loading...</div>);
-
-  return (
-    <div style={{minHeight:"100vh",background:"#080d13",color:"#e2e8f0",fontFamily:"'IBM Plex Mono',monospace",fontSize:"13px",maxWidth:"100vw",overflowX:"hidden"}}>
-      <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/>
-
-      {/* HEADER */}
-      <div style={{background:"linear-gradient(180deg,#0a1628,#080d13)",padding:"14px 14px 12px",borderBottom:"1px solid #1e3a5f20"}}>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"10px"}}>
-          <div style={{fontSize:"8px",letterSpacing:"4px",color:"#4ade80"}}>TLC COLLECTIONS</div>
-          {showReset?(<div style={{display:"flex",gap:"6px"}}><button onClick={doReset} style={{background:"#f87171",border:"none",color:"#fff",padding:"8px 14px",fontSize:"12px",borderRadius:"6px",fontFamily:"inherit"}}>Clear All</button><button onClick={()=>setShowReset(false)} style={{background:"transparent",border:"1px solid #334155",color:"#64748b",padding:"8px 14px",fontSize:"12px",borderRadius:"6px",fontFamily:"inherit"}}>Cancel</button></div>):(<button onClick={()=>setShowReset(true)} style={{background:"transparent",border:"1px solid #f8717130",color:"#f87171",padding:"6px 12px",fontSize:"11px",borderRadius:"6px",fontFamily:"inherit"}}>Reset</button>)}
-        </div>
-
-        {/* Top gauge + numbers */}
-        <div style={{display:"flex",alignItems:"center",gap:"14px",marginBottom:"12px"}}>
-          <div style={{position:"relative",width:"80px",height:"50px",flexShrink:0}}>
-            <svg width="80" height="50" viewBox="0 0 100 56">
-              <path d="M 6 52 A 44 44 0 0 1 94 52" fill="none" stroke="#1e293b" strokeWidth="10" strokeLinecap="round"/>
-              <path d="M 6 52 A 44 44 0 0 1 94 52" fill="none" stroke="#4ade80" strokeWidth="10" strokeLinecap="round" strokeDasharray={`${(tCol/tSold)*Math.PI*44} ${Math.PI*44}`}/>
-              {fSince>0&&<path d="M 6 52 A 44 44 0 0 1 94 52" fill="none" stroke="#38bdf8" strokeWidth="10" strokeLinecap="round" strokeDasharray={`0 ${(tCol/tSold)*Math.PI*44} ${(fSince/tSold)*Math.PI*44} ${Math.PI*44}`}/>}
-              <text x="50" y="44" textAnchor="middle" fill="#e2e8f0" fontSize="20" fontWeight="700" fontFamily="'Instrument Serif',serif">{pct(gp)}</text>
-            </svg>
-          </div>
-          <div>
-            <div style={{fontSize:"22px",fontWeight:700,color:"#fb923c",fontFamily:"'Instrument Serif',serif"}}>{fmt(fBal)}</div>
-            <div style={{fontSize:"11px",color:"#64748b"}}>{clients.length} accts · {contd} contacted</div>
-            <div style={{display:"flex",gap:"8px",fontSize:"10px",marginTop:"2px"}}>
-              <span style={{color:"#4ade80"}}>WS: {fmt(tCol)}</span>
-              {fSince>0&&<span style={{color:"#38bdf8"}}>+{fmt(fSince)}</span>}
-              {fExp>0&&<span style={{color:"#fbbf24"}}>Exp: {fmt(fExp)}</span>}
-            </div>
-          </div>
-        </div>
-
-        {/* Legend */}
-        <div style={{display:"flex",gap:"12px",fontSize:"9px",marginBottom:"10px",color:"#475569"}}>
-          <span><span style={{display:"inline-block",width:"8px",height:"8px",background:"#4ade80",borderRadius:"2px",marginRight:"4px"}}/>Workshop</span>
-          <span><span style={{display:"inline-block",width:"8px",height:"8px",background:"#38bdf8",borderRadius:"2px",marginRight:"4px"}}/>Since WS</span>
-          <span><span style={{display:"inline-block",width:"8px",height:"8px",background:"#fbbf2450",borderRadius:"2px",marginRight:"4px"}}/>Expected</span>
-        </div>
-
-        {/* Presets */}
-        <div style={{display:"flex",gap:"5px",marginBottom:"8px"}}>
-          {[{l:"4W",w:4},{l:"6W",w:6},{l:"8W",w:8},{l:"3M",w:13},{l:"ALL",w:52}].map(p=>(
-            <button key={p.l} onClick={()=>setPre(p.w)} style={{flex:1,background:"#0f1a2a",border:"1px solid #1e3a5f30",color:"#94a3b8",padding:"10px 0",fontSize:"13px",borderRadius:"6px",fontFamily:"inherit",fontWeight:600}}>{p.l}</button>
-          ))}
-          <button onClick={()=>setShowDates(!showDates)} style={{width:"44px",background:showDates?"#1e3a5f":"#0f1a2a",border:"1px solid #1e3a5f30",color:"#7dd3fc",fontSize:"16px",borderRadius:"6px"}}>📅</button>
-        </div>
-        {showDates&&(<div style={{display:"flex",gap:"8px",marginBottom:"8px"}}><input type="date" value={df} onChange={e=>setDf(e.target.value)} style={{flex:1,background:"#0f1a2a",border:"1px solid #1e3a5f30",color:"#cbd5e1",padding:"10px",fontSize:"14px",fontFamily:"inherit",borderRadius:"6px"}}/><input type="date" value={dt} onChange={e=>setDt(e.target.value)} style={{flex:1,background:"#0f1a2a",border:"1px solid #1e3a5f30",color:"#cbd5e1",padding:"10px",fontSize:"14px",fontFamily:"inherit",borderRadius:"6px"}}/></div>)}
-
-        {/* Closer buttons — BIG and obvious */}
-        <div style={{display:"flex",gap:"5px",overflowX:"auto",WebkitOverflowScrolling:"touch",paddingBottom:"2px"}}>
-          <button onClick={()=>setCf("ALL")} style={{background:cf==="ALL"?"#4ade80":"#0f1a2a",border:cf==="ALL"?"none":"1px solid #1e3a5f40",color:cf==="ALL"?"#080d13":"#94a3b8",padding:"10px 18px",fontSize:"15px",borderRadius:"8px",fontFamily:"inherit",fontWeight:700,whiteSpace:"nowrap",flexShrink:0}}>ALL</button>
-          {Object.keys(CN).map(k=>(
-            <button key={k} onClick={()=>setCf(cf===k?"ALL":k)} style={{background:cf===k?"#7dd3fc":"#0f1a2a",border:cf===k?"none":"1px solid #1e3a5f40",color:cf===k?"#080d13":"#7dd3fc",padding:"10px 16px",fontSize:"15px",borderRadius:"8px",fontFamily:"inherit",fontWeight:700,whiteSpace:"nowrap",flexShrink:0}}>{k}</button>
-          ))}
-        </div>
-      </div>
-
-      {/* BODY */}
-      <div style={{padding:"10px"}}>
-
-        {/* Closer cards with gauges */}
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"6px",marginBottom:"10px"}}>
-          {clSum.map((cs,i)=>{
-            const total=cs.totalSale;
-            const w1=total>0?cs.wsCol/total:0;
-            const w2=total>0?cs.sinceCol/total:0;
-            const w3=total>0?cs.expCol/total:0;
-            const paidPct=total>0?(cs.wsCol+cs.sinceCol)/total:0;
-            const circ=Math.PI*34;
-            const a1=Math.min(w1,1)*circ;
-            const a2=Math.min(w2,1-w1)*circ;
-            const a3=Math.min(w3,1-w1-w2)*circ;
-            return(
-            <div key={i} onClick={()=>setCf(cf===cs.cl?"ALL":cs.cl)} style={{background:cf===cs.cl?"#0f1a2a":"#0c1117",border:cf===cs.cl?"2px solid #7dd3fc40":"1px solid #1e3a5f15",padding:"10px",borderRadius:"8px"}}>
-              <div style={{display:"flex",gap:"8px",alignItems:"flex-start"}}>
-                {/* Mini gauge */}
-                <div style={{flexShrink:0,width:"60px",height:"38px"}}>
-                  <svg width="60" height="38" viewBox="0 0 80 44">
-                    <path d="M 4 40 A 34 34 0 0 1 76 40" fill="none" stroke="#1e293b" strokeWidth="7" strokeLinecap="round"/>
-                    {a1>0&&<path d="M 4 40 A 34 34 0 0 1 76 40" fill="none" stroke="#4ade80" strokeWidth="7" strokeLinecap="round" strokeDasharray={`${a1} ${circ}`}/>}
-                    {a2>0&&<path d="M 4 40 A 34 34 0 0 1 76 40" fill="none" stroke="#38bdf8" strokeWidth="7" strokeLinecap="round" strokeDasharray={`0 ${a1} ${a2} ${circ}`}/>}
-                    {a3>0&&<path d="M 4 40 A 34 34 0 0 1 76 40" fill="none" stroke="#fbbf2460" strokeWidth="7" strokeLinecap="round" strokeDasharray={`0 ${a1+a2} ${a3} ${circ}`}/>}
-                    <text x="40" y="36" textAnchor="middle" fill="#e2e8f0" fontSize="14" fontWeight="700" fontFamily="'Instrument Serif',serif">{pct(paidPct)}</text>
-                  </svg>
-                </div>
-                <div style={{flex:1,minWidth:0}}>
-                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline"}}>
-                    <span style={{color:"#7dd3fc",fontWeight:700,fontSize:"15px"}}>{cs.cl}</span>
-                    <span style={{color:"#fb923c",fontWeight:700,fontSize:"13px"}}>{fmt(cs.bal)}</span>
-                  </div>
-                  <div style={{color:"#64748b",fontSize:"10px",marginTop:"1px"}}>{cs.n}</div>
-                  <div style={{fontSize:"9px",marginTop:"4px",display:"flex",gap:"6px",flexWrap:"wrap"}}>
-                    <span style={{color:"#4ade80"}}>{fmt(cs.wsCol)}</span>
-                    {cs.sinceCol>0&&<span style={{color:"#38bdf8"}}>+{fmt(cs.sinceCol)}</span>}
-                    {cs.expCol>0&&<span style={{color:"#fbbf24"}}>exp {fmt(cs.expCol)}</span>}
-                  </div>
-                  <div style={{color:"#475569",fontSize:"10px",marginTop:"2px"}}>{cs.con}/{cs.cnt} contacted</div>
-                </div>
-              </div>
-            </div>)})}
-        </div>
-
-        {/* Chart — constrained width */}
-        {evChart.length>0&&(<div style={{background:"#0c1117",border:"1px solid #1e3a5f15",padding:"12px",borderRadius:"8px",marginBottom:"10px",maxWidth:Math.max(evChart.length*80,200)+"px"}}>
-          <div style={{fontSize:"10px",letterSpacing:"2px",color:"#64748b",marginBottom:"8px"}}>BY EVENT</div>
-          <ResponsiveContainer width="100%" height={100}>
-            <BarChart data={evChart} margin={{left:0,right:5,top:0,bottom:0}}>
-              <XAxis dataKey="event" tick={{fill:"#94a3b8",fontSize:11}} axisLine={false} tickLine={false}/>
-              <YAxis tickFormatter={v=>`$${(v/1000).toFixed(0)}k`} tick={{fill:"#475569",fontSize:10}} axisLine={false} tickLine={false} width={40}/>
-              <Bar dataKey="balance" fill="#7dd3fc" opacity={0.6} radius={[4,4,0,0]}/>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>)}
-
-        {/* Sort */}
-        <div style={{display:"flex",gap:"10px",marginBottom:"8px",overflowX:"auto"}}>
-          {[["bal","Balance"],["nm","Name"],["ev","Event"],["cl","Closer"]].map(([c,l])=>(
-            <span key={c} onClick={()=>doSort(c)} style={{color:sortBy===c?"#7dd3fc":"#475569",fontSize:"12px",whiteSpace:"nowrap",fontWeight:sortBy===c?700:400}}>{l}{sortBy===c?(sortDir==="asc"?" ↑":" ↓"):""}</span>
-          ))}
-        </div>
-
-        {/* Client cards */}
-        {clients.length===0?(<div style={{padding:"40px 10px",textAlign:"center"}}><div style={{fontSize:"18px",fontFamily:"'Instrument Serif',serif",color:"#475569"}}>No open accounts</div><div style={{fontSize:"12px",color:"#334155",marginTop:"4px"}}>Adjust window or filter</div></div>)
-        :clients.map((c,i)=>{
-          const isX=expId===c.id;
-          const sc=sC[c.cs];
-          const wks=Math.round((new Date(TODAY)-new Date(c.ed))/(7*24*60*60*1000));
-          const urg=wks>=4?"URGENT":wks>=3?"DUE":"ACTIVE";
-          const uC=urg==="URGENT"?"#f87171":urg==="DUE"?"#fbbf24":"#4ade80";
-          const remaining=c.bal-c.since;
-
-          return (
-            <div key={c.id} style={{background:"#0c1117",border:"1px solid #1e3a5f15",borderRadius:"8px",marginBottom:"8px",overflow:"hidden"}}>
-              {/* Top: gauge + name + balance */}
-              <div style={{padding:"12px",display:"flex",gap:"10px",alignItems:"flex-start"}}>
-                <Gauge sale={c.sale} workshopCol={c.col} sinceCol={c.since} expected={c.exp}/>
-                <div style={{flex:1,minWidth:0}}>
-                  <div style={{display:"flex",alignItems:"center",gap:"6px",flexWrap:"wrap",marginBottom:"4px"}}>
-                    <span style={{fontSize:"9px",fontWeight:700,color:uC,background:uC+"15",padding:"2px 7px",borderRadius:"4px"}}>{urg} W{wks}</span>
-                    <span style={{color:TC[c.t],fontSize:"10px",fontWeight:600,background:TC[c.t]+"15",padding:"1px 7px",borderRadius:"4px"}}>{TS[c.t]}</span>
-                    <span style={{color:"#7dd3fc",fontSize:"11px",fontWeight:700}}>{c.cl}</span>
-                  </div>
-                  <div style={{color:"#e2e8f0",fontWeight:600,fontSize:"15px"}}>{c.nm}</div>
-                  <div style={{color:"#475569",fontSize:"11px"}}>{c.ev}</div>
-                </div>
-                <div style={{textAlign:"right",flexShrink:0}}>
-                  <div style={{color:"#fb923c",fontWeight:700,fontSize:"17px",fontFamily:"'Instrument Serif',serif"}}>{fmt(remaining>0?remaining:c.bal)}</div>
-                  <div style={{color:"#475569",fontSize:"9px"}}>of {fmt(c.sale)}</div>
-                  {c.since>0&&<div style={{color:"#38bdf8",fontSize:"10px",fontWeight:600}}>+{fmt(c.since)} since</div>}
-                </div>
-              </div>
-
-              {/* Stats row */}
-              <div style={{padding:"0 12px 8px",display:"flex",gap:"10px",fontSize:"11px",flexWrap:"wrap"}}>
-                <span style={{color:"#4ade80"}}>WS: {fmt(c.col)}</span>
-                {c.rr&&<span style={{color:c.rr==="DECLINED"?"#f87171":c.rr==="RANGE"?"#38bdf8":"#fbbf24"}}>RR: {c.rn}</span>}
-                {c.nt&&<span style={{color:"#475569"}}>{c.nt}</span>}
-              </div>
-
-              {/* Contact — tappable */}
-              {(c.ph||c.em)&&(<div style={{padding:"0 12px 8px",display:"flex",gap:"6px",flexWrap:"wrap"}}>
-                {c.ph&&<a href={`tel:${c.ph}`} style={{color:"#38bdf8",textDecoration:"none",background:"#38bdf810",padding:"6px 12px",borderRadius:"6px",fontSize:"12px"}}>📞 {c.ph}</a>}
-                {c.em&&<a href={`mailto:${c.em}`} style={{color:"#38bdf8",textDecoration:"none",background:"#38bdf810",padding:"6px 12px",borderRadius:"6px",fontSize:"11px",overflow:"hidden",textOverflow:"ellipsis",maxWidth:"220px",whiteSpace:"nowrap"}}> ✉ {c.em}</a>}
-              </div>)}
-
-              {/* Status + expand */}
-              <div style={{padding:"6px 12px 8px",display:"flex",gap:"8px",borderTop:"1px solid #1e3a5f10"}}>
-                <select value={c.cs} onChange={e=>upd(c.id,"cs",e.target.value)} style={{flex:1,background:"#0a0f18",border:`1px solid ${sc}30`,color:sc,padding:"10px",fontSize:"13px",fontFamily:"inherit",borderRadius:"6px",fontWeight:600}}>
-                  {Object.entries(sL).map(([k,v])=><option key={k} value={k}>{v}</option>)}
-                </select>
-                <button onClick={()=>setExpId(isX?null:c.id)} style={{background:isX?"#7dd3fc15":"#0a0f18",border:"1px solid #1e3a5f30",color:"#7dd3fc",padding:"10px 18px",fontSize:"13px",borderRadius:"6px",fontFamily:"inherit",fontWeight:700}}>{isX?"▲":"▼"}</button>
-              </div>
-
-              {/* Expanded */}
-              {isX&&(<div style={{padding:"12px",background:"#080d13",borderTop:"1px solid #1e3a5f15"}}>
-                {/* Collected Since Workshop */}
-                <div style={{marginBottom:"12px"}}>
-                  <label style={{fontSize:"10px",color:"#38bdf8",letterSpacing:"1px",display:"block",marginBottom:"4px",fontWeight:600}}>COLLECTED SINCE WORKSHOP</label>
-                  <div style={{display:"flex",gap:"8px",alignItems:"center"}}>
-                    <input type="number" value={c.since||""} onChange={e=>upd(c.id,"since",e.target.value)} placeholder="0" max={c.bal} style={{flex:1,background:"#0c1117",border:"1px solid #38bdf830",color:"#38bdf8",padding:"12px",fontSize:"16px",fontFamily:"inherit",borderRadius:"6px",fontWeight:700,maxWidth:"160px"}}/>
-                    <button onClick={()=>{upd(c.id,"since",String(c.bal));upd(c.id,"cs","collected")}} style={{background:"#4ade8020",border:"1px solid #4ade8040",color:"#4ade80",padding:"12px 14px",fontSize:"12px",borderRadius:"6px",fontFamily:"inherit",fontWeight:700,whiteSpace:"nowrap"}}>✓ PIF</button>
-                  </div>
-                </div>
-
-                {/* Expected */}
-                <div style={{marginBottom:"12px"}}>
-                  <label style={{fontSize:"10px",color:"#fbbf24",letterSpacing:"1px",display:"block",marginBottom:"4px",fontWeight:600}}>EXPECTED NEXT PAYMENT</label>
-                  <div style={{display:"flex",gap:"8px"}}>
-                    <input type="number" value={c.exp||""} onChange={e=>upd(c.id,"exp",e.target.value)} placeholder="0" max={46997} style={{background:"#0c1117",border:"1px solid #fbbf2430",color:"#fbbf24",padding:"12px",fontSize:"16px",fontFamily:"inherit",borderRadius:"6px",fontWeight:700,width:"140px"}}/>
-                    <input type="date" value={c.edt} onChange={e=>upd(c.id,"edt",e.target.value)} style={{flex:1,background:"#0c1117",border:"1px solid #1e3a5f30",color:"#cbd5e1",padding:"12px",fontSize:"14px",fontFamily:"inherit",borderRadius:"6px"}}/>
-                  </div>
-                </div>
-
-                {/* Notes */}
-                <div>
-                  <label style={{fontSize:"10px",color:"#64748b",letterSpacing:"1px",display:"block",marginBottom:"4px"}}>NOTES</label>
-                  <input value={c.cn} onChange={e=>upd(c.id,"cn",e.target.value)} placeholder="Follow-up notes..." style={{width:"100%",background:"#0c1117",border:"1px solid #1e3a5f30",color:"#94a3b8",padding:"12px",fontSize:"14px",fontFamily:"inherit",borderRadius:"6px"}}/>
-                </div>
-              </div>)}
-
-              {/* Inline summary when collapsed */}
-              {!isX&&(c.cn||c.since>0||c.exp>0)&&(<div style={{padding:"4px 12px 8px",fontSize:"11px",display:"flex",gap:"8px",flexWrap:"wrap"}}>
-                {c.since>0&&<span style={{color:"#38bdf8"}}>+{fmt(c.since)} since</span>}
-                {c.exp>0&&<span style={{color:"#fbbf24"}}>Exp: {fmt(c.exp)}</span>}
-                {c.edt&&<span style={{color:"#94a3b8"}}>by {c.edt}</span>}
-                {c.cn&&<span style={{color:"#64748b"}}>"{c.cn}"</span>}
-              </div>)}
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
+  }, []);
+  const save = useCallback((d) => {
+    setTd(d);
+    try {
+      window.localStorage?.setItem(SK, JSON.stringify(d));
+    } catch (e) {
+    }
+    syncToApi(d);
+  }, []);
+  const upd = useCallback((id, f, v) => {
+    save({ ...td, [id]: { ...td[id] || {}, [f]: v } });
+  }, [td, save]);
+  const doReset = useCallback(() => {
+    setTd({});
+    try {
+      window.localStorage?.removeItem(SK);
+    } catch (e) {
+    }
+    syncToApi({});
+    setShowReset(false);
+  }, []);
+  const doSort = (col) => {
+    if (sortBy === col) setSortDir((d) => d === "asc" ? "desc" : "asc");
+    else {
+      setSortBy(col);
+      setSortDir("desc");
+    }
+  };
+  const setPre = (w) => {
+    const d = new Date(TODAY);
+    d.setDate(d.getDate() - w * 7);
+    setDf(d.toISOString().split("T")[0]);
+    setDt(TODAY);
+  };
+  const allW = useMemo(() => D.filter((c) => c.ed >= df && c.ed <= dt && c.bal > 0), [df, dt]);
+  const clients = useMemo(() => allW.filter((c) => cf === "ALL" || c.cl === cf).map((c) => {
+    const since = parseFloat(td[c.id]?.since) || 0;
+    const exp = parseFloat(td[c.id]?.exp) || 0;
+    return { ...c, since, exp, edt: td[c.id]?.edt || "", cn: td[c.id]?.cn || "", cs: td[c.id]?.cs || "not_contacted" };
+  }).sort((a, b) => {
+    let av = a[sortBy], bv = b[sortBy];
+    if (typeof av === "string") return sortDir === "asc" ? av.localeCompare(bv) : bv.localeCompare(av);
+    return sortDir === "asc" ? av - bv : bv - av;
+  }), [cf, allW, td, sortBy, sortDir]);
+  const tBal = allW.reduce((s, c) => s + c.bal, 0);
+  const tCol = allW.reduce((s, c) => s + c.col, 0);
+  const tSold = allW.reduce((s, c) => s + c.sale, 0);
+  const fBal = clients.reduce((s, c) => s + c.bal, 0);
+  const fSince = clients.reduce((s, c) => s + c.since, 0);
+  const fExp = clients.reduce((s, c) => s + c.exp, 0);
+  const contd = clients.filter((c) => c.cs !== "not_contacted").length;
+  const gp = tSold > 0 ? (tCol + fSince) / tSold : 0;
+  const evsW = useMemo(() => [...new Set(allW.map((c) => c.ev))], [allW]);
+  const clSum = useMemo(() => Object.keys(CN).map((k) => {
+    const cc = allW.filter((c) => c.cl === k);
+    if (!cc.length) return null;
+    const totalSale = cc.reduce((s, c) => s + c.sale, 0);
+    const wsCol = cc.reduce((s, c) => s + c.col, 0);
+    const sinceCol = cc.reduce((s, c) => s + (parseFloat(td[c.id]?.since) || 0), 0);
+    const expCol = cc.reduce((s, c) => s + (parseFloat(td[c.id]?.exp) || 0), 0);
+    return {
+      cl: k,
+      n: CN[k],
+      cnt: cc.length,
+      bal: cc.reduce((s, c) => s + c.bal, 0),
+      totalSale,
+      wsCol,
+      sinceCol,
+      expCol,
+      con: cc.filter((c) => (td[c.id]?.cs || "not_contacted") !== "not_contacted").length
+    };
+  }).filter(Boolean).sort((a, b) => b.bal - a.bal), [allW, td]);
+  const evChart = useMemo(() => evsW.map((ev) => {
+    const cc = allW.filter((c) => c.ev === ev);
+    return { event: ev.length > 9 ? ev.substring(0, 8) + "\u2026" : ev, balance: cc.reduce((s, c) => s + c.bal, 0) };
+  }).sort((a, b) => b.balance - a.balance), [allW, evsW]);
+  if (loading) return /* @__PURE__ */ React.createElement("div", { style: { minHeight: "100vh", background: "#080d13", display: "flex", alignItems: "center", justifyContent: "center", color: "#7dd3fc", fontFamily: "monospace", fontSize: "14px" } }, "Loading...");
+  return /* @__PURE__ */ React.createElement("div", { style: { minHeight: "100vh", background: "#080d13", color: "#e2e8f0", fontFamily: "'IBM Plex Mono',monospace", fontSize: "13px", maxWidth: "100vw", overflowX: "hidden" } }, /* @__PURE__ */ React.createElement("link", { href: "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap", rel: "stylesheet" }), /* @__PURE__ */ React.createElement("div", { style: { background: "linear-gradient(180deg,#0a1628,#080d13)", padding: "14px 14px 12px", borderBottom: "1px solid #1e3a5f20" } }, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" } }, /* @__PURE__ */ React.createElement("div", { style: { fontSize: "8px", letterSpacing: "4px", color: "#4ade80" } }, "TLC COLLECTIONS"), showReset ? /* @__PURE__ */ React.createElement("div", { style: { display: "flex", gap: "6px" } }, /* @__PURE__ */ React.createElement("button", { onClick: doReset, style: { background: "#f87171", border: "none", color: "#fff", padding: "8px 14px", fontSize: "12px", borderRadius: "6px", fontFamily: "inherit" } }, "Clear All"), /* @__PURE__ */ React.createElement("button", { onClick: () => setShowReset(false), style: { background: "transparent", border: "1px solid #334155", color: "#64748b", padding: "8px 14px", fontSize: "12px", borderRadius: "6px", fontFamily: "inherit" } }, "Cancel")) : /* @__PURE__ */ React.createElement("button", { onClick: () => setShowReset(true), style: { background: "transparent", border: "1px solid #f8717130", color: "#f87171", padding: "6px 12px", fontSize: "11px", borderRadius: "6px", fontFamily: "inherit" } }, "Reset")), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "14px", marginBottom: "12px" } }, /* @__PURE__ */ React.createElement("div", { style: { position: "relative", width: "80px", height: "50px", flexShrink: 0 } }, /* @__PURE__ */ React.createElement("svg", { width: "80", height: "50", viewBox: "0 0 100 56" }, /* @__PURE__ */ React.createElement("path", { d: "M 6 52 A 44 44 0 0 1 94 52", fill: "none", stroke: "#1e293b", strokeWidth: "10", strokeLinecap: "round" }), /* @__PURE__ */ React.createElement("path", { d: "M 6 52 A 44 44 0 0 1 94 52", fill: "none", stroke: "#4ade80", strokeWidth: "10", strokeLinecap: "round", strokeDasharray: `${tCol / tSold * Math.PI * 44} ${Math.PI * 44}` }), fSince > 0 && /* @__PURE__ */ React.createElement("path", { d: "M 6 52 A 44 44 0 0 1 94 52", fill: "none", stroke: "#38bdf8", strokeWidth: "10", strokeLinecap: "round", strokeDasharray: `0 ${tCol / tSold * Math.PI * 44} ${fSince / tSold * Math.PI * 44} ${Math.PI * 44}` }), /* @__PURE__ */ React.createElement("text", { x: "50", y: "44", textAnchor: "middle", fill: "#e2e8f0", fontSize: "20", fontWeight: "700", fontFamily: "'Instrument Serif',serif" }, pct(gp)))), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { style: { fontSize: "22px", fontWeight: 700, color: "#fb923c", fontFamily: "'Instrument Serif',serif" } }, fmt(fBal)), /* @__PURE__ */ React.createElement("div", { style: { fontSize: "11px", color: "#64748b" } }, clients.length, " accts \xB7 ", contd, " contacted"), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", gap: "8px", fontSize: "10px", marginTop: "2px" } }, /* @__PURE__ */ React.createElement("span", { style: { color: "#4ade80" } }, "WS: ", fmt(tCol)), fSince > 0 && /* @__PURE__ */ React.createElement("span", { style: { color: "#38bdf8" } }, "+", fmt(fSince)), fExp > 0 && /* @__PURE__ */ React.createElement("span", { style: { color: "#fbbf24" } }, "Exp: ", fmt(fExp))))), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", gap: "12px", fontSize: "9px", marginBottom: "10px", color: "#475569" } }, /* @__PURE__ */ React.createElement("span", null, /* @__PURE__ */ React.createElement("span", { style: { display: "inline-block", width: "8px", height: "8px", background: "#4ade80", borderRadius: "2px", marginRight: "4px" } }), "Workshop"), /* @__PURE__ */ React.createElement("span", null, /* @__PURE__ */ React.createElement("span", { style: { display: "inline-block", width: "8px", height: "8px", background: "#38bdf8", borderRadius: "2px", marginRight: "4px" } }), "Since WS"), /* @__PURE__ */ React.createElement("span", null, /* @__PURE__ */ React.createElement("span", { style: { display: "inline-block", width: "8px", height: "8px", background: "#fbbf2450", borderRadius: "2px", marginRight: "4px" } }), "Expected")), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", gap: "5px", marginBottom: "8px" } }, [{ l: "4W", w: 4 }, { l: "6W", w: 6 }, { l: "8W", w: 8 }, { l: "3M", w: 13 }, { l: "ALL", w: 52 }].map((p) => /* @__PURE__ */ React.createElement("button", { key: p.l, onClick: () => setPre(p.w), style: { flex: 1, background: "#0f1a2a", border: "1px solid #1e3a5f30", color: "#94a3b8", padding: "10px 0", fontSize: "13px", borderRadius: "6px", fontFamily: "inherit", fontWeight: 600 } }, p.l)), /* @__PURE__ */ React.createElement("button", { onClick: () => setShowDates(!showDates), style: { width: "44px", background: showDates ? "#1e3a5f" : "#0f1a2a", border: "1px solid #1e3a5f30", color: "#7dd3fc", fontSize: "16px", borderRadius: "6px" } }, "\u{1F4C5}")), showDates && /* @__PURE__ */ React.createElement("div", { style: { display: "flex", gap: "8px", marginBottom: "8px" } }, /* @__PURE__ */ React.createElement("input", { type: "date", value: df, onChange: (e) => setDf(e.target.value), style: { flex: 1, background: "#0f1a2a", border: "1px solid #1e3a5f30", color: "#cbd5e1", padding: "10px", fontSize: "14px", fontFamily: "inherit", borderRadius: "6px" } }), /* @__PURE__ */ React.createElement("input", { type: "date", value: dt, onChange: (e) => setDt(e.target.value), style: { flex: 1, background: "#0f1a2a", border: "1px solid #1e3a5f30", color: "#cbd5e1", padding: "10px", fontSize: "14px", fontFamily: "inherit", borderRadius: "6px" } })), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", gap: "5px", overflowX: "auto", WebkitOverflowScrolling: "touch", paddingBottom: "2px" } }, /* @__PURE__ */ React.createElement("button", { onClick: () => setCf("ALL"), style: { background: cf === "ALL" ? "#4ade80" : "#0f1a2a", border: cf === "ALL" ? "none" : "1px solid #1e3a5f40", color: cf === "ALL" ? "#080d13" : "#94a3b8", padding: "10px 18px", fontSize: "15px", borderRadius: "8px", fontFamily: "inherit", fontWeight: 700, whiteSpace: "nowrap", flexShrink: 0 } }, "ALL"), Object.keys(CN).map((k) => /* @__PURE__ */ React.createElement("button", { key: k, onClick: () => setCf(cf === k ? "ALL" : k), style: { background: cf === k ? "#7dd3fc" : "#0f1a2a", border: cf === k ? "none" : "1px solid #1e3a5f40", color: cf === k ? "#080d13" : "#7dd3fc", padding: "10px 16px", fontSize: "15px", borderRadius: "8px", fontFamily: "inherit", fontWeight: 700, whiteSpace: "nowrap", flexShrink: 0 } }, k)))), /* @__PURE__ */ React.createElement("div", { style: { padding: "10px" } }, /* @__PURE__ */ React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px", marginBottom: "10px" } }, clSum.map((cs, i) => {
+    const total = cs.totalSale;
+    const w1 = total > 0 ? cs.wsCol / total : 0;
+    const w2 = total > 0 ? cs.sinceCol / total : 0;
+    const w3 = total > 0 ? cs.expCol / total : 0;
+    const paidPct = total > 0 ? (cs.wsCol + cs.sinceCol) / total : 0;
+    const circ = Math.PI * 34;
+    const a1 = Math.min(w1, 1) * circ;
+    const a2 = Math.min(w2, 1 - w1) * circ;
+    const a3 = Math.min(w3, 1 - w1 - w2) * circ;
+    return /* @__PURE__ */ React.createElement("div", { key: i, onClick: () => setCf(cf === cs.cl ? "ALL" : cs.cl), style: { background: cf === cs.cl ? "#0f1a2a" : "#0c1117", border: cf === cs.cl ? "2px solid #7dd3fc40" : "1px solid #1e3a5f15", padding: "10px", borderRadius: "8px" } }, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", gap: "8px", alignItems: "flex-start" } }, /* @__PURE__ */ React.createElement("div", { style: { flexShrink: 0, width: "60px", height: "38px" } }, /* @__PURE__ */ React.createElement("svg", { width: "60", height: "38", viewBox: "0 0 80 44" }, /* @__PURE__ */ React.createElement("path", { d: "M 4 40 A 34 34 0 0 1 76 40", fill: "none", stroke: "#1e293b", strokeWidth: "7", strokeLinecap: "round" }), a1 > 0 && /* @__PURE__ */ React.createElement("path", { d: "M 4 40 A 34 34 0 0 1 76 40", fill: "none", stroke: "#4ade80", strokeWidth: "7", strokeLinecap: "round", strokeDasharray: `${a1} ${circ}` }), a2 > 0 && /* @__PURE__ */ React.createElement("path", { d: "M 4 40 A 34 34 0 0 1 76 40", fill: "none", stroke: "#38bdf8", strokeWidth: "7", strokeLinecap: "round", strokeDasharray: `0 ${a1} ${a2} ${circ}` }), a3 > 0 && /* @__PURE__ */ React.createElement("path", { d: "M 4 40 A 34 34 0 0 1 76 40", fill: "none", stroke: "#fbbf2460", strokeWidth: "7", strokeLinecap: "round", strokeDasharray: `0 ${a1 + a2} ${a3} ${circ}` }), /* @__PURE__ */ React.createElement("text", { x: "40", y: "36", textAnchor: "middle", fill: "#e2e8f0", fontSize: "14", fontWeight: "700", fontFamily: "'Instrument Serif',serif" }, pct(paidPct)))), /* @__PURE__ */ React.createElement("div", { style: { flex: 1, minWidth: 0 } }, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "baseline" } }, /* @__PURE__ */ React.createElement("span", { style: { color: "#7dd3fc", fontWeight: 700, fontSize: "15px" } }, cs.cl), /* @__PURE__ */ React.createElement("span", { style: { color: "#fb923c", fontWeight: 700, fontSize: "13px" } }, fmt(cs.bal))), /* @__PURE__ */ React.createElement("div", { style: { color: "#64748b", fontSize: "10px", marginTop: "1px" } }, cs.n), /* @__PURE__ */ React.createElement("div", { style: { fontSize: "9px", marginTop: "4px", display: "flex", gap: "6px", flexWrap: "wrap" } }, /* @__PURE__ */ React.createElement("span", { style: { color: "#4ade80" } }, fmt(cs.wsCol)), cs.sinceCol > 0 && /* @__PURE__ */ React.createElement("span", { style: { color: "#38bdf8" } }, "+", fmt(cs.sinceCol)), cs.expCol > 0 && /* @__PURE__ */ React.createElement("span", { style: { color: "#fbbf24" } }, "exp ", fmt(cs.expCol))), /* @__PURE__ */ React.createElement("div", { style: { color: "#475569", fontSize: "10px", marginTop: "2px" } }, cs.con, "/", cs.cnt, " contacted"))));
+  })), evChart.length > 0 && /* @__PURE__ */ React.createElement("div", { style: { background: "#0c1117", border: "1px solid #1e3a5f15", padding: "12px", borderRadius: "8px", marginBottom: "10px", maxWidth: Math.max(evChart.length * 80, 200) + "px" } }, /* @__PURE__ */ React.createElement("div", { style: { fontSize: "10px", letterSpacing: "2px", color: "#64748b", marginBottom: "8px" } }, "BY EVENT"), /* @__PURE__ */ React.createElement(ResponsiveContainer, { width: "100%", height: 100 }, /* @__PURE__ */ React.createElement(BarChart, { data: evChart, margin: { left: 0, right: 5, top: 0, bottom: 0 } }, /* @__PURE__ */ React.createElement(XAxis, { dataKey: "event", tick: { fill: "#94a3b8", fontSize: 11 }, axisLine: false, tickLine: false }), /* @__PURE__ */ React.createElement(YAxis, { tickFormatter: (v) => `$${(v / 1e3).toFixed(0)}k`, tick: { fill: "#475569", fontSize: 10 }, axisLine: false, tickLine: false, width: 40 }), /* @__PURE__ */ React.createElement(Bar, { dataKey: "balance", fill: "#7dd3fc", opacity: 0.6, radius: [4, 4, 0, 0] })))), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", gap: "10px", marginBottom: "8px", overflowX: "auto" } }, [["bal", "Balance"], ["nm", "Name"], ["ev", "Event"], ["cl", "Closer"]].map(([c, l]) => /* @__PURE__ */ React.createElement("span", { key: c, onClick: () => doSort(c), style: { color: sortBy === c ? "#7dd3fc" : "#475569", fontSize: "12px", whiteSpace: "nowrap", fontWeight: sortBy === c ? 700 : 400 } }, l, sortBy === c ? sortDir === "asc" ? " \u2191" : " \u2193" : ""))), clients.length === 0 ? /* @__PURE__ */ React.createElement("div", { style: { padding: "40px 10px", textAlign: "center" } }, /* @__PURE__ */ React.createElement("div", { style: { fontSize: "18px", fontFamily: "'Instrument Serif',serif", color: "#475569" } }, "No open accounts"), /* @__PURE__ */ React.createElement("div", { style: { fontSize: "12px", color: "#334155", marginTop: "4px" } }, "Adjust window or filter")) : clients.map((c, i) => {
+    const isX = expId === c.id;
+    const sc = sC[c.cs];
+    const wks = Math.round((new Date(TODAY) - new Date(c.ed)) / (7 * 24 * 60 * 60 * 1e3));
+    const urg = wks >= 4 ? "URGENT" : wks >= 3 ? "DUE" : "ACTIVE";
+    const uC = urg === "URGENT" ? "#f87171" : urg === "DUE" ? "#fbbf24" : "#4ade80";
+    const remaining = c.bal - c.since;
+    return /* @__PURE__ */ React.createElement("div", { key: c.id, style: { background: "#0c1117", border: "1px solid #1e3a5f15", borderRadius: "8px", marginBottom: "8px", overflow: "hidden" } }, /* @__PURE__ */ React.createElement("div", { style: { padding: "12px", display: "flex", gap: "10px", alignItems: "flex-start" } }, /* @__PURE__ */ React.createElement(Gauge, { sale: c.sale, workshopCol: c.col, sinceCol: c.since, expected: c.exp }), /* @__PURE__ */ React.createElement("div", { style: { flex: 1, minWidth: 0 } }, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap", marginBottom: "4px" } }, /* @__PURE__ */ React.createElement("span", { style: { fontSize: "9px", fontWeight: 700, color: uC, background: uC + "15", padding: "2px 7px", borderRadius: "4px" } }, urg, " W", wks), /* @__PURE__ */ React.createElement("span", { style: { color: TC[c.t], fontSize: "10px", fontWeight: 600, background: TC[c.t] + "15", padding: "1px 7px", borderRadius: "4px" } }, TS[c.t]), /* @__PURE__ */ React.createElement("span", { style: { color: "#7dd3fc", fontSize: "11px", fontWeight: 700 } }, c.cl)), /* @__PURE__ */ React.createElement("div", { style: { color: "#e2e8f0", fontWeight: 600, fontSize: "15px" } }, c.nm), /* @__PURE__ */ React.createElement("div", { style: { color: "#475569", fontSize: "11px" } }, c.ev)), /* @__PURE__ */ React.createElement("div", { style: { textAlign: "right", flexShrink: 0 } }, /* @__PURE__ */ React.createElement("div", { style: { color: "#fb923c", fontWeight: 700, fontSize: "17px", fontFamily: "'Instrument Serif',serif" } }, fmt(remaining > 0 ? remaining : c.bal)), /* @__PURE__ */ React.createElement("div", { style: { color: "#475569", fontSize: "9px" } }, "of ", fmt(c.sale)), c.since > 0 && /* @__PURE__ */ React.createElement("div", { style: { color: "#38bdf8", fontSize: "10px", fontWeight: 600 } }, "+", fmt(c.since), " since"))), /* @__PURE__ */ React.createElement("div", { style: { padding: "0 12px 8px", display: "flex", gap: "10px", fontSize: "11px", flexWrap: "wrap" } }, /* @__PURE__ */ React.createElement("span", { style: { color: "#4ade80" } }, "WS: ", fmt(c.col)), c.rr && /* @__PURE__ */ React.createElement("span", { style: { color: c.rr === "DECLINED" ? "#f87171" : c.rr === "RANGE" ? "#38bdf8" : "#fbbf24" } }, "RR: ", c.rn), c.nt && /* @__PURE__ */ React.createElement("span", { style: { color: "#475569" } }, c.nt)), (c.ph || c.em) && /* @__PURE__ */ React.createElement("div", { style: { padding: "0 12px 8px", display: "flex", gap: "6px", flexWrap: "wrap" } }, c.ph && /* @__PURE__ */ React.createElement("a", { href: `tel:${c.ph}`, style: { color: "#38bdf8", textDecoration: "none", background: "#38bdf810", padding: "6px 12px", borderRadius: "6px", fontSize: "12px" } }, "\u{1F4DE} ", c.ph), c.em && /* @__PURE__ */ React.createElement("a", { href: `mailto:${c.em}`, style: { color: "#38bdf8", textDecoration: "none", background: "#38bdf810", padding: "6px 12px", borderRadius: "6px", fontSize: "11px", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "220px", whiteSpace: "nowrap" } }, " \u2709 ", c.em)), /* @__PURE__ */ React.createElement("div", { style: { padding: "6px 12px 8px", display: "flex", gap: "8px", borderTop: "1px solid #1e3a5f10" } }, /* @__PURE__ */ React.createElement("select", { value: c.cs, onChange: (e) => upd(c.id, "cs", e.target.value), style: { flex: 1, background: "#0a0f18", border: `1px solid ${sc}30`, color: sc, padding: "10px", fontSize: "13px", fontFamily: "inherit", borderRadius: "6px", fontWeight: 600 } }, Object.entries(sL).map(([k, v]) => /* @__PURE__ */ React.createElement("option", { key: k, value: k }, v))), /* @__PURE__ */ React.createElement("button", { onClick: () => setExpId(isX ? null : c.id), style: { background: isX ? "#7dd3fc15" : "#0a0f18", border: "1px solid #1e3a5f30", color: "#7dd3fc", padding: "10px 18px", fontSize: "13px", borderRadius: "6px", fontFamily: "inherit", fontWeight: 700 } }, isX ? "\u25B2" : "\u25BC")), isX && /* @__PURE__ */ React.createElement("div", { style: { padding: "12px", background: "#080d13", borderTop: "1px solid #1e3a5f15" } }, /* @__PURE__ */ React.createElement("div", { style: { marginBottom: "12px" } }, /* @__PURE__ */ React.createElement("label", { style: { fontSize: "10px", color: "#38bdf8", letterSpacing: "1px", display: "block", marginBottom: "4px", fontWeight: 600 } }, "COLLECTED SINCE WORKSHOP"), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", gap: "8px", alignItems: "center" } }, /* @__PURE__ */ React.createElement("input", { type: "number", value: c.since || "", onChange: (e) => upd(c.id, "since", e.target.value), placeholder: "0", max: c.bal, style: { flex: 1, background: "#0c1117", border: "1px solid #38bdf830", color: "#38bdf8", padding: "12px", fontSize: "16px", fontFamily: "inherit", borderRadius: "6px", fontWeight: 700, maxWidth: "160px" } }), /* @__PURE__ */ React.createElement("button", { onClick: () => {
+      upd(c.id, "since", String(c.bal));
+      upd(c.id, "cs", "collected");
+    }, style: { background: "#4ade8020", border: "1px solid #4ade8040", color: "#4ade80", padding: "12px 14px", fontSize: "12px", borderRadius: "6px", fontFamily: "inherit", fontWeight: 700, whiteSpace: "nowrap" } }, "\u2713 PIF"))), /* @__PURE__ */ React.createElement("div", { style: { marginBottom: "12px" } }, /* @__PURE__ */ React.createElement("label", { style: { fontSize: "10px", color: "#fbbf24", letterSpacing: "1px", display: "block", marginBottom: "4px", fontWeight: 600 } }, "EXPECTED NEXT PAYMENT"), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", gap: "8px" } }, /* @__PURE__ */ React.createElement("input", { type: "number", value: c.exp || "", onChange: (e) => upd(c.id, "exp", e.target.value), placeholder: "0", max: 46997, style: { background: "#0c1117", border: "1px solid #fbbf2430", color: "#fbbf24", padding: "12px", fontSize: "16px", fontFamily: "inherit", borderRadius: "6px", fontWeight: 700, width: "140px" } }), /* @__PURE__ */ React.createElement("input", { type: "date", value: c.edt, onChange: (e) => upd(c.id, "edt", e.target.value), style: { flex: 1, background: "#0c1117", border: "1px solid #1e3a5f30", color: "#cbd5e1", padding: "12px", fontSize: "14px", fontFamily: "inherit", borderRadius: "6px" } }))), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { style: { fontSize: "10px", color: "#64748b", letterSpacing: "1px", display: "block", marginBottom: "4px" } }, "NOTES"), /* @__PURE__ */ React.createElement("input", { value: c.cn, onChange: (e) => upd(c.id, "cn", e.target.value), placeholder: "Follow-up notes...", style: { width: "100%", background: "#0c1117", border: "1px solid #1e3a5f30", color: "#94a3b8", padding: "12px", fontSize: "14px", fontFamily: "inherit", borderRadius: "6px" } }))), !isX && (c.cn || c.since > 0 || c.exp > 0) && /* @__PURE__ */ React.createElement("div", { style: { padding: "4px 12px 8px", fontSize: "11px", display: "flex", gap: "8px", flexWrap: "wrap" } }, c.since > 0 && /* @__PURE__ */ React.createElement("span", { style: { color: "#38bdf8" } }, "+", fmt(c.since), " since"), c.exp > 0 && /* @__PURE__ */ React.createElement("span", { style: { color: "#fbbf24" } }, "Exp: ", fmt(c.exp)), c.edt && /* @__PURE__ */ React.createElement("span", { style: { color: "#94a3b8" } }, "by ", c.edt), c.cn && /* @__PURE__ */ React.createElement("span", { style: { color: "#64748b" } }, '"', c.cn, '"')));
+  })));
 }
-
-
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(React.createElement(App));
 </script>
 
